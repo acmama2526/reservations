@@ -21,6 +21,11 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
             $table->timestamps();
+
+            // $table->unique([
+            //     'reservation_id',
+            //     'seat_id'
+            // ]);
         });
     }
 
