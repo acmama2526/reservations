@@ -9,3 +9,7 @@ Route::get('/', function () {
 
 
 Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+
+Route::get('/top', function () {
+    return view('top');
+});
