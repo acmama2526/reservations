@@ -7,7 +7,6 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Http\Controllers\ReservationController;
 use App\Livewire\SeatManager;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\ShopSetting;
 
 Route::get('/', function () {
