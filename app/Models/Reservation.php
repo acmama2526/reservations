@@ -23,6 +23,7 @@ class Reservation extends Model
         'reservation_date' => 'date',
     ];
 
+    //予約（Reservation）モデルなどから、関連する複数の席（Seat）を取得する多対多のリレーション
     public function seats(): BelongsToMany
     {
         return $this->belongsToMany(
