@@ -20,14 +20,15 @@ class SeatManager extends Component
    * @param int $id  席ID
    * @return void
    */
-  public function toggleActive(int $id)
-  {
-    $seat = Seat::findOrFail($id);
+  // 停止ボタンを消したので要らない
+  // public function toggleActive(int $id)
+  // {
+  //   $seat = Seat::findOrFail($id);
 
-    $seat->update([
-      'is_active' => ! $seat->is_active,
-    ]);
-  }
+  //   $seat->update([
+  //     'is_active' => ! $seat->is_active,
+  //   ]);
+  // }
 
   /**
    * 追加ボタンを押したときにDBへ保存する処理
