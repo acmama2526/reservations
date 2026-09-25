@@ -11,5 +11,10 @@ class ShopSetting extends Model
         'business_start',
         'business_end',
         'slot_minutes',
+        'closed_days',
+    ];
+
+    protected $casts = [
+        'closed_days' => 'array',
     ];
 }
