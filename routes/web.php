@@ -14,16 +14,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/reservations', ReservationList::class)
-    ->name('reservations.index');
-Route::get('/reservations/create', ReservationCreate::class)
-    ->name('reservations.create');
+// Route::get('/reservations', ReservationList::class)
+//     ->name('reservations.index');
+// Route::get('/reservations/create', ReservationCreate::class)
+//     ->name('reservations.create');
 
-Route::get('/reservations/{reservation}', ReservationShow::class)
-    ->name('reservations.show');
+// Route::get('/reservations/{reservation}', ReservationShow::class)
+//     ->name('reservations.show');
 
-Route::get('/reservations/{reservation}/edit', ReservationEdit::class)
-    ->name('reservations.edit');
+// Route::get('/reservations/{reservation}/edit', ReservationEdit::class)
+//     ->name('reservations.edit');
 
 Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
 
