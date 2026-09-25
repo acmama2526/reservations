@@ -9,12 +9,11 @@ Route::get('/', function () {
 });
 
 
-Route::get(
-  '/reservations',
-  [ReservationController::class, 'index']
-)->name('reservations.index');
+Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
 
-Route::get(
-  '/seats',
-  SeatManager::class
-)->name('seats.index');
+Route::get('/top', function () {
+  return view('top');
+});
+
+Route::get('/seats', SeatManager::class)
+  ->name('seats.index');
