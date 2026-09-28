@@ -30,6 +30,22 @@ class ShopSetting extends Component
         }
     }
 
+    public function save()
+    {
+        ShopSettingModel::updateOrCreate(
+            ['id' => 1],
+            [
+                'shop_name' => $this->shop_name,
+                'business_start' => $this->business_start,
+                'business_end' => $this->business_end,
+                'slot_minutes' => $this->slot_minutes,
+                'closed_days' => $this->closed_days,
+            ]
+        );
+
+        session()->flash('message','保存しました');
+    }
+
     public function render()
     {
         return view('livewire.shop-setting');
