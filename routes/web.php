@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\Route;
 // use Illuminate\Support\Facades\Route;
 use \App\Livewire\ShopSetting;
 use App\Livewire\UserManagement;
+use App\Livewire\ReservationList;
+use App\Livewire\ReservationCreate;
+use App\Livewire\ReservationShow;
+use App\Livewire\ReservationEdit;
+use App\Http\Controllers\ReservationController;
+use App\Livewire\SeatManager;
+use App\Livewire\ShopSetting;
 
 // Route::get('/', function () {
 //     return view('welcome');
