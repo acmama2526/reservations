@@ -57,7 +57,7 @@
         <main class="flex-1">
 
             <h1 class="text-3xl font-bold text-blue-950">
-                担当A：予約状況画面（TOP）
+                予約状況画面（TOP）
             </h1>
 
             <p class="mt-1 text-slate-600">
@@ -98,35 +98,6 @@
 
         {{-- サイドバー --}}
         <aside class="w-72">
-
-            <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-
-                <h3 class="font-bold text-blue-900">
-                    ◎ 担当範囲
-                </h3>
-
-                <ul class="mt-3 list-disc space-y-1 pl-5 text-sm">
-                    <li>予約状況TOP画面</li>
-                    <li>タイムテーブル表示</li>
-                    <li>予約登録・編集・削除</li>
-                    <li>予約変更</li>
-                </ul>
-
-            </section>
-
-
-            <section class="mt-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-
-                <h3 class="font-bold text-blue-900">
-                    ☑ MUST（必須）
-                </h3>
-
-                <ul class="mt-3 list-disc space-y-1 pl-5 text-sm">
-                    <li>席別タイムテーブル表示</li>
-                    <li>新規予約</li>
-                    <li>予約編集</li>
-                    <li>予約削除</li>
-                </ul>
 
             </section>
 
