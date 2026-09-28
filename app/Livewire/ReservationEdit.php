@@ -40,6 +40,7 @@ class ReservationEdit extends Component
         $this->seat = (string) ($reservation->seats->first()?->id ?? '');
     }
 
+
     public function update(ReservationService $service): void
     {
         $this->validate([
@@ -54,22 +55,22 @@ class ReservationEdit extends Component
             'description' => ['nullable', 'string'],
         ]);
 
-        // 予約情報を更新
-        $this->reservation->update([
-            'customer_name' => $this->customerName,
-            'people' => $this->people,
-            'reservation_date' => $this->reservationDate,
-            'start_time' => $this->startTime,
-            'end_time' => $this->endTime,
-            'phone' => $this->phone,
-            'status' => $this->status,
-            'description' => $this->description,
-        ]);
 
-        // 席を更新
-        $this->reservation->seats()->sync([
-            (int) $this->seat,
-        ]);
+        // 予約情報を更新
+        $service->update(
+            $this->reservation,
+            [
+                'customer_name' => $this->customerName,
+                'people' => $this->people,
+                'reservation_date' => $this->reservationDate,
+                'start_time' => $this->startTime,
+                'end_time' => $this->endTime,
+                'phone' => $this->phone,
+                'status' => $this->status,
+                'description' => $this->description,
+            ],
+            [(int) $this->seat]
+        );
 
         session()->flash('message', '予約を更新しました。');
 

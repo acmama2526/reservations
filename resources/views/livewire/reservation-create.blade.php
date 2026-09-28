@@ -135,7 +135,17 @@
             </label>
 
             <div class="col-span-3">
-                <input id="startTime" type="time" wire:model="startTime" class="rounded border-gray-300">
+                <select id="startTime" wire:model="startTime" class="rounded border-gray-300">
+                    <option value="">選択してください</option>
+
+                    @if ($start && $end && $slot > 0)
+                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slot))
+                            <option value="{{ $time->format('H:i') }}">
+                                {{ $time->format('H:i') }}
+                            </option>
+                        @endfor
+                    @endif
+                </select>
 
                 @error('startTime')
                     <p class="mt-1 text-sm text-red-600">
@@ -153,7 +163,17 @@
             </label>
 
             <div class="col-span-3">
-                <input id="endTime" type="time" wire:model="endTime" class="rounded border-gray-300">
+                <select id="endTime" wire:model="endTime" class="rounded border-gray-300">
+                    <option value="">選択してください</option>
+
+                    @if ($start && $end && $slot > 0)
+                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slot))
+                            <option value="{{ $time->format('H:i') }}">
+                                {{ $time->format('H:i') }}
+                            </option>
+                        @endfor
+                    @endif
+                </select>
 
                 @error('endTime')
                     <p class="mt-1 text-sm text-red-600">
