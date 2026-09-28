@@ -143,15 +143,19 @@ class ReservationCreate extends Component
      * 画面を表示する
      */
     public function render()
-    {
-        // 使用可能な席を取得
-        $seats = Seat::query()
-            ->where('is_active', true)
-            ->orderBy('display_order')
-            ->get();
+{
+    //席情報取得
+    $seats = Seat::query()
+        ->where('is_active', true)
+        ->orderBy('display_order')
+        ->get();
 
-        return view('livewire.reservation-create', [
-            'seats' => $seats,
-        ]);
-    }
+    //店舗情報取得
+    $shopSetting = \App\Models\ShopSetting::first();
+
+    return view('livewire.reservation-create', [
+        'seats' => $seats,
+        'shopSetting' => $shopSetting,
+    ]);
+}
 }
