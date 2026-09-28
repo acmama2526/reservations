@@ -1,13 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-// use App\Livewire\ReservationList;
-// use App\Livewire\ReservationCreate;
-// use App\Livewire\ReservationShow;
-// use App\Livewire\ReservationEdit;
-// use App\Http\Controllers\ReservationController;
-// use App\Livewire\SeatManager;
-// use Illuminate\Support\Facades\Route;
 use \App\Livewire\ShopSetting;
 use App\Livewire\UserManagement;
 use App\Livewire\ReservationList;
@@ -16,14 +9,11 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Livewire\SeatManager;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 
-// Route::get('/reservations', ReservationList::class)
-//     ->name('reservations.index');
-// Route::get('/reservations/create', ReservationCreate::class)
-//     ->name('reservations.create');
+// トップ
+Route::get('/', function () {
+    return view('welcome');
+});
 
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
@@ -52,20 +42,31 @@ Route::get('/seats', SeatManager::class)
 // Route::get('/reservations/{reservation}', ReservationShow::class)
 //     ->name('reservations.show');
 
-// Route::get('/reservations/{reservation}/edit', ReservationEdit::class)
-//     ->name('reservations.edit');
+// 新規予約登録
+Route::get('/reservations/create', ReservationCreate::class)
+    ->name('reservations.create');
 
-// Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+// 予約詳細
+Route::get('/reservations/{reservation}', ReservationShow::class)
+    ->name('reservations.show');
 
-// Route::get('/top', function () {
-//     return view('top');
-// });
+// 予約編集
+Route::get('/reservations/{reservation}/edit', ReservationEdit::class)
+    ->name('reservations.edit');
 
-// Route::get('/seats', SeatManager::class)
-//     ->name('seats.index');
+// トップ
+Route::get('/top', function () {
+    return view('top');
+});
 
+// 席管理
+Route::get('/seats', SeatManager::class)
+    ->name('seats.index');
+
+// 店舗設定
 Route::get('/settings', ShopSetting::class)
     ->name('shop_setting');
 
+// ユーザー管理
 Route::get('/users', UserManagement::class)
-->name('users.index');
+    ->name('users.index');
