@@ -20,6 +20,9 @@ class Seat extends Model
   // 予約（reservations）との多対多のリレーション定義
   public function reservations()
   {
-    return $this->belongsToMany(Reservation::class, 'reservation_seat');
+    return $this->belongsToMany(
+      Reservation::class,
+      'reservation_seat'
+    )->withTimestamps();
   }
 }

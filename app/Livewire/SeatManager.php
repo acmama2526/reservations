@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Seat;
+use App\Models\Reservation;
 
 class SeatManager extends Component
 {
@@ -14,6 +15,37 @@ class SeatManager extends Component
   public bool $is_active = true;
   public ?int $editingSeatId = null;  //編集中の席id または null:新規作成
 
+  //席自動配置用
+  public ?int $people = null;               //人数
+  public ?string $reservation_date = null;  //予約日
+  public ?string $start_time = null;        //開始時刻
+  public ?string $end_time = null;          //終了時刻
+  public array $availableSeatIds = [];      //空席候補を入れる配列
+
+  /**
+   * 利用可能な席を検索
+   * @return void
+   */
+  public function searchAvailableSeats()
+  {
+    $reservedSeatIds = Reservation::where('reservation_date', $this->reservation_date)
+      ->where('start_time', '<', $this->end_time)
+      ->where('end_time', '>', $this->start_time)
+      ->with('seats')
+      ->get()
+      ->flatMap(function ($reservation) {
+        return $reservation->seats->pluck('id');
+      })
+      ->unique()
+      ->values()
+      ->all();
+
+    $this->availableSeatIds = Seat::where('is_active', true)
+      ->whereNotIn('id', $reservedSeatIds)
+      ->orderBy('display_order')
+      ->pluck('id')
+      ->all();
+  }
 
   /**
    * 利用可否の切り替えトグル

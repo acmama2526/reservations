@@ -215,4 +215,83 @@
     </div>
   </div>
 
+  {{-- 空席検索 --}}
+  <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="mb-4 text-xl font-semibold text-slate-700">
+      空席検索
+    </h2>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-600">
+          人数
+        </label>
+        <input
+          type="number"
+          min="1"
+          wire:model="people"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2">
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-600">
+          予約日
+        </label>
+        <input
+          type="date"
+          wire:model="reservation_date"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2">
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-600">
+          開始時刻
+        </label>
+        <input
+          type="time"
+          wire:model="start_time"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2">
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-600">
+          終了時刻
+        </label>
+        <input
+          type="time"
+          wire:model="end_time"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2">
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <button
+        type="button"
+        wire:click="searchAvailableSeats"
+        class="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700">
+        空席を検索
+      </button>
+    </div>
+
+    <div class="mt-6">
+      <h3 class="mb-3 font-semibold text-slate-700">
+        空いている席
+      </h3>
+
+      @if (count($availableSeatIds) > 0)
+        <div class="flex flex-wrap gap-2">
+          @foreach ($seats->whereIn('id', $availableSeatIds) as $seat)
+            <span class="rounded-lg bg-green-100 px-3 py-2 text-green-700">
+              {{ $seat->seat_name }}
+              （{{ $seat->capacity }}名）
+            </span>
+          @endforeach
+        </div>
+      @else
+        <p class="text-slate-500">
+          条件を入力して「空席を検索」を押してください。
+        </p>
+      @endif
+    </div>
+  </div>
 </div>
