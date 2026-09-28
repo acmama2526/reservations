@@ -17,6 +17,7 @@ class UserManagement extends Component
 
     public $editingId = null;
 
+    //登録
     public function showCreateForm()
     {
         $this->reset([
@@ -61,6 +62,7 @@ class UserManagement extends Component
         $this->showForm = true;
     }
 
+    //編集
     public function updateUser()
     {
         User::find($this->editingId)->update([
@@ -81,11 +83,13 @@ class UserManagement extends Component
         $this->role = 'staff';
     }
 
+    //削除
     public function deleteUser($id)
     {
         User::find($id)?->delete();
     }
 
+    //ユーザー情報表示
     public function render()
     {
         return view('livewire.user-management', [

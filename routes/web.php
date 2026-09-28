@@ -9,6 +9,7 @@ use App\Livewire\ReservationCreate;
 use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Livewire\SeatManager;
+use App\Livewire\Login;
 
 
 // トップ
@@ -42,4 +43,9 @@ Route::get('/settings', ShopSetting::class)
 
 // ユーザー管理
 Route::get('/users', UserManagement::class)
+->name('users.index');
+
+Route::get('/login', Login::class)
+    ->name('login');
     ->name('users.index');
+

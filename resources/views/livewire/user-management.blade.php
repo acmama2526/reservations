@@ -33,7 +33,7 @@
             <select wire:model="role">
                 <option value="admin">管理者</option>
                 <option value="manager">責任者</option>
-                <option value="staff">アルバイト</option>
+                <option value="staff">スタッフ</option>
             </select>
 
             @if ($editingId)
