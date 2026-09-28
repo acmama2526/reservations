@@ -16,7 +16,6 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Http\Controllers\ReservationController;
 use App\Livewire\SeatManager;
-use App\Livewire\ShopSetting;
 
 // Route::get('/', function () {
 //     return view('welcome');
