@@ -16,6 +16,7 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Http\Controllers\ReservationController;
 use App\Livewire\SeatManager;
+use App\Livewire\Login;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -46,3 +47,6 @@ Route::get('/settings', ShopSetting::class)
 
 Route::get('/users', UserManagement::class)
 ->name('users.index');
+
+Route::get('/login', Login::class)
+    ->name('login');
