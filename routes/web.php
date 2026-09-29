@@ -22,7 +22,6 @@ Route::get('/', function () {
     return view('top');
 })->name('top');
 
-
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
     ->name('reservations.index');
