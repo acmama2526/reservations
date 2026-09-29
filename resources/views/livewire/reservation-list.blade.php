@@ -55,11 +55,7 @@
                         日付（開始）
                     </label>
 
-                    <input
-                        type="date"
-                        wire:model="dateFrom"
-                        class="w-full rounded-lg border px-4 py-3"
-                    >
+                    <input type="date" wire:model="dateFrom" class="w-full rounded-lg border px-4 py-3">
 
                 </div>
 
@@ -71,11 +67,7 @@
                         日付（終了）
                     </label>
 
-                    <input
-                        type="date"
-                        wire:model="dateTo"
-                        class="w-full rounded-lg border px-4 py-3"
-                    >
+                    <input type="date" wire:model="dateTo" class="w-full rounded-lg border px-4 py-3">
 
                 </div>
 
@@ -87,12 +79,8 @@
                         お名前
                     </label>
 
-                    <input
-                        type="text"
-                        wire:model="customerName"
-                        placeholder="例）山田 太郎"
-                        class="w-full rounded-lg border px-4 py-3"
-                    >
+                    <input type="text" wire:model="customerName" placeholder="例）山田 太郎"
+                        class="w-full rounded-lg border px-4 py-3">
 
                 </div>
 
@@ -104,10 +92,7 @@
                         人数
                     </label>
 
-                    <select
-                        wire:model="people"
-                        class="w-full rounded-lg border px-4 py-3"
-                    >
+                    <select wire:model="people" class="w-full rounded-lg border px-4 py-3">
 
                         <option value="">
                             指定なし
@@ -131,10 +116,7 @@
                         状態
                     </label>
 
-                    <select
-                        wire:model="status"
-                        class="w-full rounded-lg border px-4 py-3"
-                    >
+                    <select wire:model="status" class="w-full rounded-lg border px-4 py-3">
 
                         <option value="">
                             指定なし
@@ -164,10 +146,7 @@
                         席
                     </label>
 
-                    <select
-                        wire:model="seat"
-                        class="w-full rounded-lg border px-4 py-3"
-                    >
+                    <select wire:model="seat" class="w-full rounded-lg border px-4 py-3">
 
                         <option value="">
                             指定なし
@@ -189,19 +168,13 @@
             {{-- 検索ボタン --}}
             <div class="mt-6 flex justify-end gap-3">
 
-                <button
-                    type="button"
-                    wire:click="clearSearch"
-                    class="rounded-lg border bg-white px-8 py-3 font-medium hover:bg-gray-50"
-                >
+                <button type="button" wire:click="clearSearch"
+                    class="rounded-lg border bg-white px-8 py-3 font-medium hover:bg-gray-50">
                     ↻ クリア
                 </button>
 
-                <button
-                    type="button"
-                    wire:click="search"
-                    class="rounded-lg bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700"
-                >
+                <button type="button" wire:click="search"
+                    class="rounded-lg bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700">
                     🔍 検索
                 </button>
 
@@ -225,13 +198,10 @@
                 <div class="flex items-center gap-4">
 
                     {{-- 新規登録 --}}
-                    <a
-                        href="{{ route('reservations.create') }}"
-                        class="rounded-lg bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700"
-                    >
+                    <a href="{{ route('reservations.create') }}"
+                        class="rounded-lg bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700">
                         ＋ 新規登録
                     </a>
-
 
                     {{-- 表示件数 --}}
                     <div class="flex items-center gap-2">
@@ -240,10 +210,7 @@
                             表示件数
                         </span>
 
-                        <select
-                            wire:model.live="perPage"
-                            class="rounded-lg border px-3 py-2"
-                        >
+                        <select wire:model.live="perPage" class="rounded-lg border px-3 py-2">
 
                             <option value="10">
                                 10件
@@ -334,7 +301,6 @@
                                     {{ $reservation->reservation_date->format('Y/m/d') }}
 
                                     ({{ $reservation->reservation_date->locale('ja')->isoFormat('ddd') }})
-
                                     <br>
 
                                     {{ substr($reservation->start_time, 0, 5) }}
@@ -362,7 +328,6 @@
                                 <td class="border px-3 py-3">
 
                                     @forelse ($reservation->seats as $seat)
-
                                         <div>
                                             {{ $seat->seat_name }}
                                         </div>
@@ -372,7 +337,6 @@
                                         <span class="text-gray-400">
                                             未割当
                                         </span>
-
                                     @endforelse
 
                                 </td>
@@ -382,23 +346,17 @@
                                 <td class="border px-3 py-3 text-center">
 
                                     @if ($reservation->status === 'reserved')
-
                                         <span class="rounded-md bg-blue-100 px-3 py-1 text-blue-700">
                                             確定
                                         </span>
-
                                     @elseif ($reservation->status === 'temporary')
-
                                         <span class="rounded-md bg-gray-100 px-3 py-1 text-gray-700">
                                             仮予約
                                         </span>
-
                                     @elseif ($reservation->status === 'cancelled')
-
                                         <span class="rounded-md bg-red-100 px-3 py-1 text-red-700">
                                             キャンセル
                                         </span>
-
                                     @endif
 
                                 </td>
@@ -422,30 +380,23 @@
                                     <div class="flex gap-2">
 
                                         {{-- 詳細 --}}
-                                        <a
-                                            href="{{ route('reservations.show', $reservation) }}"
-                                            class="rounded border px-3 py-1 text-sm hover:bg-gray-100"
-                                        >
+                                        <a href="{{ route('reservations.show', $reservation) }}"
+                                            class="rounded border px-3 py-1 text-sm hover:bg-gray-100">
                                             詳細
                                         </a>
 
 
                                         {{-- 編集 --}}
-                                        <a
-                                            href="{{ route('reservations.edit', $reservation) }}"
-                                            class="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
-                                        >
+                                        <a href="{{ route('reservations.edit', $reservation) }}"
+                                            class="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700">
                                             編集
                                         </a>
 
 
                                         {{-- 削除 --}}
-                                        <button
-                                            type="button"
-                                            wire:click="deleteReservation({{ $reservation->id }})"
+                                        <button type="button" wire:click="deleteReservation({{ $reservation->id }})"
                                             wire:confirm="この予約を削除しますか？"
-                                            class="rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
-                                        >
+                                            class="rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
                                             削除
                                         </button>
 
@@ -460,15 +411,11 @@
 
                             <tr>
 
-                                <td
-                                    colspan="9"
-                                    class="border px-3 py-10 text-center text-gray-500"
-                                >
+                                <td colspan="9" class="border px-3 py-10 text-center text-gray-500">
                                     該当する予約がありません。
                                 </td>
 
                             </tr>
-
                         @endforelse
 
                     </tbody>
