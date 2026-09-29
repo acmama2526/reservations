@@ -1,37 +1,62 @@
 <header>
+    <div>
+        <h1>予約管理システム</h1>
 
-    <h1>予約管理システム</h1>
+        <nav aria-label="メインメニュー">
+            <ul>
+                <li>
+                    <a
+                        href="#"
+                        wire:click.prevent="changePage('reservation')"
+                    >
+                        予約管理
+                    </a>
+                </li>
 
-    <nav>
+                <li>
+                    <a
+                        href="#"
+                        wire:click.prevent="changePage('reservation-list')"
+                    >
+                        予約一覧・検索
+                    </a>
+                </li>
 
-        /reservations
-            予約管理
-        </a>
+                <li>
+                    <a
+                        href="#"
+                        wire:click.prevent="changePage('seat')"
+                    >
+                        席マスタ
+                    </a>
+                </li>
 
-        /reservation-list
-            予約一覧・検索
-        </a>
+                <li>
+                    <a
+                        href="#"
+                        wire:click.prevent="changePage('setting')"
+                    >
+                        店舗・スタッフ管理
+                    </a>
+                </li>
 
-        /seats
-            席マスタ
-        </a>
+                {{-- @guest
+                    <li>
+                        <a
+                            href="#"
+                            wire:click.prevent="changePage('login')"
+                        >
+                            ログイン
+                        </a>
+                    </li>
+                @endguest
 
-        /settings
-            店舗・スタッフ管理
-        </a>
-
-        @guest
-            <aogin
-                ログイン
-            </a>
-        @endguest
-
-        @auth
-            /logout
-                ログアウト
-            </a>
-        @endauth
-
-    </nav>
-
+                @auth
+                    <li>
+                        <span>ログアウト（未設定）</span>
+                    </li>
+                @endauth --}}
+            </ul>
+        </nav>
+    </div>
 </header>
