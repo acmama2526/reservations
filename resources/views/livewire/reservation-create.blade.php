@@ -138,8 +138,8 @@
                 <select id="startTime" wire:model="startTime" class="rounded border-gray-300">
                     <option value="">選択してください</option>
 
-                    @if ($start && $end && $slot > 0)
-                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slot))
+                    @if ($start && $end && $slotMinutes > 0)
+                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
                             <option value="{{ $time->format('H:i') }}">
                                 {{ $time->format('H:i') }}
                             </option>
@@ -166,8 +166,8 @@
                 <select id="endTime" wire:model="endTime" class="rounded border-gray-300">
                     <option value="">選択してください</option>
 
-                    @if ($start && $end && $slot > 0)
-                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slot))
+                    @if ($start && $end && $slotMinutes > 0)
+                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
                             <option value="{{ $time->format('H:i') }}">
                                 {{ $time->format('H:i') }}
                             </option>

@@ -21,6 +21,10 @@ class ReservationEdit extends Component
     public string $status = '';
     public string $description = '';
 
+
+    /*
+    *編集画面を開いたときの初期値
+    */
     public function mount(Reservation $reservation): void
     {
         // 編集する予約を取得
@@ -40,7 +44,9 @@ class ReservationEdit extends Component
         $this->seat = (string) ($reservation->seats->first()?->id ?? '');
     }
 
-
+    /*
+    *ReservationServiceに予約変更を依頼
+    */
     public function update(ReservationService $service): void
     {
         $this->validate([
@@ -55,9 +61,8 @@ class ReservationEdit extends Component
             'description' => ['nullable', 'string'],
         ]);
 
-
         // 予約情報を更新
-        $service->update(
+        $this->reservation = $service->update(
             $this->reservation,
             [
                 'customer_name' => $this->customerName,
@@ -74,9 +79,15 @@ class ReservationEdit extends Component
 
         session()->flash('message', '予約を更新しました。');
 
-        $this->redirectRoute('reservations.show', $this->reservation);
+        $this->redirectRoute(
+            'reservations.show',
+            $this->reservation
+        );
     }
 
+    /*
+    *編集中の内容を元の予約内容に戻す
+    */
     public function clear(): void
     {
         // 編集画面では「クリア」ではなく、
@@ -86,6 +97,9 @@ class ReservationEdit extends Component
         $this->resetValidation();
     }
 
+    /*
+    *編集画面を表示
+    */
     public function render()
     {
         $seats = Seat::query()
