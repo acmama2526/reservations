@@ -18,7 +18,7 @@ use App\Http\Controllers\AdminDashboardController;
 // });
 
 // トップページ
-Route::get('/', function () {
+Route::get('/top', function () {
     return view('top');
 })->name('top');
 
