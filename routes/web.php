@@ -17,6 +17,8 @@ use App\Livewire\ReservationEdit;
 use App\Http\Controllers\ReservationController;
 use App\Livewire\SeatManager;
 use App\Livewire\Login;
+use App\Http\Controllers\AdminDashboardController;
+
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -46,7 +48,11 @@ Route::get('/settings', ShopSetting::class)
     ->name('shop_setting');
 
 Route::get('/users', UserManagement::class)
-->name('users.index');
+    ->name('users.index');
 
 Route::get('/login', Login::class)
     ->name('login');
+
+Route::get('/admin-dashboard', [
+    AdminDashboardController::class,'index'])
+    ->name('admin.dashboard');
