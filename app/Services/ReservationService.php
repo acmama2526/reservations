@@ -81,8 +81,17 @@ class ReservationService
         });
     }
 
-    public function update(Reservation $reservation, array $data, array $seatIds): Reservation
-    {
+    /**
+     * A画面・B画面共通の予約変更処理
+     *
+     * 予約情報の更新、席の更新、
+     * 定員・営業時間・ダブルブッキングのチェックを行う
+     */
+    public function update(
+        Reservation $reservation,
+        array $data,
+        array $seatIds
+    ): Reservation {
         return DB::transaction(function () use ($reservation, $data, $seatIds) {
 
             // 選択された席を取得
@@ -108,6 +117,13 @@ class ReservationService
                 ]);
             }
 
+            // 営業時間を確認
+            $this->checkBusinessHours(
+                $data['reservation_date'],
+                $data['start_time'],
+                $data['end_time']
+            );
+
             // ダブルブッキングを確認
             $this->checkDoubleBooking(
                 $seatIds,
@@ -132,7 +148,7 @@ class ReservationService
             // 席を更新
             $reservation->seats()->sync($seatIds);
 
-            return $reservation;
+            return $reservation->fresh('seats');
         });
     }
 
@@ -175,7 +191,9 @@ class ReservationService
         }
     }
 
-    //営業時間のチェック
+    /**
+     * 営業時間の確認
+     */
     private function checkBusinessHours(
         string $reservationDate,
         string $startTime,

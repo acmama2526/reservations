@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Seat;
+use App\Models\ShopSetting;
 use App\Services\ReservationService;
+use Carbon\Carbon;
 use Livewire\Component;
 
 class ReservationCreate extends Component
@@ -143,19 +145,45 @@ class ReservationCreate extends Component
      * 画面を表示する
      */
     public function render()
-{
-    //席情報取得
-    $seats = Seat::query()
-        ->where('is_active', true)
-        ->orderBy('display_order')
-        ->get();
+    {
+        // 席情報取得
+        $seats = Seat::query()
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->get();
 
-    //店舗情報取得
-    $shopSetting = \App\Models\ShopSetting::first();
+        // 店舗設定を取得
+        $shopSetting = ShopSetting::first();
 
-    return view('livewire.reservation-create', [
-        'seats' => $seats,
-        'shopSetting' => $shopSetting,
-    ]);
-}
+        // 初期値
+        $start = null;
+        $end = null;
+        $slotMinutes= 0;
+
+        // 店舗設定が存在する場合
+        if ($shopSetting) {
+            // 営業開始時間
+            $start = Carbon::createFromFormat(
+                'H:i:s',
+                $shopSetting->business_start
+            );
+
+            // 営業終了時間
+            $end = Carbon::createFromFormat(
+                'H:i:s',
+                $shopSetting->business_end
+            );
+
+            // 予約時間の単位
+            $slotMinutes= (int) $shopSetting->slot_minutes;
+        }
+
+        return view('livewire.reservation-create', [
+            'seats' => $seats,
+            'shopSetting' => $shopSetting,
+            'start' => $start,
+            'end' => $end,
+            'slotMinutes' => $slotMinutes,
+        ]);
+    }
 }
