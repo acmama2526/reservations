@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Seat;
 use App\Models\Reservation;
+use App\Models\ShopSetting as ShopSettingModel;
+use App\Services\SeatAssignmentService;
 
 class SeatManager extends Component
 {
@@ -15,52 +17,94 @@ class SeatManager extends Component
   public bool $is_active = true;
   public ?int $editingSeatId = null;  //編集中の席id または null:新規作成
 
-  //席自動配置用
-  public ?int $people = null;               //人数
+  //席自動配置用データ
+  public ?int $people = null;               //予約人数
   public ?string $reservation_date = null;  //予約日
   public ?string $start_time = null;        //開始時刻
   public ?string $end_time = null;          //終了時刻
-  public array $availableSeatIds = [];      //空席候補を入れる配列
+  public array $availableSeatIds = [];      //空いている席を入れる配列
+  public array $selectedSeatIds = [];       //自動配置で最終的に選ばれた席を入れる配列
+  public ?int $reservationId = null;        // 対象となる予約ID テスト用
+
 
   /**
-   * 利用可能な席を検索
+   * 予約情報と既存予約を基に、自動席割り当てを行い、selectedSeatIds[]に格納
    * @return void
+   * SIDE EFFECT: selectedSeatIds[]を更新。最終的に選ばれた席IDの配列
    */
-  public function searchAvailableSeats()
+  public function autoAssignSeats()
   {
-    $reservedSeatIds = Reservation::where('reservation_date', $this->reservation_date)
-      ->where('start_time', '<', $this->end_time)
-      ->where('end_time', '>', $this->start_time)
-      ->with('seats')
-      ->get()
-      ->flatMap(function ($reservation) {
-        return $reservation->seats->pluck('id');
-      })
-      ->unique()
-      ->values()
-      ->all();
+    $service = app(SeatAssignmentService::class);
 
-    $this->availableSeatIds = Seat::where('is_active', true)
-      ->whereNotIn('id', $reservedSeatIds)
-      ->orderBy('display_order')
-      ->pluck('id')
-      ->all();
+    $result = $service->assign(
+      $this->people,
+      $this->reservation_date,
+      $this->start_time,
+      $this->end_time,
+      $this->reservationId
+    );
+
+    $this->availableSeatIds = $result['availableSeatIds'];
+    $this->selectedSeatIds = $result['selectedSeatIds'];
+
+    if ($result['error']) {
+      session()->flash('error', $result['error']);
+    }
   }
 
   /**
-   * 利用可否の切り替えトグル
-   * @param int $id  席ID
+   * 自動配置した席を予約DBに保存
    * @return void
    */
-  // 停止ボタンを消したので要らない
-  // public function toggleActive(int $id)
-  // {
-  //   $seat = Seat::findOrFail($id);
+  public function saveAssignment()
+  {
+    if (! $this->reservationId) {
+      session()->flash('error', '予約IDを入力してください。');
+      return;
+    }
 
-  //   $seat->update([
-  //     'is_active' => ! $seat->is_active,
-  //   ]);
-  // }
+    if (empty($this->selectedSeatIds)) {
+      session()->flash('error', '先に自動配置を実行してください。');
+      return;
+    }
+
+    //reservations.id から対象予約を取得
+    $reservation = Reservation::find($this->reservationId);
+
+    if (! $reservation) {
+      session()->flash('error', '指定された予約IDが見つかりません。');
+      return;
+    }
+
+    //reservation_seat に保存
+    $reservation->seats()->sync($this->selectedSeatIds);
+
+    session()->flash('message', '席配置を保存しました。');
+  }
+
+  /**
+   * 利用可能な席を検索し、availableSeatIds[]に格納
+   * @return void
+   * SIDE EFFECT: availableSeatIds[]を更新
+   */
+  public function searchAvailableSeats()
+  {
+    $service = app(SeatAssignmentService::class);
+
+    $result = $service->searchAvailableSeatIds(
+      $this->reservation_date,
+      $this->start_time,
+      $this->end_time
+    );
+
+    $this->availableSeatIds = $result['availableSeatIds'];
+
+    if ($result['error']) {
+      $this->selectedSeatIds = [];
+
+      session()->flash('error', $result['error']);
+    }
+  }
 
   /**
    * 追加ボタンを押したときにDBへ保存する処理

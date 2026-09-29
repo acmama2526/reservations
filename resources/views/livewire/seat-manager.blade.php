@@ -264,6 +264,13 @@
       </div>
     </div>
 
+    {{-- 営業時間外の場合のエラー表示 --}}
+    @if (session()->has('error'))
+      <div class="mb-4 rounded-lg bg-red-100 px-4 py-3 text-red-700">
+        {{ session('error') }}
+      </div>
+    @endif
+
     <div class="mt-4">
       <button
         type="button"
@@ -272,7 +279,6 @@
         空席を検索
       </button>
     </div>
-
     <div class="mt-6">
       <h3 class="mb-3 font-semibold text-slate-700">
         空いている席
@@ -293,5 +299,60 @@
         </p>
       @endif
     </div>
+
+    <button
+      type="button"
+      wire:click="autoAssignSeats"
+      class="rounded-lg bg-indigo-600 px-5 py-2 font-medium text-white hover:bg-indigo-700">
+      自動配置
+    </button>
+    <div class="mt-6">
+      <h3 class="mb-3 font-semibold text-slate-700">
+        自動配置結果
+      </h3>
+      @if (count($selectedSeatIds) > 0)
+        <div class="flex flex-wrap gap-2">
+          @foreach ($seats->whereIn('id', $selectedSeatIds) as $seat)
+            <span class="rounded-lg bg-indigo-100 px-3 py-2 text-indigo-700">
+              {{ $seat->seat_name }}
+              （{{ $seat->capacity }}名）
+            </span>
+          @endforeach
+        </div>
+      @else
+        <p class="text-slate-500">
+          自動配置結果はありません。
+        </p>
+      @endif
+    </div>
+
+    {{-- 予約ID入力欄（テスト用） --}}
+    <div class="mt-4">
+      <label class="mb-1 block text-sm font-medium text-slate-600">
+        予約ID（テスト用）
+      </label>
+
+      <input
+        type="number"
+        min="1"
+        wire:model="reservationId"
+        class="w-40 rounded-lg border border-slate-300 px-3 py-2">
+    </div>
+    <div class="mt-4">
+      <button
+        type="button"
+        wire:click="saveAssignment"
+        class="rounded-lg bg-green-600 px-5 py-2 font-medium text-white hover:bg-green-700">
+        配置を保存
+      </button>
+    </div>
+    @if (session()->has('message'))
+      <div class="mb-4 rounded-lg bg-green-100 px-4 py-3 text-green-700">
+        {{ session('message') }}
+      </div>
+    @endif
+
+
+
   </div>
 </div>
