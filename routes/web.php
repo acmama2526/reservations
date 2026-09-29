@@ -10,12 +10,12 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Livewire\SeatManager;
 use App\Livewire\Login;
+use App\Http\Controllers\AdminDashboardController;
 
 
-// トップ
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
@@ -43,9 +43,11 @@ Route::get('/settings', ShopSetting::class)
 
 // ユーザー管理
 Route::get('/users', UserManagement::class)
-->name('users.index');
+    ->name('users.index');
 
 Route::get('/login', Login::class)
     ->name('login');
-    ->name('users.index');
 
+Route::get('/admin-dashboard', [
+    AdminDashboardController::class,'index'])
+    ->name('admin.dashboard');
