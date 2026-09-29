@@ -82,13 +82,22 @@
             </div>
         </div>
 
-        {{-- 戻るボタン --}}
         <div class="flex justify-center">
-            <a href="{{ route('reservations.index') }}"
-                class="rounded border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 hover:bg-gray-100">
-                一覧に戻る
-            </a>
-        </div>
+            {{-- 戻るボタン --}}
+            <div class="flex justify-center">
+                <a href="{{ route('reservations.index') }}"
+                    class="rounded border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 hover:bg-gray-100">
+                    一覧に戻る
+                </a>
+            </div>
 
+            {{-- 編集ボタン --}}
+            <div class="flex justify-center">
+                <a href="{{ route('reservations.edit', $reservation) }}"
+                    class="rounded border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 hover:bg-gray-100">
+                    編集する
+                </a>
+            </div>
+        </div>
     </div>
 </div>

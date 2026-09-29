@@ -49,52 +49,57 @@ class ReservationCreate extends Component
     public function save(ReservationService $service): void
     {
         // ① 入力チェック
-        $this->validate([
-            'customerName' => [
-                'required',
-                'string',
-                'max:255',
-            ],
+        $this->validate(
+            [
+                'customerName' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
 
-            'people' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
+                'people' => [
+                    'required',
+                    'integer',
+                    'min:1',
+                ],
 
-            'phone' => [
-                'nullable',
-                'string',
-                'max:20',
-            ],
+                'phone' => [
+                    'nullable',
+                    'string',
+                    'max:20',
+                ],
 
-            'reservationDate' => [
-                'required',
-                'date',
-            ],
+                'reservationDate' => [
+                    'required',
+                    'date',
+                ],
 
-            'startTime' => [
-                'required',
-                'date_format:H:i',
-            ],
+                'startTime' => [
+                    'required',
+                    'date_format:H:i',
+                ],
 
-            'endTime' => [
-                'required',
-                'date_format:H:i',
-                'after:startTime',
-            ],
+                'endTime' => [
+                    'required',
+                    'date_format:H:i',
+                    'after:startTime',
+                ],
 
-            'seat' => [
-                'required',
-                'integer',
-                'exists:seats,id',
-            ],
+                'seat' => [
+                    'required',
+                    'integer',
+                    'exists:seats,id',
+                ],
 
-            'description' => [
-                'nullable',
-                'string',
+                'description' => [
+                    'nullable',
+                    'string',
+                ],
             ],
-        ]);
+            [
+                'endTime.after' => '終了時間は開始時間より後の時間を選択してください。',
+            ]
+        );
 
         // ② ReservationServiceに渡すデータを作る
         $service->create(
@@ -158,7 +163,7 @@ class ReservationCreate extends Component
         // 初期値
         $start = null;
         $end = null;
-        $slotMinutes= 0;
+        $slotMinutes = 0;
 
         // 店舗設定が存在する場合
         if ($shopSetting) {
@@ -175,7 +180,7 @@ class ReservationCreate extends Component
             );
 
             // 予約時間の単位
-            $slotMinutes= (int) $shopSetting->slot_minutes;
+            $slotMinutes = (int) $shopSetting->slot_minutes;
         }
 
         return view('livewire.reservation-create', [

@@ -8,38 +8,6 @@
                 📅 予約管理システム
             </div>
 
-            {{-- ナビゲーション --}}
-            {{--
-            <nav class="ml-12 flex gap-8">
-
-                <a href="#" class="hover:text-blue-200">
-                    予約状況
-                </a>
-
-                <a href="{{ route('reservations.index') }}"
-                    class="rounded-lg bg-blue-500 px-5 py-2">
-                    予約一覧
-                </a>
-
-                <a href="#" class="hover:text-blue-200">
-                    席マスタ
-                </a>
-
-                <a href="#" class="hover:text-blue-200">
-                    ユーザー管理
-                </a>
-
-                <a href="#" class="hover:text-blue-200">
-                    設定
-                </a>
-
-            </nav>
-
-            <div class="ml-auto">
-                👤 スタッフA
-            </div>
-            --}}
-
         </div>
     </header>
 

@@ -49,17 +49,64 @@ class ReservationEdit extends Component
     */
     public function update(ReservationService $service): void
     {
-        $this->validate([
-            'customerName' => ['required', 'string', 'max:255'],
-            'people' => ['required', 'integer', 'min:1'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'reservationDate' => ['required', 'date'],
-            'startTime' => ['required', 'date_format:H:i'],
-            'endTime' => ['required', 'date_format:H:i', 'after:startTime'],
-            'seat' => ['required', 'integer', 'exists:seats,id'],
-            'status' => ['required', 'in:temporary,reserved,cancelled'],
-            'description' => ['nullable', 'string'],
-        ]);
+        $this->validate(
+            [
+                'customerName' => [
+                    'required',
+                    'string',
+                    'max:255'
+                ],
+
+                'people' => [
+                    'required',
+                    'integer',
+                    'min:1'
+                ],
+
+                'phone' => [
+                    'nullable',
+                    'string',
+                    'max:20'
+                ],
+
+                'reservationDate' => [
+                    'required',
+                    'date'
+                ],
+
+                'startTime' => [
+                    'required',
+                    'date_format:H:i'
+                ],
+
+                'endTime' => [
+                    'required',
+                    'date_format:H:i',
+                    'after:startTime'
+                ],
+
+                'seat' => [
+                    'required',
+                    'integer',
+                    'exists:seats,id'
+                ],
+
+                'status' => [
+                    'required',
+                    'in:temporary,reserved,cancelled'
+                ],
+
+                'description' => [
+                    'nullable',
+                    'string'
+                ],
+
+            ],
+
+            [
+                'endTime.after' => '終了時間は開始時間より後の時間を選択してください。',
+            ]
+        );
 
         // 予約情報を更新
         $this->reservation = $service->update(
