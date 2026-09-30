@@ -58,3 +58,11 @@ Route::get('/login', Login::class)
 Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
+
+Route::view('/top', 'top')->name('top');
+
+Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
+
+Route::view('/seat-manager', 'seat-manager')->name('seat-manager');
+
+Route::view('/admin-dashboard', 'admin-dashboard')->name('admin-dashboard');
