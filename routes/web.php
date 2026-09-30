@@ -19,8 +19,14 @@ use App\Http\Controllers\AdminDashboardController;
 // });
 
 // トップページ
+
 Route::get("/top",ReservationTop::class)
     ->name('reservation.top');
+
+Route::get('/top', function () {
+    return view('top');
+})->name('top');
+
 
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
@@ -50,9 +56,19 @@ Route::get('/settings', ShopSetting::class)
 Route::get('/users', UserManagement::class)
     ->name('users.index');
 
+
 Route::get('/login', Login::class)
     ->name('login');
+
 
 Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
+
+Route::view('/top', 'top')->name('top');
+
+Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
+
+Route::view('/seat-manager', 'seat-manager')->name('seat-manager');
+
+Route::view('/admin-dashboard', 'admin-dashboard')->name('admin-dashboard');
