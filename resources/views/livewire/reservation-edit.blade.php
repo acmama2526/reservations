@@ -94,29 +94,91 @@
         </div>
 
         {{-- 席 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="seat" class="font-semibold">
+        <div class="grid grid-cols-4 items-start gap-4 mb-4">
+
+            <label class="font-semibold">
                 席
             </label>
 
             <div class="col-span-3">
-                <select id="seat" wire:model="seat" class="w-full rounded border-gray-300">
-                    <option value="">選択してください</option>
+
+                {{-- 手動で複数選択 --}}
+                <div class="grid grid-cols-2 gap-3">
 
                     @foreach ($seats as $seatItem)
-                        <option value="{{ $seatItem->id }}">
-                            {{ $seatItem->seat_name }}
-                            （{{ $seatItem->capacity }}名）
-                        </option>
-                    @endforeach
-                </select>
+                        <label class="flex items-center gap-2 rounded border p-3 cursor-pointer hover:bg-gray-50">
 
-                @error('seat')
+                            <input type="checkbox" wire:model="selectedSeatIds" value="{{ $seatItem->id }}"
+                                class="rounded border-gray-300">
+
+                            <span>
+                                {{ $seatItem->seat_name }}
+                                （{{ $seatItem->capacity }}名）
+                            </span>
+
+                        </label>
+                    @endforeach
+
+                </div>
+
+                {{-- 手動選択のエラー --}}
+                @error('selectedSeatIds')
                     <p class="mt-1 text-sm text-red-600">
                         {{ $message }}
                     </p>
                 @enderror
+
+                @error('selectedSeatIds.*')
+                    <p class="mt-1 text-sm text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+
+                {{-- 自動配置ボタン --}}
+                <div class="mt-4">
+
+                    <button type="button" wire:click="autoAssignSeats" wire:loading.attr="disabled"
+                        class="rounded bg-green-600 px-5 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50">
+                        🪑 自動配置
+                    </button>
+
+                </div>
+
+                {{-- 自動配置エラー --}}
+                @if ($autoAssignError)
+                    <div class="mt-3 rounded bg-red-50 p-3">
+                        <p class="text-sm text-red-600">
+                            {{ $autoAssignError }}
+                        </p>
+                    </div>
+                @endif
+
+                {{-- 現在選択されている席 --}}
+                @if (!empty($selectedSeats))
+
+                    <div class="mt-3 rounded bg-blue-50 p-3">
+
+                        <p class="font-semibold text-blue-700">
+                            選択中の席
+                        </p>
+
+                        <ul class="mt-2 list-disc pl-5">
+
+                            @foreach ($selectedSeats as $selectedSeat)
+                                <li>
+                                    {{ $selectedSeat->seat_name }}
+                                    （{{ $selectedSeat->capacity }}名）
+                                </li>
+                            @endforeach
+
+                        </ul>
+
+                    </div>
+
+                @endif
+
             </div>
+
         </div>
 
         {{-- 開始時間 --}}

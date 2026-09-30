@@ -30,17 +30,20 @@ class ReservationCreate extends Component
     public string $endTime = '';
 
     // 手動で選択した席
-    public string $seat = '';
+    // public string $seat = '';
 
-    // 自動配置で選択された席
+    // 手動選択・自動配置の両方で使用
     public array $selectedSeatIds = [];
+
+    // 自動配置のエラー
+    public string $autoAssignError = '';
 
     // 備考
     public string $description = '';
 
 
     /**
-     * 画面を開いたときに実行される
+     * 初期表示
      */
     public function mount(): void
     {
@@ -54,6 +57,9 @@ class ReservationCreate extends Component
      */
     public function autoAssignSeats(SeatAssignmentService $service): void
     {
+        // 前回の自動配置エラーを消す
+        $this->autoAssignError = '';
+
         // 自動配置に必要な入力を先にチェック
         $this->validate(
             [
@@ -81,6 +87,18 @@ class ReservationCreate extends Component
             ],
 
             [
+                'people.required' => '人数を選択してください。',
+                'people.integer' => '人数は数字で入力してください。',
+                'people.min' => '人数は1人以上を選択してください。',
+
+                'reservationDate.required' => '予約日を入力してください。',
+                'reservationDate.date' => '正しい予約日を入力してください。',
+
+                'startTime.required' => '開始時間を選択してください。',
+                'startTime.date_format' => '開始時間は正しい形式で選択してください。',
+
+                'endTime.required' => '終了時間を選択してください。',
+                'endTime.date_format' => '終了時間は正しい形式で選択してください。',
                 'endTime.after' => '終了時間は開始時間より後の時間を選択してください。',
             ]
         );
@@ -96,20 +114,19 @@ class ReservationCreate extends Component
         // エラーの場合
         if ($result['error']) {
             $this->selectedSeatIds = [];
-
-            session()->flash(
-                'error',
-                $result['error']
-            );
+            $this->autoAssignError = $result['error'];
 
             return;
         }
 
-        // 自動配置された席を保存
+        // 自動配置された席selectedSeatIds に入れる
         $this->selectedSeatIds = $result['selectedSeatIds'];
 
+        // エラーメッセージを消す
+        $this->autoAssignError = '';
+
         // 自動配置した場合は手動選択を解除
-        $this->seat = '';
+        // $this->seat = '';
 
         session()->flash(
             'message',
@@ -159,9 +176,19 @@ class ReservationCreate extends Component
                     'after:startTime',
                 ],
 
-                'seat' => [
-                    'required_without:selectedSeatIds',
-                    'nullable',
+                // 'seat' => [
+                //     'required_without:selectedSeatIds',
+                //     'nullable',
+                //     'integer',
+                //     'exists:seats,id',
+                // ],
+                'selectedSeatIds' => [
+                    'required',
+                    'array',
+                    'min:1',
+                ],
+
+                'selectedSeatIds.*' => [
                     'integer',
                     'exists:seats,id',
                 ],
@@ -172,18 +199,50 @@ class ReservationCreate extends Component
                 ],
             ],
             [
+                'customerName.required' => 'お客様名を入力してください。',
+                'customerName.string' => 'お客様名は文字で入力してください。',
+                'customerName.max' => 'お客様名は255文字以内で入力してください。',
+
+                'people.required' => '人数を選択してください。',
+                'people.integer' => '人数は数字で入力してください。',
+                'people.min' => '人数は1人以上を選択してください。',
+
+                'phone.max' => '電話番号は20文字以内で入力してください。',
+
+                'reservationDate.required' => '予約日を入力してください。',
+                'reservationDate.date' => '正しい予約日を入力してください。',
+
+                'startTime.required' => '開始時間を選択してください。',
+                'startTime.date_format' => '開始時間は正しい形式で選択してください。',
+
+                'endTime.required' => '終了時間を選択してください。',
+                'endTime.date_format' => '終了時間は正しい形式で選択してください。',
                 'endTime.after' => '終了時間は開始時間より後の時間を選択してください。',
-                'seat.required_without' => '席を選択するか、自動配置を実行してください。',
+
+                'selectedSeatIds.required' => '席を1つ以上選択してください。',
+                'selectedSeatIds.array' => '席の選択形式が正しくありません。',
+                'selectedSeatIds.min' => '席を1つ以上選択してください。',
+                'selectedSeatIds.*.exists' => '選択した席が存在しません。',
+
+                'description.string' => 'メモの形式が正しくありません。',
+
             ]
         );
 
-        // 自動配置された席があれば、それを使用
-        if (!empty($this->selectedSeatIds)) {
-            $seatIds = $this->selectedSeatIds;
-        } else {
-            // 自動配置していなければ、手動選択した席を使用
-            $seatIds = [(int) $this->seat,];
-        }
+        // // 自動配置された席があれば、それを使用
+        // if (!empty($this->selectedSeatIds)) {
+        //     $seatIds = $this->selectedSeatIds;
+        // } else {
+        //     // 自動配置していなければ、手動選択した席を使用
+        //     $seatIds = [(int) $this->seat,];
+        // }
+
+
+        /*
+         * 手動選択でも自動配置でも
+         * selectedSeatIds をそのまま使用
+         */
+        $seatIds = $this->selectedSeatIds;
 
         // ReservationServiceに渡すデータを作る
         $service->create(
@@ -222,15 +281,15 @@ class ReservationCreate extends Component
 
     }
 
-    /**
-     * 手動で席を選択したら、自動配置の選択を解除する
-     */
-    public function updatedSeat($value): void
-    {
-        if ($value !== '') {
-            $this->selectedSeatIds = [];
-        }
-    }
+    // /**
+    //  * 手動で席を選択したら、自動配置の選択を解除する
+    //  */
+    // public function updatedSeat($value): void
+    // {
+    //     if ($value !== '') {
+    //         $this->selectedSeatIds = [];
+    //     }
+    // }
 
     /**
      * 入力内容をクリアする
@@ -243,9 +302,10 @@ class ReservationCreate extends Component
         $this->reservationDate = now()->format('Y-m-d');
         $this->startTime = '';
         $this->endTime = '';
-        $this->seat = '';
+        // $this->seat = '';
         $this->selectedSeatIds = [];
         $this->description = '';
+        $this->autoAssignError = '';
 
         // エラーメッセージも消す
         $this->resetValidation();
@@ -289,7 +349,11 @@ class ReservationCreate extends Component
 
         }
 
-        // 自動配置された席の情報
+        /*
+         * 選択されている席を取得
+         *
+         * 手動選択でも自動配置でもselectedSeatIds に入っている席を表示する
+         */
         $selectedSeats = [];
 
         if (!empty($this->selectedSeatIds)) {
