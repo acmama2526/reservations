@@ -51,7 +51,6 @@ Route::get('/settings', ShopSetting::class)
 Route::get('/users', UserManagement::class)
     ->name('users.index');
 
-
 Route::get('/login', Login::class)
     ->name('login');
 
@@ -59,7 +58,6 @@ Route::get('/login', Login::class)
 Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
-
 
 Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
 
