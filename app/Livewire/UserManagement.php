@@ -16,7 +16,7 @@ class UserManagement extends Component
     public $showForm = false;
     public $editingId = null;
 
-    // ログイン中のユーザーが管理者か確認する
+    //ログイン中のユーザーが管理者か確認する
     private function ensureAdmin(): bool
     {
         $this->resetValidation('permission');

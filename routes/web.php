@@ -52,6 +52,7 @@ Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
 
+//ヘッダーリンク
 Route::view('/top', 'top')->name('top');
 
 Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
