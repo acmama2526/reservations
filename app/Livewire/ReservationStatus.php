@@ -277,7 +277,7 @@ class ReservationStatus extends Component
                  * の3枠です。
                  */
 
-                $span = $endIndex - $startIndex + 1;
+                $span = $endIndex - $startIndex;
 
 
                 /*
