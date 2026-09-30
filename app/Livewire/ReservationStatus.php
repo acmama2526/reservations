@@ -2,175 +2,318 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Carbon\Carbon; // 日付をインポート
+use App\Models\Reservation;
+use App\Models\Seat;
+use App\Models\ShopSetting;
+use Carbon\Carbon;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class ReservationStatus extends Component
 {
-    public $date;
-    public $times;
-    public $seats = [
-        "テーブルA",
-        "テーブルB",
-        "テーブルC",
-        "座席A",
-        "座席B",
-        "カウンターA",
-        "カウンターB",
-        "カウンターC",
-        "カウンターD",
-        "カウンターE",
-    ];
-    public $reservations;
+    // 日付
+    public string $date = '';
+    // 時間(配列)
+    public array $times = [];
 
-    public function mount()
+
+    // 今日の日付がデフォルト
+    public function mount(): void
     {
-        // 今日の日付
+        // 最初は今日を表示
         $this->date = Carbon::today()->format('Y-m-d');
 
-        // タイムテーブルに表示する時間
-        $this->times = [
-            '17:00',
-            '17:30',
-            '18:00',
-            '18:30',
-            '19:00',
-            '19:30',
-            '20:00',
-            '20:30',
-            '21:00',
-            '21:30',
-            '22:00',
-        ];
+        // 営業時間から予約枠を作成
+        $this->makeTimes();
+    }
 
-        // 仮の予約データ
-        $this->reservations = [
-            [
-                'seat' => 'テーブルA',
-                'start_time' => '18:00',
-                'end_time' => '20:00',
-                'name' => '山田太郎',
-                'people' => 4,
-            ],
-            [
-                'seat' => 'テーブルB',
-                'start_time' => '19:30',
-                'end_time' => '20:30',
-                'name' => '佐藤花子',
-                'people' => 2,
-            ],
-        ];
 
-        // 予約ごとにバーの長さを計算
-        foreach ($this->reservations as &$reservation) {
+    //　前の日へ
+    public function previousDay(): void
+    {
+        $this->date = Carbon::parse($this->date)
+            ->subDay()
+            ->format('Y-m-d');
+    }
 
-            $startIndex = array_search(
-                $reservation['start_time'],
-                $this->times
-            );
+    //　次の日へ
+    public function nextDay(): void
+    {
+        $this->date = Carbon::parse($this->date)
+            ->addDay()
+            ->format('Y-m-d');
+    }
 
-            $endIndex = array_search(
-                $reservation['end_time'],
-                $this->times
-            );
+    // 時間枠を作成
 
-            // 終了時間を含めるため +1
-            $span = $endIndex - $startIndex + 1;
+    // | ShopSettingから
+    // |
+    // | business_start
+    // | business_end
+    // | slot_minutes
+    // |
+    // | を取得して時間一覧を作ります。
 
-            // 計算結果をその予約に追加
-            $reservation['span'] = $span;
+
+    private function makeTimes(): void
+    {
+        $shopSetting = ShopSetting::first();
+
+
+        /*
+         * 店舗設定がまだ存在しない場合は、
+         * 仮の営業時間を使用します。
+         */
+        if (!$shopSetting) {
+
+            $this->times = [
+                '17:00',
+                '17:30',
+                '18:00',
+                '18:30',
+                '19:00',
+                '19:30',
+                '20:00',
+                '20:30',
+                '21:00',
+                '21:30',
+                '22:00',
+            ];
+
+            return;
         }
 
-        // foreachの参照を解除
-        unset($reservation);
+
+        /*
+         * DBの営業時間をCarbonへ変換
+         */
+        $start = Carbon::createFromFormat(
+            'H:i:s',
+            $shopSetting->business_start
+        );
+
+        $end = Carbon::createFromFormat(
+            'H:i:s',
+            $shopSetting->business_end
+        );
+
+        $slotMinutes = (int) $shopSetting->slot_minutes;
+
+
+        /*
+         * 時間一覧を一度空にする
+         */
+        $this->times = [];
+
+
+        /*
+         * 営業開始～営業終了まで
+         * slot_minutes間隔で作成します。
+         */
+        $current = $start->copy();
+
+        while ($current <= $end) {
+
+            $this->times[] = $current->format('H:i');
+
+            $current->addMinutes($slotMinutes);
+        }
     }
+
 
     /*
-|--------------------------------------------------------------------------
-| 新規予約を受け取る
-|--------------------------------------------------------------------------
-|
-| #[On('reservation-created')]
-|
-| によって、
-| ReservationFormからreservation-createdイベントが送られてきたら
-| このメソッドが自動的に実行されます。
-|
-*/
-
-    #[On('reservation-created')]
-    public function addReservation(
-        $seat,
-        $startTime,
-        $endTime,
-        $name,
-        $people
-    ) {
-        /*
-     * 開始時間がtimes配列の何番目なのか調べます。
-     */
-        $startIndex = array_search(
-            $startTime,
-            $this->times
-        );
-
-        /*
-     * 終了時間も同じように調べます。
-     */
-        $endIndex = array_search(
-            $endTime,
-            $this->times
-        );
-
-
-        /*
-     * 予約バーの長さを計算します。
-     *
-     * 例：
-     *
-     * 18:00 → index 2
-     * 19:00 → index 4
-     *
-     * 4 - 2 + 1 = 3マス
-     */
-        $span = $endIndex - $startIndex + 1;
-
-
-        /*
-     * reservations配列の最後に
-     * 新しい予約を追加します。
-     *
-     * [] を付けることで、
-     *
-     * $this->reservations の最後に追加
-     *
-     * という意味になります。
-     */
-        $this->reservations[] = [
-            'seat' => $seat,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'name' => $name,
-            'people' => $people,
-            'span' => $span,
-        ];
-    }
-
-    public function previousDay()
-    {
-        //$dateを1日戻す
-        $this->date = Carbon::parse($this->date)->subDay()->format('Y-m-d');
-    }
-
-    public function nextDay()
-    {
-        //$dateを1日進める
-        $this->date = Carbon::parse($this->date)->addDay()->format('Y-m-d');
-    }
+    |--------------------------------------------------------------------------
+    | 画面表示
+    |--------------------------------------------------------------------------
+    */
 
     public function render()
     {
-        return view('livewire.reservation-status');
+        /*
+        |--------------------------------------------------------------------------
+        | 使用可能な席を取得
+        |--------------------------------------------------------------------------
+        |
+        | is_active = true の席だけ表示します。
+        |
+        | display_order が設定されているので、
+        | その順番で表示します。
+        |
+        */
+
+        $seatModels = Seat::query()
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | 選択日の予約を取得
+        |--------------------------------------------------------------------------
+        |
+        | カレンダーで選択されている $date の予約だけ取得します。
+        |
+        | with('seats') によって
+        | 予約に紐付いている席も一緒に取得します。
+        |
+        */
+
+        $reservationModels = Reservation::with('seats')
+            ->whereDate('reservation_date', $this->date)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('start_time')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bladeで使いやすい席配列へ変換
+        |--------------------------------------------------------------------------
+        |
+        | Bladeでは今まで
+        |
+        | @foreach ($seats as $seat)
+        |
+        | としていたので、その形を維持します。
+        |
+        */
+
+        $seats = $seatModels
+            ->pluck('seat_name')
+            ->toArray();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Blade用予約データを作成
+        |--------------------------------------------------------------------------
+        */
+
+        $reservations = [];
+
+
+        foreach ($reservationModels as $reservation) {
+
+            /*
+             * DBでは1つの予約に複数の席を
+             * 紐付けられる構造になっています。
+             *
+             * そのため席ごとに予約バーを作ります。
+             */
+
+            foreach ($reservation->seats as $seat) {
+
+                /*
+                 * DBのtime型は
+                 *
+                 * 18:00:00
+                 *
+                 * のようになっているため、
+                 *
+                 * 18:00
+                 *
+                 * に変換します。
+                 */
+
+                $startTime = substr(
+                    $reservation->start_time,
+                    0,
+                    5
+                );
+
+                $endTime = substr(
+                    $reservation->end_time,
+                    0,
+                    5
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 予約バーの長さを計算
+                |--------------------------------------------------------------------------
+                |
+                | $times の何番目から何番目まで使うかを探します。
+                |
+                */
+
+                $startIndex = array_search(
+                    $startTime,
+                    $this->times,
+                    true
+                );
+
+                $endIndex = array_search(
+                    $endTime,
+                    $this->times,
+                    true
+                );
+
+
+                /*
+                 * 営業時間外などで時間が見つからない場合は
+                 * タイムラインに表示しません。
+                 */
+                if (
+                    $startIndex === false ||
+                    $endIndex === false
+                ) {
+                    continue;
+                }
+
+
+                /*
+                 * 現在のプロジェクトでは
+                 * 「終了時間も1枠として含める」
+                 * という仕様にしています。
+                 *
+                 * 18:00～19:00なら
+                 *
+                 * 18:00
+                 * 18:30
+                 * 19:00
+                 *
+                 * の3枠です。
+                 */
+
+                $span = $endIndex - $startIndex;
+
+
+                /*
+                 * Bladeがこれまで使用していた形式へ変換します。
+                 */
+
+                $reservations[] = [
+
+                    'seat' => $seat->seat_name,
+
+                    'start_time' => $startTime,
+
+                    'end_time' => $endTime,
+
+                    'name' => $reservation->customer_name,
+
+                    'people' => $reservation->people,
+
+                    'span' => $span,
+                ];
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bladeへ渡す
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'livewire.reservation-status',
+            [
+                'seats' => $seats,
+                'reservations' => $reservations,
+            ]
+        );
     }
 }

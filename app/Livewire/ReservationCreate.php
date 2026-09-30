@@ -265,8 +265,20 @@ class ReservationCreate extends Component
             '予約を登録しました。'
         );
 
+
+        // // ④ 予約一覧へ戻る
+        // $this->redirectRoute('reservations.index');
+
+        // 他のLivewireコンポーネントへ通知
+        $this->dispatch('reservation-created');
+
+
+        // フォームを初期化
+        $this->clear();
+
         // 予約一覧へ戻る
         $this->redirectRoute('reservations.index');
+
     }
 
     // /**
@@ -334,6 +346,7 @@ class ReservationCreate extends Component
 
             // 予約時間の単位
             $slotMinutes = (int) $shopSetting->slot_minutes;
+
         }
 
         /*
@@ -350,6 +363,7 @@ class ReservationCreate extends Component
             )
                 ->orderBy('display_order')
                 ->get();
+
         }
 
         return view('livewire.reservation-create', [

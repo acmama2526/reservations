@@ -32,6 +32,11 @@ class ShopSetting extends Component
 
     public function save()
     {
+        // if (! in_array(auth()->user()?->role, ['admin', 'manager'], true)) {
+        //     $this->addError('permission', '店舗設定を変更する権限がありません。');
+        //     return;
+        // }
+
         ShopSettingModel::updateOrCreate(
             ['id' => 1],
             [
@@ -43,7 +48,7 @@ class ShopSetting extends Component
             ]
         );
 
-        session()->flash('message','保存しました');
+        session()->flash('message', '保存しました');
     }
 
     public function render()
