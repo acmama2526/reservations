@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Reservation;
 use App\Models\Seat;
 use App\Services\ReservationService;
-use App\Services\SeatAssignmentService;
 use Livewire\Component;
 
 class ReservationEdit extends Component
@@ -19,14 +18,13 @@ class ReservationEdit extends Component
     public string $startTime = '';
     public string $endTime = '';
     public string $seat = '';
-    public array $selectedSeatIds = [];
     public string $status = '';
     public string $description = '';
 
 
     /*
-    *編集画面を開いたときの初期値
-    */
+     * 編集画面を開いたときの初期値
+     */
     public function mount(Reservation $reservation): void
     {
         // 編集する予約を取得
@@ -44,16 +42,12 @@ class ReservationEdit extends Component
 
         // 現在設定されている席
         $this->seat = (string) ($reservation->seats->first()?->id ?? '');
-
-        $this->selectedSeatIds = $reservation->seats
-            ->pluck('id')
-            ->map(fn($id) => (int) $id)
-            ->all();
     }
 
+
     /*
-    *ReservationServiceに予約変更を依頼
-    */
+     * ReservationServiceに予約変更を依頼
+     */
     public function update(ReservationService $service): void
     {
         $this->validate(
@@ -107,7 +101,6 @@ class ReservationEdit extends Component
                     'nullable',
                     'string'
                 ],
-
             ],
 
             [
@@ -115,12 +108,6 @@ class ReservationEdit extends Component
             ]
         );
 
-
-        // 自動配置された席があれば、それを使用
-        // なければ手動で選択した席を使用
-        $seatIds = !empty($this->selectedSeatIds)
-            ? $this->selectedSeatIds
-            : [(int) $this->seat];
 
         // 予約情報を更新
         $this->reservation = $service->update(
@@ -135,8 +122,9 @@ class ReservationEdit extends Component
                 'status' => $this->status,
                 'description' => $this->description,
             ],
-            $seatIds
+            [(int) $this->seat]
         );
+
 
         session()->flash('message', '予約を更新しました。');
 
@@ -146,71 +134,10 @@ class ReservationEdit extends Component
         );
     }
 
-    /*
-    *自動配置の処理
-    */
-    public function autoAssignSeats(SeatAssignmentService $service): void
-    {
-        $this->validate(
-            [
-                'people' => [
-                    'required',
-                    'integer',
-                    'min:1',
-                ],
-
-                'reservationDate' => [
-                    'required',
-                    'date',
-                ],
-
-                'startTime' => [
-                    'required',
-                    'date_format:H:i',
-                ],
-
-                'endTime' => [
-                    'required',
-                    'date_format:H:i',
-                    'after:startTime',
-                ],
-            ],
-            [
-                'endTime.after' => '終了時間は開始時間より後の時間を選択してください。',
-            ]
-        );
-
-        // 自動配置を実行
-        $result = $service->assign(
-            (int) $this->people,
-            $this->reservationDate,
-            $this->startTime,
-            $this->endTime,
-            $this->reservation->id
-        );
-
-        // 自動配置できなかった場合
-        if ($result['error']) {
-            $this->selectedSeatIds = [];
-
-            session()->flash('error', $result['error']);
-
-            return;
-        }
-
-        // 自動配置された席をセット
-        $this->selectedSeatIds = $result['selectedSeatIds'];
-
-        // 手動選択の席を解除
-        $this->seat = '';
-
-        session()->flash('message', '席を自動配置しました。');
-    }
-
 
     /*
-    *編集中の内容を元の予約内容に戻す
-    */
+     * 編集中の内容を元の予約内容に戻す
+     */
     public function clear(): void
     {
         // 編集画面では「クリア」ではなく、
@@ -220,9 +147,10 @@ class ReservationEdit extends Component
         $this->resetValidation();
     }
 
+
     /*
-    *編集画面を表示
-    */
+     * 編集画面を表示
+     */
     public function render()
     {
         $seats = Seat::query()
