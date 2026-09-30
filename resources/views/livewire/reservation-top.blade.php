@@ -1,133 +1,273 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-slate-50">
 
-    <main class="mx-auto max-w-7xl px-6 py-8">
+    {{-- ============================================================
+         TOPページ本体
+    ============================================================= --}}
+    <div class="mx-auto max-w-7xl px-6 py-8">
 
-        {{-- ページタイトル --}}
+
+        {{-- ========================================================
+             ページタイトル
+        ========================================================= --}}
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-blue-950">
+
+            <h1 class="text-2xl font-bold text-blue-900">
                 予約状況画面（TOP）
             </h1>
+
         </div>
 
 
-        {{-- 予約状況 --}}
-        <section class="rounded-xl border bg-white p-6 shadow-sm">
-            
+        {{-- ========================================================
+             予約状況
+        ========================================================= --}}
+        <section>
 
             <livewire:reservation-status />
 
         </section>
 
 
-        {{-- 下段 --}}
-        <div class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+        {{-- ========================================================
+             下段
 
-            {{-- 左：当日の予約一覧（7カラム） --}}
-            <div class="lg:col-span-7">
+             PC
+             左：7カラム
+             右：5カラム
 
-                <section class="rounded-xl border bg-white p-6 shadow-sm">
+             スマートフォン
+             縦並び
+        ========================================================= --}}
+        <div
+            class="
+                mt-6
+                grid grid-cols-1
+                items-start
+                gap-6
+                lg:grid-cols-12
+            "
+        >
 
-                    <h2 class="mb-5 text-xl font-bold text-blue-900">
-                        本日の予約
-                    </h2>
 
+            {{-- ====================================================
+                 左：本日の予約一覧
+            ===================================================== --}}
+            <section class="lg:col-span-7">
+
+                <div
+                    class="
+                        rounded-xl
+                        border border-slate-200
+                        bg-white
+                        p-6
+                    "
+                >
+
+                    {{-- タイトル --}}
+                    <div class="mb-5 flex items-center justify-between">
+
+                        <h2 class="text-xl font-bold text-blue-900">
+                            本日の予約
+                        </h2>
+
+                    </div>
+
+
+                    {{-- =============================================
+                         予約一覧
+                    ============================================== --}}
                     <div class="overflow-x-auto">
 
                         <table class="w-full border-collapse text-sm">
 
+                            {{-- ヘッダー --}}
                             <thead>
+
                                 <tr class="bg-blue-50">
 
-                                    <th class="border px-3 py-3">
+                                    <th class="border border-slate-200 px-3 py-3">
                                         時間
                                     </th>
 
-                                    <th class="border px-3 py-3">
+                                    <th class="border border-slate-200 px-3 py-3">
                                         お名前
                                     </th>
 
-                                    <th class="border px-3 py-3">
+                                    <th class="border border-slate-200 px-3 py-3">
                                         人数
                                     </th>
 
-                                    <th class="border px-3 py-3">
+                                    <th class="border border-slate-200 px-3 py-3">
                                         席
                                     </th>
 
-                                    <th class="border px-3 py-3">
+                                    <th class="border border-slate-200 px-3 py-3">
                                         状態
                                     </th>
 
                                 </tr>
+
                             </thead>
 
+
+                            {{-- データ --}}
                             <tbody>
 
                                 @forelse ($todayReservations as $reservation)
 
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-slate-50">
+
 
                                         {{-- 時間 --}}
-                                        <td class="border px-3 py-3 text-center">
+                                        <td
+                                            class="
+                                                whitespace-nowrap
+                                                border border-slate-200
+                                                px-3 py-3
+                                                text-center
+                                            "
+                                        >
+
                                             {{ substr($reservation->start_time, 0, 5) }}
+
                                             ～
+
                                             {{ substr($reservation->end_time, 0, 5) }}
+
                                         </td>
 
-                                        {{-- 名前 --}}
-                                        <td class="border px-3 py-3">
+
+                                        {{-- お客様名 --}}
+                                        <td
+                                            class="
+                                                border border-slate-200
+                                                px-3 py-3
+                                            "
+                                        >
                                             {{ $reservation->customer_name }}
                                         </td>
 
+
                                         {{-- 人数 --}}
-                                        <td class="border px-3 py-3 text-center">
+                                        <td
+                                            class="
+                                                border border-slate-200
+                                                px-3 py-3
+                                                text-center
+                                            "
+                                        >
                                             {{ $reservation->people }}名
                                         </td>
 
+
                                         {{-- 席 --}}
-                                        <td class="border px-3 py-3">
+                                        <td
+                                            class="
+                                                border border-slate-200
+                                                px-3 py-3
+                                            "
+                                        >
 
                                             @forelse ($reservation->seats as $seat)
+
                                                 <div>
                                                     {{ $seat->seat_name }}
                                                 </div>
 
                                             @empty
 
-                                                <span class="text-gray-400">
+                                                <span class="text-slate-400">
                                                     未割当
                                                 </span>
+
                                             @endforelse
 
                                         </td>
 
-                                        {{-- 状態 --}}
-                                        <td class="border px-3 py-3 text-center">
 
+                                        {{-- 状態 --}}
+                                        <td
+                                            class="
+                                                border border-slate-200
+                                                px-3 py-3
+                                                text-center
+                                            "
+                                        >
+
+                                            {{-- 確定 --}}
                                             @if ($reservation->status === 'reserved')
-                                                <span class="rounded bg-blue-100 px-2 py-1 text-blue-700">
+
+                                                <span
+                                                    class="
+                                                        inline-block
+                                                        rounded-md
+                                                        bg-blue-100
+                                                        px-3 py-1
+                                                        text-xs font-semibold
+                                                        text-blue-700
+                                                    "
+                                                >
                                                     確定
                                                 </span>
+
+
+                                            {{-- 仮予約 --}}
                                             @elseif ($reservation->status === 'temporary')
-                                                <span class="rounded bg-gray-100 px-2 py-1 text-gray-700">
+
+                                                <span
+                                                    class="
+                                                        inline-block
+                                                        rounded-md
+                                                        bg-slate-100
+                                                        px-3 py-1
+                                                        text-xs font-semibold
+                                                        text-slate-700
+                                                    "
+                                                >
                                                     仮予約
                                                 </span>
+
+
+                                            {{-- キャンセル --}}
                                             @elseif ($reservation->status === 'cancelled')
-                                                <span class="rounded bg-red-100 px-2 py-1 text-red-700">
+
+                                                <span
+                                                    class="
+                                                        inline-block
+                                                        rounded-md
+                                                        bg-red-100
+                                                        px-3 py-1
+                                                        text-xs font-semibold
+                                                        text-red-700
+                                                    "
+                                                >
                                                     キャンセル
                                                 </span>
+
                                             @endif
 
                                         </td>
 
                                     </tr>
 
+
                                 @empty
 
+                                    {{-- 予約がない場合 --}}
                                     <tr>
-                                        <td colspan="5" class="border px-3 py-8 text-center text-gray-500">
+
+                                        <td
+                                            colspan="5"
+                                            class="
+                                                border border-slate-200
+                                                px-3 py-10
+                                                text-center
+                                                text-slate-500
+                                            "
+                                        >
                                             本日の予約はありません。
                                         </td>
+
                                     </tr>
 
                                 @endforelse
@@ -138,20 +278,28 @@
 
                     </div>
 
-                </section>
+                </div>
 
-            </div>
+            </section>
 
 
-            {{-- 右：新規予約（5カラム） --}}
-            <div class="lg:col-span-5">
+            {{-- ====================================================
+                 右：新規予約
+            ===================================================== --}}
+            <section class="lg:col-span-5">
+
+                {{--
+                    チームメンバーが作成した
+                    ReservationCreateをそのまま再利用します。
+                --}}
 
                 <livewire:reservation-create />
 
-            </div>
+            </section>
+
 
         </div>
 
-    </main>
+    </div>
 
 </div>

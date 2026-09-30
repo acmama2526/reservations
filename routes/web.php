@@ -21,12 +21,7 @@ use App\Http\Controllers\AdminDashboardController;
 // トップページ
 
 Route::get("/top",ReservationTop::class)
-    ->name('reservation.top');
-
-Route::get('/top', function () {
-    return view('top');
-})->name('top');
-
+    ->name('top');
 
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
@@ -65,7 +60,6 @@ Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
 
-Route::view('/top', 'top')->name('top');
 
 Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
 
