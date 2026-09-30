@@ -304,7 +304,7 @@
                                     @elseif (
                                         $seat === $reservation['seat']
                                         && $time > $reservation['start_time']
-                                        && $time <= $reservation['end_time']
+                                        && $time < $reservation['end_time']
                                     )
 
                                         @php

@@ -9,11 +9,18 @@ class ReservationTop extends Component
 {
     /*
     |--------------------------------------------------------------------------
-    | 予約管理TOPページ
+    | 予約管理TOP
     |--------------------------------------------------------------------------
     |
-    | TOPページで必要になるデータを取得し、
-    | reservation-top.blade.php に渡します。
+    | TOPページ全体を管理するLivewireコンポーネントです。
+    |
+    | この画面では、
+    |
+    | ・予約状況
+    | ・本日の予約一覧
+    | ・新規予約
+    |
+    | を表示します。
     |
     */
 
@@ -24,14 +31,10 @@ class ReservationTop extends Component
         | 本日の予約を取得
         |--------------------------------------------------------------------------
         |
-        | with('seats')
-        | → 予約に紐付いている席情報も一緒に取得します。
+        | TOP左下に表示する本日の予約です。
         |
-        | whereDate(...)
-        | → reservation_date が今日の予約だけ取得します。
-        |
-        | orderBy(...)
-        | → 開始時間が早い順に並べます。
+        | with('seats') によって
+        | 予約に紐付いている席も同時に取得します。
         |
         */
 
@@ -43,20 +46,24 @@ class ReservationTop extends Component
 
         /*
         |--------------------------------------------------------------------------
-        | Bladeへデータを渡す
+        | TOP画面を表示
         |--------------------------------------------------------------------------
         |
-        | ここで渡した 'todayReservations' が、
-        | reservation-top.blade.php で
+        | layout('components.layout') を指定することで、
         |
-        | $todayReservations
+        | header
+        | ↓
+        | reservation-top
+        | ↓
+        | footer
         |
-        | として使用できます。
+        | の構成になります。
         |
         */
 
         return view('livewire.reservation-top', [
             'todayReservations' => $todayReservations,
-        ]);
+        ])
+            ->layout('components.layout');
     }
 }
