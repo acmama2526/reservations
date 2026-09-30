@@ -10,6 +10,7 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Livewire\SeatManager;
 use App\Livewire\Login;
+use App\Livewire\ReservationTop;
 use App\Http\Controllers\AdminDashboardController;
 
 
@@ -18,9 +19,8 @@ use App\Http\Controllers\AdminDashboardController;
 // });
 
 // トップページ
-Route::get('/top', function () {
-    return view('top');
-})->name('top');
+Route::get("/top",ReservationTop::class)
+    ->name('reservation.top');
 
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
