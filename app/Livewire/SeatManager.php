@@ -18,42 +18,68 @@ class SeatManager extends Component
   public ?int $editingSeatId = null;  //編集中の席id または null:新規作成
 
   //席自動配置用データ
-  public ?int $people = null;               //予約人数
-  public ?string $reservation_date = null;  //予約日
-  public ?string $start_time = null;        //開始時刻
-  public ?string $end_time = null;          //終了時刻
-  public array $availableSeatIds = [];      //空いている席を入れる配列
-  public array $selectedSeatIds = [];       //自動配置で最終的に選ばれた席を入れる配列
+  public ?int $people = null;               // 予約人数
+  public ?string $reservation_date = null;  // 予約日
+  public ?string $start_time = null;        // 開始時刻
+  public ?string $end_time = null;          // 終了時刻
+  public array $availableSeatIds = [];      // 空いている席を入れる配列
+  public array $selectedSeatIds = [];       // 自動配置で最終的に選ばれた席を入れる配列
   public ?int $reservationId = null;        // 対象となる予約ID テスト用
 
 
   /**
-   * 予約情報と既存予約を基に、自動席割り当てを行い、selectedSeatIds[]に格納
+   * Blade画面から入力された予約条件を SeatAssignmentService に渡し、
+   * 自動配置結果を Livewire の画面状態へ反映する。
+   * このメソッド自身は席の組み合わせ計算を行わず、
+   * 実際の自動配置ロジックは SeatAssignmentService に任せる。
+   * wire:click="autoAssignSeats" などから呼ばれる。
+   *
    * @return void
-   * SIDE EFFECT: selectedSeatIds[]を更新。最終的に選ばれた席IDの配列
+   * SIDE EFFECT:
+   * - availableSeatIds[] を更新
+   * - selectedSeatIds[] を更新
+   * - エラー時は session flash にメッセージを設定
    */
   public function autoAssignSeats()
   {
+    // Laravelのサービスコンテナから SeatAssignmentService のインスタンスを取得
+    // new SeatAssignmentService() と直接生成せず、Laravelに生成を任せる
     $service = app(SeatAssignmentService::class);
 
-    $result = $service->assign(
-      $this->people,
-      $this->reservation_date,
-      $this->start_time,
-      $this->end_time,
-      $this->reservationId
+    // 予約条件を Service に渡して自動配置を実行する
+    // reservationId は予約編集時、自分自身の予約を空席判定から除外するために使用
+    // assign() の返り値例
+    // [
+    //   'availableSeatIds' => [1, 2, 5], // 空いている席
+    //   'selectedSeatIds'  => [2, 5],    // 自動配置で選ばれた席
+    //   'error'            => null,      // エラーメッセージ
+    // ]
+    $result = $service->assign(   //SeatAssignmentServiceのassignをCallし、$resultに最適な席を返す
+      $this->people,              //人数
+      $this->reservation_date,    //予約日
+      $this->start_time,          //開始時刻
+      $this->end_time,            //終了時刻
+      $this->reservationId        //編集時に除外したい「自分自身の予約ID」
     );
 
-    $this->availableSeatIds = $result['availableSeatIds'];
-    $this->selectedSeatIds = $result['selectedSeatIds'];
+    // Serviceの計算結果をLivewireプロパティへ反映
+    // プロパティを書き換えるとBlade側の表示も自動更新される
+    $this->availableSeatIds = $result['availableSeatIds'];  //空いてる席idの配列
+    $this->selectedSeatIds = $result['selectedSeatIds'];    //選択された席idの配列
 
+    // Serviceからエラーが返った場合、画面表示用に1回だけセッションへ保存
     if ($result['error']) {
       session()->flash('error', $result['error']);
     }
   }
 
   /**
-   * 自動配置した席を予約DBに保存
+   * 自動配置結果を既存予約に紐付けて保存する。
+   * このメソッドは reservations 本体の人数・日時は変更しない。
+   * reservation_seat 中間テーブルの席割り当てだけを更新する。
+   *
+   * 現在はテスト画面用。
+   *
    * @return void
    */
   public function saveAssignment()
@@ -76,21 +102,26 @@ class SeatManager extends Component
       return;
     }
 
-    //reservation_seat に保存
+    // reservation_seat の紐付けを selectedSeatIds の内容に揃える
+    // 既存の席割り当ては必要に応じて解除され、新しい席へ置き換わる
     $reservation->seats()->sync($this->selectedSeatIds);
 
     session()->flash('message', '席配置を保存しました。');
   }
 
   /**
-   * 利用可能な席を検索し、availableSeatIds[]に格納
+   * 指定日時の空席だけを取得し、画面表示用プロパティへ反映する。
+   *
+   * 実際の営業時間チェック・予約重複判定・空席抽出は
+   * SeatAssignmentService に任せる。
+   *
    * @return void
-   * SIDE EFFECT: availableSeatIds[]を更新
    */
   public function searchAvailableSeats()
   {
     $service = app(SeatAssignmentService::class);
 
+    // 日付・開始・終了時刻をServiceへ渡して空席検索
     $result = $service->searchAvailableSeatIds(
       $this->reservation_date,
       $this->start_time,
@@ -112,6 +143,8 @@ class SeatManager extends Component
    */
   public function save()
   {
+    // editingSeatId がある場合は既存席を更新
+    // null の場合は新規席を作成
     if ($this->editingSeatId) {
       $seat = Seat::findOrFail($this->editingSeatId);
 
@@ -152,6 +185,7 @@ class SeatManager extends Component
    */
   public function cancelEdit()
   {
+    // 編集中のフォーム内容を破棄し、新規登録モードへ戻す
     $this->reset([
       'seat_name',
       'type',
@@ -170,8 +204,10 @@ class SeatManager extends Component
    */
   public function edit(int $id)
   {
+    // 指定された席をDBから取得し、その値をLivewireプロパティへコピー
     $seat = Seat::findOrFail($id);
 
+    // Bladeの編集フォームに既存値を表示する
     $this->editingSeatId = $seat->id;
     $this->seat_name = $seat->seat_name;
     $this->type = $seat->type;
