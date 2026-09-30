@@ -14,7 +14,7 @@ class SeatSeeder extends Seeder
   public function run(): void
   {
     Seat::create([
-      'seat_name' => 'T1',
+      'seat_name' => 'テーブル１',
       'type' => 'テーブル',
       'capacity' => 4,
       'display_order' => 1,
@@ -22,7 +22,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'T2',
+      'seat_name' => 'テーブル２',
       'type' => 'テーブル',
       'capacity' => 4,
       'display_order' => 2,
@@ -30,7 +30,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'Z1',
+      'seat_name' => '座敷１',
       'type' => '座敷',
       'capacity' => 6,
       'display_order' => 3,
@@ -38,7 +38,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'Z2',
+      'seat_name' => '座敷２',
       'type' => '座敷',
       'capacity' => 6,
       'display_order' => 4,
@@ -46,7 +46,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'C1',
+      'seat_name' => 'カウンター１',
       'type' => 'カウンター',
       'capacity' => 1,
       'display_order' => 5,
@@ -54,7 +54,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'C2',
+      'seat_name' => 'カウンター２',
       'type' => 'カウンター',
       'capacity' => 1,
       'display_order' => 6,
@@ -62,7 +62,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'C3',
+      'seat_name' => 'カウンター３',
       'type' => 'カウンター',
       'capacity' => 1,
       'display_order' => 7,
@@ -70,7 +70,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'C4',
+      'seat_name' => 'カウンター４',
       'type' => 'カウンター',
       'capacity' => 1,
       'display_order' => 8,
@@ -78,7 +78,7 @@ class SeatSeeder extends Seeder
     ]);
 
     Seat::create([
-      'seat_name' => 'C5',
+      'seat_name' => 'カウンター５',
       'type' => 'カウンター',
       'capacity' => 1,
       'display_order' => 9,

@@ -10,12 +10,18 @@ use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
 use App\Livewire\SeatManager;
 use App\Livewire\Login;
+use App\Livewire\ReservationTop;
 use App\Http\Controllers\AdminDashboardController;
 
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+
+// トップページ
+
+Route::get("/top",ReservationTop::class)
+    ->name('top');
 
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
@@ -48,12 +54,10 @@ Route::get('/users', UserManagement::class)
 Route::get('/login', Login::class)
     ->name('login');
 
+
 Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
-
-//ヘッダーリンク
-Route::view('/top', 'top')->name('top');
 
 Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
 

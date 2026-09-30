@@ -100,30 +100,62 @@
             </div>
         </div>
 
-
         {{-- 席 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="seat" class="font-semibold">
+        <div class="grid grid-cols-4 items-start gap-4 mb-4">
+            <label for="seat" class="font-semibold pt-2">
                 席
             </label>
 
             <div class="col-span-3">
-                <select id="seat" wire:model="seat" class="w-full rounded border-gray-300">
-                    <option value="">選択してください</option>
 
-                    @foreach ($seats as $seatItem)
-                        <option value="{{ $seatItem->id }}">
-                            {{ $seatItem->seat_name }}
-                            （{{ $seatItem->capacity }}名）
-                        </option>
-                    @endforeach
-                </select>
+                {{-- 手動選択 --}}
+                <div class="flex items-center gap-3">
+
+                    <select id="seat" wire:model="seat" class="flex-1 rounded border-gray-300">
+                        <option value="">選択してください</option>
+
+                        @foreach ($seats as $seatItem)
+                            <option value="{{ $seatItem->id }}">
+                                {{ $seatItem->seat_name }}
+                                （{{ $seatItem->capacity }}名）
+                            </option>
+                        @endforeach
+                    </select>
+
+                    {{-- 自動配置 --}}
+                    <button type="button" wire:click="autoAssignSeats" wire:loading.attr="disabled"
+                        class="whitespace-nowrap rounded bg-green-600 px-5 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50">
+                        🪑 自動配置
+                    </button>
+
+                </div>
 
                 @error('seat')
                     <p class="mt-1 text-sm text-red-600">
                         {{ $message }}
                     </p>
                 @enderror
+
+                {{-- 自動配置結果 --}}
+                @if (!empty($selectedSeats))
+                    <div class="mt-3 rounded border border-green-200 bg-green-50 p-3">
+
+                        <p class="font-semibold text-green-800">
+                            自動配置された席
+                        </p>
+
+                        <div class="mt-2 space-y-1">
+                            @foreach ($selectedSeats as $selectedSeat)
+                                <div class="text-green-700">
+                                    ✓ {{ $selectedSeat->seat_name }}
+                                    （{{ $selectedSeat->capacity }}名）
+                                </div>
+                            @endforeach
+                        </div>
+
+                    </div>
+                @endif
+
             </div>
         </div>
 
@@ -138,8 +170,8 @@
                 <select id="startTime" wire:model="startTime" class="rounded border-gray-300">
                     <option value="">選択してください</option>
 
-                    @if ($start && $end && $slot > 0)
-                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slot))
+                    @if ($start && $end && $slotMinutes > 0)
+                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
                             <option value="{{ $time->format('H:i') }}">
                                 {{ $time->format('H:i') }}
                             </option>
@@ -166,8 +198,8 @@
                 <select id="endTime" wire:model="endTime" class="rounded border-gray-300">
                     <option value="">選択してください</option>
 
-                    @if ($start && $end && $slot > 0)
-                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slot))
+                    @if ($start && $end && $slotMinutes > 0)
+                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
                             <option value="{{ $time->format('H:i') }}">
                                 {{ $time->format('H:i') }}
                             </option>
