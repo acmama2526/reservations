@@ -50,8 +50,10 @@ Route::get('/settings', ShopSetting::class)
 Route::get('/users', UserManagement::class)
     ->name('users.index');
 
+
 Route::get('/login', Login::class)
     ->name('login');
+
 
 Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
