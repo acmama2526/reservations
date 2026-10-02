@@ -19,7 +19,7 @@
                 </li>
 
                 <li class="shrink-0">
-                    <a href="{{ route('reservation-list') }}">
+                    <a href="{{ route('reservations.index') }}">
                         予約一覧・検索
                     </a>
                 </li>
