@@ -121,6 +121,15 @@ class SeatAssignmentService
     ?int $excludeReservationId = null
   ): array {
 
+    // 【結合テスト用】B側から自動配置Serviceへ渡された値を確認
+    logger()->info('SeatAssignmentService::assign INPUT', [
+      'people' => $people,
+      'reservationDate' => $reservationDate,
+      'startTime' => $startTime,
+      'endTime' => $endTime,
+      'excludeReservationId' => $excludeReservationId,
+    ]);
+
     // まず指定日時の空席を取得する
     $searchResult = $this->searchAvailableSeatIds(
       $reservationDate,
@@ -188,6 +197,13 @@ class SeatAssignmentService
         $bestCount = $count;
       }
     }
+
+    // 【結合テスト用】自動配置結果を確認
+    logger()->info('SeatAssignmentService::assign OUTPUT', [
+      'availableSeatIds' => $availableSeatIds,
+      'selectedSeatIds' => $bestCombination,
+      'error' => null,
+    ]);
 
     // 全候補を調べても収容可能な組み合わせがなければエラー
     if ($bestCombination === null) {
