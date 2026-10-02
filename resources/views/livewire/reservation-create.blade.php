@@ -102,61 +102,90 @@
 
         {{-- 席 --}}
         <div class="grid grid-cols-4 items-start gap-4 mb-4">
-            <label for="seat" class="font-semibold pt-2">
+
+            <label class="font-semibold">
                 席
             </label>
 
             <div class="col-span-3">
 
-                {{-- 手動選択 --}}
-                <div class="flex items-center gap-3">
+                {{-- 手動で複数選択 --}}
+                <div class="grid grid-cols-2 gap-3">
 
-                    <select id="seat" wire:model="seat" class="flex-1 rounded border-gray-300">
-                        <option value="">選択してください</option>
+                    @foreach ($seats as $seatItem)
+                        <label class="flex items-center gap-2 rounded border p-3 cursor-pointer hover:bg-gray-50">
 
-                        @foreach ($seats as $seatItem)
-                            <option value="{{ $seatItem->id }}">
+                            <input type="checkbox" wire:model="selectedSeatIds" value="{{ $seatItem->id }}"
+                                class="rounded border-gray-300">
+
+                            <span>
                                 {{ $seatItem->seat_name }}
                                 （{{ $seatItem->capacity }}名）
-                            </option>
-                        @endforeach
-                    </select>
+                            </span>
 
-                    {{-- 自動配置 --}}
-                    <button type="button" wire:click="autoAssignSeats" wire:loading.attr="disabled"
-                        class="whitespace-nowrap rounded bg-green-600 px-5 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-                        🪑 自動配置
-                    </button>
+                        </label>
+                    @endforeach
 
                 </div>
 
-                @error('seat')
+                {{-- 手動選択のエラー --}}
+                @error('selectedSeatIds')
                     <p class="mt-1 text-sm text-red-600">
                         {{ $message }}
                     </p>
                 @enderror
 
-                {{-- 自動配置結果 --}}
-                @if (!empty($selectedSeats))
-                    <div class="mt-3 rounded border border-green-200 bg-green-50 p-3">
+                @error('selectedSeatIds.*')
+                    <p class="mt-1 text-sm text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
 
-                        <p class="font-semibold text-green-800">
-                            自動配置された席
+                {{-- 自動配置ボタン --}}
+                <div class="mt-4">
+
+                    <button type="button" wire:click="autoAssignSeats" wire:loading.attr="disabled"
+                        class="rounded bg-green-600 px-5 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50">
+                        🪑 自動配置
+                    </button>
+
+                </div>
+
+                {{-- 自動配置エラー --}}
+                @if ($autoAssignError)
+                    <div class="mt-3 rounded bg-red-50 p-3">
+                        <p class="text-sm text-red-600">
+                            {{ $autoAssignError }}
                         </p>
-
-                        <div class="mt-2 space-y-1">
-                            @foreach ($selectedSeats as $selectedSeat)
-                                <div class="text-green-700">
-                                    ✓ {{ $selectedSeat->seat_name }}
-                                    （{{ $selectedSeat->capacity }}名）
-                                </div>
-                            @endforeach
-                        </div>
-
                     </div>
                 @endif
 
+                {{-- 現在選択されている席 --}}
+                @if (!empty($selectedSeats))
+
+                    <div class="mt-3 rounded bg-blue-50 p-3">
+
+                        <p class="font-semibold text-blue-700">
+                            選択中の席
+                        </p>
+
+                        <ul class="mt-2 list-disc pl-5">
+
+                            @foreach ($selectedSeats as $selectedSeat)
+                                <li>
+                                    {{ $selectedSeat->seat_name }}
+                                    （{{ $selectedSeat->capacity }}名）
+                                </li>
+                            @endforeach
+
+                        </ul>
+
+                    </div>
+
+                @endif
+
             </div>
+
         </div>
 
 
