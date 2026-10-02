@@ -12,6 +12,8 @@ use App\Livewire\SeatManager;
 use App\Livewire\Login;
 use App\Livewire\ReservationTop;
 use App\Http\Controllers\AdminDashboardController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 // Route::get('/', function () {
@@ -60,3 +62,13 @@ Route::get('/admin-dashboard', [
     ->name('admin.dashboard');
 
 Route::view('/admin-dashboard', 'admin-dashboard')->name('admin-dashboard');
+
+//ログアウト
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('admin-dashboard');
+})->middleware('auth')->name('logout');

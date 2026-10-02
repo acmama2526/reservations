@@ -1,54 +1,74 @@
-<div class="overflow-hidden rounded-lg border border-blue-100 bg-white text-blue-900">
+<div class="w-full min-w-0 rounded-lg border border-blue-100 bg-white text-blue-900">
 
-    {{-- 見出し --}}
-    <div class="flex items-center justify-between gap-4 border-b border-blue-100 bg-blue-50 px-5 py-3">
-        <h2 class="m-0 flex items-center gap-2 text-base font-bold">
+    @php
+        $inputClass = 'w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none';
+    @endphp
+
+    <div class="flex items-center justify-between gap-4 border-b border-blue-100 bg-blue-50 px-5 py-4">
+
+        <div class="flex items-center gap-2">
             <svg
-                class="h-5 w-5 text-blue-600"
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
+                class="h-5 w-5 shrink-0 text-blue-600"
                 fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
                 aria-hidden="true"
             >
                 <circle cx="9" cy="7" r="4" />
-                <path
-                    stroke-linecap="round"
-                    d="M2 21v-2a7 7 0 0 1 14 0v2M17 3a4 4 0 0 1 0 8M22 21v-2a7 7 0 0 0-4-6"
-                />
+                <path d="M2 21v-3a7 7 0 0 1 14 0v3" />
+                <path d="M16 3a4 4 0 0 1 0 8" />
+                <path d="M22 21v-3a7 7 0 0 0-4-6" />
             </svg>
 
-            ユーザー管理
-        </h2>
+            <h2 class="m-0 text-sm font-bold">
+                ユーザー管理
+            </h2>
+        </div>
 
-        <button
-            type="button"
-            wire:click="showCreateForm"
-            class="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-            ＋ 新規登録
-        </button>
+        @if ($canManageUsers)
+            <button
+                type="button"
+                wire:click="showCreateForm"
+                class="shrink-0 cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+            >
+                ＋ 新規登録
+            </button>
+        @endif
+
     </div>
 
-    {{-- 登録・編集フォーム --}}
-    @if ($showForm)
-        <div class="border-b border-blue-100 bg-blue-50/50 p-5">
-            <h3 class="mb-4 text-sm font-bold text-blue-900">
+    @if (session()->has('user-message'))
+        <p role="status" class="mx-5 mt-4 rounded bg-green-50 px-3 py-2 text-sm text-green-700">
+            {{ session('user-message') }}
+        </p>
+    @endif
+
+    @if ($errors->any())
+        <ul role="alert" class="mx-5 mt-4 list-none space-y-1 rounded bg-red-50 p-3 text-sm text-red-700">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    @endif
+
+    @if ($canManageUsers && $showForm)
+        <div class="m-5 rounded-lg border border-blue-100 bg-blue-50 p-5">
+
+            <h3 class="mb-4 text-base font-bold">
                 {{ $editingId ? 'ユーザー編集' : '新規登録' }}
             </h3>
 
-            @php
-                $inputClass = 'block w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-blue-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100';
-            @endphp
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <form
+                wire:submit.prevent="{{ $editingId ? 'updateUser' : 'createUser' }}"
+                class="space-y-4"
+            >
 
                 <div>
-                    <label
-                        for="user-name"
-                        class="mb-1 block text-sm font-medium"
-                    >
+                    <label for="user-name" class="mb-1 block text-sm font-medium">
                         名前
                     </label>
 
@@ -56,22 +76,13 @@
                         id="user-name"
                         type="text"
                         wire:model="name"
+                        autocomplete="name"
                         class="{{ $inputClass }}"
-                        placeholder="名前"
                     >
-
-                    @error('name')
-                        <p class="mt-1 text-xs text-red-600">
-                            {{ $message }}
-                        </p>
-                    @enderror
                 </div>
 
                 <div>
-                    <label
-                        for="user-email"
-                        class="mb-1 block text-sm font-medium"
-                    >
+                    <label for="user-email" class="mb-1 block text-sm font-medium">
                         メールアドレス
                     </label>
 
@@ -79,23 +90,14 @@
                         id="user-email"
                         type="email"
                         wire:model="email"
+                        autocomplete="email"
                         class="{{ $inputClass }}"
-                        placeholder="メールアドレス"
                     >
-
-                    @error('email')
-                        <p class="mt-1 text-xs text-red-600">
-                            {{ $message }}
-                        </p>
-                    @enderror
                 </div>
 
                 @if (!$editingId)
                     <div>
-                        <label
-                            for="user-password"
-                            class="mb-1 block text-sm font-medium"
-                        >
+                        <label for="user-password" class="mb-1 block text-sm font-medium">
                             パスワード
                         </label>
 
@@ -105,22 +107,12 @@
                             wire:model="password"
                             autocomplete="new-password"
                             class="{{ $inputClass }}"
-                            placeholder="パスワード"
                         >
-
-                        @error('password')
-                            <p class="mt-1 text-xs text-red-600">
-                                {{ $message }}
-                            </p>
-                        @enderror
                     </div>
                 @endif
 
                 <div>
-                    <label
-                        for="user-role"
-                        class="mb-1 block text-sm font-medium"
-                    >
+                    <label for="user-role" class="mb-1 block text-sm font-medium">
                         権限
                     </label>
 
@@ -133,137 +125,139 @@
                         <option value="manager">責任者</option>
                         <option value="staff">スタッフ</option>
                     </select>
-
-                    @error('role')
-                        <p class="mt-1 text-xs text-red-600">
-                            {{ $message }}
-                        </p>
-                    @enderror
                 </div>
 
-            </div>
+                <div class="flex gap-3">
+                    <button
+                        type="submit"
+                        wire:loading.attr="disabled"
+                        class="cursor-pointer rounded-md bg-blue-600 px-5 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        {{ $editingId ? '更新' : '登録' }}
+                    </button>
 
-            <div class="mt-4 flex justify-end">
-                @if ($editingId)
                     <button
                         type="button"
-                        wire:click="updateUser"
-                        wire:loading.attr="disabled"
-                        wire:target="updateUser"
-                        class="cursor-pointer rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-50"
+                        wire:click="cancelForm"
+                        class="cursor-pointer rounded-md border border-blue-200 bg-white px-5 py-2 text-sm hover:bg-blue-100"
                     >
-                        更新
+                        キャンセル
                     </button>
-                @else
-                    <button
-                        type="button"
-                        wire:click="createUser"
-                        wire:loading.attr="disabled"
-                        wire:target="createUser"
-                        class="cursor-pointer rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-50"
-                    >
-                        登録
-                    </button>
-                @endif
-            </div>
+                </div>
+
+            </form>
+
         </div>
     @endif
 
-    {{-- ユーザー一覧 --}}
-    <div class="overflow-x-auto">
-        <table class="w-full min-w-[640px] border-collapse text-left text-sm">
+    <div class="w-full overflow-x-auto">
+        <table class="w-full border-collapse text-sm">
+
             <thead class="bg-blue-50">
                 <tr>
-                    <th scope="col" class="border border-blue-100 px-4 py-3 text-center font-semibold">
+                    <th class="border-b border-r border-blue-100 px-4 py-3 text-center font-medium">
                         No
                     </th>
 
-                    <th scope="col" class="border border-blue-100 px-4 py-3 font-semibold">
+                    <th class="border-b border-r border-blue-100 px-4 py-3 text-left font-medium">
                         名前
                     </th>
 
-                    <th scope="col" class="border border-blue-100 px-4 py-3 font-semibold">
+                    <th class="border-b border-r border-blue-100 px-4 py-3 text-left font-medium">
                         メールアドレス
                     </th>
 
-                    <th scope="col" class="border border-blue-100 px-4 py-3 text-center font-semibold">
+                    <th class="border-b border-blue-100 px-4 py-3 text-center font-medium">
                         権限
                     </th>
 
-                    <th scope="col" class="border border-blue-100 px-4 py-3 text-center font-semibold">
-                        操作
-                    </th>
+                    @if ($canManageUsers)
+                        <th class="border-b border-l border-blue-100 px-4 py-3 text-center font-medium">
+                            操作
+                        </th>
+                    @endif
                 </tr>
             </thead>
 
             <tbody>
                 @forelse ($users as $user)
-                    <tr
-                        wire:key="user-{{ $user->id }}"
-                        class="transition-colors hover:bg-blue-50/50"
-                    >
-                        <td class="border border-blue-100 px-4 py-3 text-center">
+                    <tr wire:key="user-row-{{ $user->id }}" class="hover:bg-blue-50">
+
+                        <td class="border-b border-r border-blue-100 px-4 py-3 text-center">
                             {{ $user->id }}
                         </td>
 
-                        <td class="whitespace-nowrap border border-blue-100 px-4 py-3">
+                        <td class="border-b border-r border-blue-100 px-4 py-3">
                             {{ $user->name }}
                         </td>
 
-                        <td class="border border-blue-100 px-4 py-3">
+                        <td class="border-b border-r border-blue-100 px-4 py-3">
                             {{ $user->email }}
                         </td>
 
-                        <td class="border border-blue-100 px-4 py-3 text-center">
+                        <td class="border-b border-blue-100 px-4 py-3 text-center">
+
                             @if ($user->role === 'admin')
-                                <span class="inline-block whitespace-nowrap rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                                <span class="inline-block min-w-[5rem] whitespace-nowrap rounded bg-rose-100 px-3 py-1 text-xs font-medium text-rose-600">
                                     管理者
                                 </span>
+
                             @elseif ($user->role === 'manager')
-                                <span class="inline-block whitespace-nowrap rounded bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                                <span class="inline-block min-w-[5rem] whitespace-nowrap rounded bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
                                     責任者
                                 </span>
+
                             @elseif ($user->role === 'staff')
-                                <span class="inline-block whitespace-nowrap rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                                    アルバイト
+                                <span class="inline-block min-w-[5rem] whitespace-nowrap rounded bg-blue-100 px-3 py-1 text-xs font-medium text-blue-600">
+                                    スタッフ
+                                </span>
+
+                            @else
+                                <span class="inline-block min-w-[5rem] whitespace-nowrap rounded bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                                    未設定
                                 </span>
                             @endif
+
                         </td>
 
-                        <td class="border border-blue-100 px-4 py-3">
-                            <div class="flex items-center justify-center gap-2">
-                                <button
-                                    type="button"
-                                    wire:click="editUser({{ $user->id }})"
-                                    class="cursor-pointer whitespace-nowrap rounded border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50"
-                                >
-                                    編集
-                                </button>
+                        @if ($canManageUsers)
+                            <td class="border-b border-l border-blue-100 px-4 py-3">
+                                <div class="flex justify-center gap-2">
 
-                                <button
-                                    type="button"
-                                    wire:click="deleteUser({{ $user->id }})"
-                                    onclick="
-                                        if (!confirm('本当に削除しますか？')) {
-                                            event.preventDefault();
-                                            event.stopImmediatePropagation();
-                                        }
-                                    "
-                                    class="cursor-pointer whitespace-nowrap rounded border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
-                                >
-                                    削除
-                                </button>
-                            </div>
-                        </td>
+                                    <button
+                                        type="button"
+                                        wire:click="editUser({{ $user->id }})"
+                                        class="cursor-pointer whitespace-nowrap rounded border border-blue-200 px-3 py-1 text-xs text-blue-600 hover:bg-blue-100"
+                                    >
+                                        編集
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        wire:click="deleteUser({{ $user->id }})"
+                                        wire:confirm="本当に削除しますか？"
+                                        class="cursor-pointer whitespace-nowrap rounded border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                                    >
+                                        削除
+                                    </button>
+
+                                </div>
+                            </td>
+                        @endif
+
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">
+                        <td
+                            colspan="{{ $canManageUsers ? 5 : 4 }}"
+                            class="px-4 py-8 text-center text-gray-500"
+                        >
                             登録されているユーザーはいません。
                         </td>
                     </tr>
                 @endforelse
             </tbody>
+
         </table>
     </div>
 
