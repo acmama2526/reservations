@@ -1,5 +1,22 @@
 <div class="min-h-[400px] w-full min-w-0 rounded-lg border border-blue-100 bg-white text-blue-900">
 
+    @php
+        $dayOrder = [
+            '月曜日',
+            '火曜日',
+            '水曜日',
+            '木曜日',
+            '金曜日',
+            '土曜日',
+            '日曜日',
+            '祝日',
+        ];
+
+        $sortedClosedDays = array_values(
+            array_intersect($dayOrder, $closed_days)
+        );
+    @endphp
+
     <div class="flex items-center gap-2 border-b border-blue-100 bg-blue-50 px-5 py-4">
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +128,7 @@
                     </legend>
 
                     <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-                        @foreach (['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日', '祝日'] as $day)
+                        @foreach ($dayOrder as $day)
                             <label class="flex cursor-pointer items-center gap-2 text-sm">
                                 <input
                                     type="checkbox"
@@ -168,7 +185,7 @@
                 <div class="grid items-start gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
                     <dt class="py-2 font-medium">定休日</dt>
                     <dd class="m-0 min-w-0 break-words py-2">
-                        {{ count($closed_days) ? implode('・', $closed_days) : 'なし' }}
+                        {{ count($sortedClosedDays) ? implode('・', $sortedClosedDays) : 'なし' }}
                     </dd>
                 </div>
 
