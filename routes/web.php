@@ -59,6 +59,4 @@ Route::get('/admin-dashboard', [
     AdminDashboardController::class,'index'])
     ->name('admin.dashboard');
 
-Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
-
 Route::view('/admin-dashboard', 'admin-dashboard')->name('admin-dashboard');
