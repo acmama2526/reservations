@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-50">
 
     {{-- ヘッダー --}}
-
+    <x-header />
 
     {{-- メイン --}}
     <main class="mx-auto max-w-7xl px-6 py-8">
@@ -426,5 +426,8 @@
         </section>
 
     </main>
+
+    {{-- フッター --}}
+    <x-footer />
 
 </div>
