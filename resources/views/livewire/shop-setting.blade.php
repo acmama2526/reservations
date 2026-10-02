@@ -1,179 +1,180 @@
-<div class="overflow-hidden rounded-lg border border-blue-100 bg-white text-blue-900">
+<div class="min-h-[400px] w-full min-w-0 rounded-lg border border-blue-100 bg-white text-blue-900">
 
-    {{-- 見出し --}}
-    <div class="border-b border-blue-100 bg-blue-50 px-5 py-3">
-        <h2 class="m-0 flex items-center gap-2 text-base font-bold">
-            <svg
-                class="h-5 w-5 text-blue-600"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 10l9-7 9 7M5 9v12h14V9M9 21v-8h6v8"
-                />
-            </svg>
+    <div class="flex items-center gap-2 border-b border-blue-100 bg-blue-50 px-5 py-4">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 shrink-0 text-blue-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5 9v12h14V9" />
+            <path d="M9 21v-8h6v8" />
+        </svg>
 
+        <h2 class="m-0 text-sm font-bold">
             店舗設定
         </h2>
     </div>
 
-    @php
-        $inputClass = 'block w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-blue-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100';
-    @endphp
+    <div class="p-5">
 
-    <div class="space-y-5 p-5">
-
-        {{-- 店舗名 --}}
-        <div class="grid gap-2 sm:grid-cols-[6rem_minmax(0,1fr)]">
-            <label
-                for="shop-name"
-                class="text-sm font-medium sm:pt-2"
-            >
-                店舗名
-            </label>
-
-            <div>
-                <input
-                    id="shop-name"
-                    type="text"
-                    wire:model="shop_name"
-                    class="{{ $inputClass }}"
-                    placeholder="店舗名を入力"
-                >
-
-                @error('shop_name')
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
-            </div>
-        </div>
-
-        {{-- 営業時間 --}}
-        <div class="grid gap-2 sm:grid-cols-[6rem_minmax(0,1fr)]">
-            <p class="m-0 text-sm font-medium sm:pt-2">
-                営業時間
+        @if (session()->has('message'))
+            <p role="status" class="mb-4 rounded bg-green-50 px-3 py-2 text-sm text-green-700">
+                {{ session('message') }}
             </p>
+        @endif
 
-            <div>
-                <div class="flex items-center gap-2">
-                    <div class="min-w-0 flex-1">
+        @if ($errors->any())
+            <ul role="alert" class="mb-4 list-none space-y-1 rounded bg-red-50 p-3 text-sm text-red-700">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        @endif
+
+        @if ($canEdit)
+
+            <form wire:submit.prevent="save" class="space-y-5">
+
+                <div class="grid items-center gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <label for="shop-name" class="text-sm font-medium">
+                        店舗名
+                    </label>
+
+                    <input
+                        id="shop-name"
+                        type="text"
+                        wire:model="shop_name"
+                        class="h-10 w-full min-w-0 rounded-md border border-blue-200 bg-white px-3 text-sm focus:border-blue-500 focus:outline-none"
+                    >
+                </div>
+
+                <fieldset class="grid items-center gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <legend class="sr-only">営業時間</legend>
+
+                    <span class="text-sm font-medium" aria-hidden="true">
+                        営業時間
+                    </span>
+
+                    <div class="flex min-w-0 items-center gap-2">
                         <label for="business-start" class="sr-only">
-                            営業開始時間
+                            開店時間
                         </label>
 
                         <input
                             id="business-start"
                             type="time"
                             wire:model="business_start"
-                            class="{{ $inputClass }}"
+                            class="h-10 w-full min-w-0 flex-1 rounded-md border border-blue-200 bg-white px-3 text-sm focus:border-blue-500 focus:outline-none"
                         >
-                    </div>
 
-                    <span class="shrink-0 text-sm">〜</span>
+                        <span class="shrink-0">〜</span>
 
-                    <div class="min-w-0 flex-1">
                         <label for="business-end" class="sr-only">
-                            営業終了時間
+                            閉店時間
                         </label>
 
                         <input
                             id="business-end"
                             type="time"
                             wire:model="business_end"
-                            class="{{ $inputClass }}"
+                            class="h-10 w-full min-w-0 flex-1 rounded-md border border-blue-200 bg-white px-3 text-sm focus:border-blue-500 focus:outline-none"
                         >
                     </div>
+                </fieldset>
+
+                <div class="grid items-center gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <label for="slot-minutes" class="text-sm font-medium">
+                        表示単位
+                    </label>
+
+                    <select
+                        id="slot-minutes"
+                        wire:model="slot_minutes"
+                        class="h-10 w-40 rounded-md border border-blue-200 bg-white px-3 text-sm focus:border-blue-500 focus:outline-none"
+                    >
+                        <option value="15">15分</option>
+                        <option value="30">30分</option>
+                        <option value="60">60分</option>
+                    </select>
                 </div>
 
-                @error('business_start')
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
+                <fieldset>
+                    <legend class="mb-3 text-sm font-medium">
+                        定休日
+                    </legend>
 
-                @error('business_end')
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
-            </div>
-        </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+                        @foreach (['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日', '祝日'] as $day)
+                            <label class="flex cursor-pointer items-center gap-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    value="{{ $day }}"
+                                    wire:model="closed_days"
+                                    class="h-4 w-4 accent-blue-600"
+                                >
+                                {{ $day }}
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
 
-        {{-- 表示単位 --}}
-        <div class="grid gap-2 sm:grid-cols-[6rem_minmax(0,1fr)]">
-            <label
-                for="slot-minutes"
-                class="text-sm font-medium sm:pt-2"
-            >
-                表示単位
-            </label>
+                <div class="border-t border-blue-100 pt-4">
+                    <button
+                        type="submit"
+                        wire:loading.attr="disabled"
+                        wire:target="save"
+                        class="cursor-pointer rounded-md bg-blue-600 px-6 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        保存
+                    </button>
+                </div>
 
-            <div>
-                <select
-                    id="slot-minutes"
-                    wire:model="slot_minutes"
-                    class="{{ $inputClass }} max-w-40"
-                >
-                    <option value="15">15分</option>
-                    <option value="30">30分</option>
-                    <option value="60">60分</option>
-                </select>
+            </form>
 
-                @error('slot_minutes')
-                    <p class="mt-1 text-xs text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
-            </div>
-        </div>
+        @else
 
-        {{-- 定休日 --}}
-        <fieldset class="m-0 min-w-0 border-0 p-0">
-            <legend class="mb-3 text-sm font-medium">
-                定休日
-            </legend>
+            <dl class="space-y-5 text-sm">
 
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-                @foreach (['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日', '祝日'] as $day)
-                    <label class="flex cursor-pointer items-center gap-2 text-sm">
-                        <input
-                            type="checkbox"
-                            value="{{ $day }}"
-                            wire:model="closed_days"
-                            class="h-4 w-4 shrink-0 cursor-pointer accent-blue-600"
-                        >
+                <div class="grid items-start gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <dt class="py-2 font-medium">店舗名</dt>
+                    <dd class="m-0 min-w-0 break-words py-2">
+                        {{ $shop_name ?: '未設定' }}
+                    </dd>
+                </div>
 
-                        <span>{{ $day }}</span>
-                    </label>
-                @endforeach
-            </div>
+                <div class="grid items-start gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <dt class="py-2 font-medium">営業時間</dt>
+                    <dd class="m-0 py-2">
+                        @if ($business_start && $business_end)
+                            {{ $business_start }} 〜 {{ $business_end }}
+                        @else
+                            未設定
+                        @endif
+                    </dd>
+                </div>
 
-            @error('closed_days')
-                <p class="mt-2 text-xs text-red-600">
-                    {{ $message }}
-                </p>
-            @enderror
-        </fieldset>
+                <div class="grid items-start gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <dt class="py-2 font-medium">表示単位</dt>
+                    <dd class="m-0 py-2">{{ $slot_minutes }}分</dd>
+                </div>
 
-        {{-- 保存 --}}
-        <div class="border-t border-blue-100 pt-4">
-            <button
-                type="button"
-                wire:click="save"
-                wire:loading.attr="disabled"
-                wire:target="save"
-                class="cursor-pointer rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-wait disabled:opacity-50"
-            >
-                保存
-            </button>
-        </div>
+                <div class="grid items-start gap-2 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-4">
+                    <dt class="py-2 font-medium">定休日</dt>
+                    <dd class="m-0 min-w-0 break-words py-2">
+                        {{ count($closed_days) ? implode('・', $closed_days) : 'なし' }}
+                    </dd>
+                </div>
+
+            </dl>
+
+        @endif
 
     </div>
 </div>

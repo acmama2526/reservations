@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class UserManagement extends Component
@@ -16,13 +18,17 @@ class UserManagement extends Component
     public $showForm = false;
     public $editingId = null;
 
-    //ログイン中のユーザーが管理者か確認する
+    private function canManageUsers(): bool
+    {
+        return Auth::user()?->role === 'admin';
+    }
+
     private function ensureAdmin(): bool
     {
         $this->resetValidation('permission');
 
-        if (auth()->user()?->role !== 'admin') {
-            $this->showForm = false;
+        if (! $this->canManageUsers()) {
+            $this->clearForm();
 
             $this->addError(
                 'permission',
@@ -35,6 +41,55 @@ class UserManagement extends Component
         return true;
     }
 
+    private function clearForm()
+    {
+        $this->reset([
+            'name',
+            'email',
+            'password',
+            'role',
+            'showForm',
+            'editingId',
+        ]);
+
+        $this->resetValidation();
+    }
+
+    private function validateUser(?User $user = null): array
+    {
+        $emailRule = Rule::unique('users', 'email');
+
+        if ($user !== null) {
+            $emailRule->ignore($user);
+        }
+
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', $emailRule],
+            'role' => [
+                'required',
+                Rule::in(['admin', 'manager', 'staff']),
+            ],
+        ];
+
+        if ($user === null) {
+            $rules['password'] = ['required', 'string', 'min:8'];
+        }
+
+        return $this->validate($rules, [
+            'name.required' => '名前を入力してください。',
+            'name.max' => '名前は255文字以内で入力してください。',
+            'email.required' => 'メールアドレスを入力してください。',
+            'email.email' => 'メールアドレスを正しく入力してください。',
+            'email.max' => 'メールアドレスは255文字以内で入力してください。',
+            'email.unique' => 'このメールアドレスは既に登録されています。',
+            'password.required' => 'パスワードを入力してください。',
+            'password.min' => 'パスワードは8文字以上で入力してください。',
+            'role.required' => '権限を選択してください。',
+            'role.in' => '権限を正しく選択してください。',
+        ]);
+    }
+
     // 新規登録フォームを表示
     public function showCreateForm()
     {
@@ -42,16 +97,7 @@ class UserManagement extends Component
             return;
         }
 
-        $this->resetValidation();
-
-        $this->reset([
-            'name',
-            'email',
-            'password',
-        ]);
-
-        $this->role = 'staff';
-        $this->editingId = null;
+        $this->clearForm();
         $this->showForm = true;
     }
 
@@ -62,22 +108,14 @@ class UserManagement extends Component
             return;
         }
 
-        User::create([
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'role' => $this->role,
-        ]);
+        $data = $this->validateUser();
+        $data['password'] = Hash::make($data['password']);
 
-        $this->reset([
-            'name',
-            'email',
-            'password',
-        ]);
+        User::create($data);
 
-        $this->role = 'staff';
-        $this->editingId = null;
-        $this->showForm = false;
+        $this->clearForm();
+
+        session()->flash('user-message', 'ユーザーを登録しました。');
     }
 
     // 編集フォームを表示
@@ -89,14 +127,12 @@ class UserManagement extends Component
 
         $user = User::findOrFail($id);
 
-        $this->resetValidation();
+        $this->clearForm();
 
         $this->editingId = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->password = '';
         $this->role = $user->role;
-
         $this->showForm = true;
     }
 
@@ -108,23 +144,13 @@ class UserManagement extends Component
         }
 
         $user = User::findOrFail($this->editingId);
+        $data = $this->validateUser($user);
 
-        $user->update([
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
-        ]);
+        $user->update($data);
 
-        $this->showForm = false;
-        $this->editingId = null;
+        $this->clearForm();
 
-        $this->reset([
-            'name',
-            'email',
-            'password',
-        ]);
-
-        $this->role = 'staff';
+        session()->flash('user-message', 'ユーザーを更新しました。');
     }
 
     // ユーザーを削除
@@ -134,14 +160,45 @@ class UserManagement extends Component
             return;
         }
 
-        User::find($id)?->delete();
+        User::findOrFail($id)->delete();
+
+        $this->clearForm();
+
+        session()->flash('user-message', 'ユーザーを削除しました。');
     }
 
-    // 一覧は閲覧できる
+    // フォームを閉じる
+    public function cancelForm()
+    {
+        $this->clearForm();
+    }
+
+    // ログイン前後とも一覧を表示
     public function render()
     {
+        $canManageUsers = $this->canManageUsers();
+
+        // 管理者以外はメールアドレスを取得しない
+        $columns = $canManageUsers
+            ? ['id', 'name', 'email', 'role']
+            : ['id', 'name', 'role'];
+
+        $users = User::query()
+            ->select($columns)
+            ->orderBy('id')
+            ->get()
+            ->map(function ($user) use ($canManageUsers) {
+                return (object) [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $canManageUsers ? $user->email : '********',
+                    'role' => $user->role,
+                ];
+            });
+
         return view('livewire.user-management', [
-            'users' => User::all(),
+            'users' => $users,
+            'canManageUsers' => $canManageUsers,
         ]);
     }
 }
