@@ -61,6 +61,4 @@ Route::get('/admin-dashboard', [
 
 Route::view('/reservation-list', 'reservation-list')->name('reservation-list');
 
-Route::view('/seat-manager', 'seat-manager')->name('seat-manager');
-
 Route::view('/admin-dashboard', 'admin-dashboard')->name('admin-dashboard');
