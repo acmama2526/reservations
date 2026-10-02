@@ -16,7 +16,6 @@ class ShopSetting extends Component
 
     public function mount()
     {
-        // 保存するときと同じレコードを読み込む
         $setting = ShopSettingModel::find(1);
 
         if ($setting) {
@@ -35,9 +34,14 @@ class ShopSetting extends Component
         }
     }
 
+    // 管理者・責任者は編集可能
     private function canEdit(): bool
     {
-        return Auth::user()?->role === 'admin';
+        return in_array(
+            Auth::user()?->role,
+            ['admin', 'manager'],
+            true
+        );
     }
 
     public function save()
