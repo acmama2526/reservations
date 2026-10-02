@@ -1,8 +1,11 @@
 <?php
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,5 +17,25 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+        $exceptions->render(function (
+            HttpException $exception,
+            Request $request
+        ) {
+            if (
+                $exception->getStatusCode() === 403
+                && $exception->getPrevious() instanceof AuthorizationException
+                && $exception->getMessage()
+                    === '席マスタを閲覧する権限がありません。'
+            ) {
+                return redirect()
+                    ->route('admin-dashboard')
+                    ->with(
+                        'permission-message',
+                        '席マスタを閲覧する権限がありません。'
+                    );
+            }
+
+            return null;
+        });
+    })
+    ->create();

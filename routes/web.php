@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-use \App\Livewire\ShopSetting;
+use App\Livewire\ShopSetting;
 use App\Livewire\UserManagement;
 use App\Livewire\ReservationList;
 use App\Livewire\ReservationCreate;
@@ -11,18 +9,12 @@ use App\Livewire\ReservationEdit;
 use App\Livewire\SeatManager;
 use App\Livewire\Login;
 use App\Livewire\ReservationTop;
-use App\Http\Controllers\AdminDashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+use Illuminate\Support\Facades\Route;
 
 // トップページ
-
-Route::get("/top",ReservationTop::class)
+Route::get('/top', ReservationTop::class)
     ->name('top');
 
 // 予約一覧
@@ -33,7 +25,7 @@ Route::get('/reservations', ReservationList::class)
 Route::get('/reservations/create', ReservationCreate::class)
     ->name('reservations.create');
 
-// 予約詳細    
+// 予約詳細
 Route::get('/reservations/{reservation}', ReservationShow::class)
     ->name('reservations.show');
 
@@ -41,8 +33,9 @@ Route::get('/reservations/{reservation}', ReservationShow::class)
 Route::get('/reservations/{reservation}/edit', ReservationEdit::class)
     ->name('reservations.edit');
 
-// 席管理
+// 席マスタ：管理者・責任者のみ
 Route::get('/seats', SeatManager::class)
+    ->middleware('can:access-seats')
     ->name('seats.index');
 
 // 店舗設定
@@ -53,17 +46,15 @@ Route::get('/settings', ShopSetting::class)
 Route::get('/users', UserManagement::class)
     ->name('users.index');
 
+// ログイン
 Route::get('/login', Login::class)
     ->name('login');
 
+// 店舗・スタッフ管理
+Route::view('/admin-dashboard', 'admin-dashboard')
+    ->name('admin-dashboard');
 
-Route::get('/admin-dashboard', [
-    AdminDashboardController::class,'index'])
-    ->name('admin.dashboard');
-
-Route::view('/admin-dashboard', 'admin-dashboard')->name('admin-dashboard');
-
-//ログアウト
+// ログアウト
 Route::post('/logout', function (Request $request) {
     Auth::logout();
 
@@ -71,4 +62,6 @@ Route::post('/logout', function (Request $request) {
     $request->session()->regenerateToken();
 
     return redirect()->route('admin-dashboard');
-})->middleware('auth')->name('logout');
+})
+    ->middleware('auth')
+    ->name('logout');

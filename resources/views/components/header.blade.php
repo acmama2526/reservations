@@ -42,7 +42,7 @@
                         <button
                             type="button"
                             class="{{ $navClass }}"
-                            onclick="this.closest('header').querySelector('dialog').showModal()"
+                            onclick="document.getElementById('header-login-modal').showModal()"
                         >
                             ログイン
                         </button>
@@ -51,7 +51,11 @@
 
                 @auth
                     <li class="shrink-0">
-                        <form method="POST" action="{{ route('logout') }}" class="m-0">
+                        <form
+                            method="POST"
+                            action="{{ route('logout') }}"
+                            class="m-0"
+                        >
                             @csrf
 
                             <button type="submit" class="{{ $navClass }}">
@@ -66,8 +70,18 @@
 
     </div>
 
+    @if (session()->has('permission-message'))
+        <p
+            role="alert"
+            class="mx-6 mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+            {{ session('permission-message') }}
+        </p>
+    @endif
+
     @guest
         <dialog
+            id="header-login-modal"
             aria-label="ログイン"
             class="m-auto max-h-[90vh] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-lg border border-blue-100 bg-white p-0 text-blue-900 shadow-xl backdrop:bg-black/40"
         >
