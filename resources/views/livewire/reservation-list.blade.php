@@ -1,16 +1,7 @@
 <div class="min-h-screen bg-gray-50">
 
     {{-- ヘッダー --}}
-    <header class="bg-blue-900 text-white">
-        <div class="mx-auto flex max-w-7xl items-center px-6 py-4">
-
-            <div class="text-2xl font-bold">
-                📅 予約管理システム
-            </div>
-
-        </div>
-    </header>
-
+    <x-header />
 
     {{-- メイン --}}
     <main class="mx-auto max-w-7xl px-6 py-8">
@@ -435,5 +426,8 @@
         </section>
 
     </main>
+
+    {{-- フッター --}}
+    <x-footer />
 
 </div>
