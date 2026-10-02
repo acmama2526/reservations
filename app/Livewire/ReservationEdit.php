@@ -280,11 +280,8 @@ class ReservationEdit extends Component
         // 完了メッセージ
         session()->flash('message', '予約を更新しました。');
 
-        // 詳細画面へ戻る
-        $this->redirectRoute(
-            'reservations.show',
-            $this->reservation
-        );
+        // 一覧画面へ戻る
+        $this->redirectRoute('reservations.index');
     }
 
 
