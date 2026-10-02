@@ -82,7 +82,7 @@
             </div>
         </div>
 
-        <div class="flex justify-center">
+        <div class="flex justify-center gap-4">
             {{-- 戻るボタン --}}
             <div class="flex justify-center">
                 <a href="{{ route('reservations.index') }}"
