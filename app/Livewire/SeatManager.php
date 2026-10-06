@@ -147,6 +147,7 @@ class SeatManager extends Component
     // バリデーション：席名、収容人数、表示順の必須チェック
     $this->validate([
       'seat_name' => 'required|string|max:255',
+      'type' => 'required|in:テーブル,座敷,カウンター',
       'capacity' => 'required|integer|min:1',
       'display_order' => [
         'required',
@@ -159,6 +160,8 @@ class SeatManager extends Component
       'capacity.required' => '定員を入力してください。',
       'capacity.integer' => '定員は整数で入力してください。',
       'capacity.min' => '定員は1以上で入力してください。',
+      'type.required' => '種類を選択してください。',
+      'type.in' => '種類を正しく選択してください。',
       'display_order.required' => '表示順を入力してください。',
       'display_order.integer' => '表示順は整数で入力してください。',
       'display_order.min' => '表示順は1以上で入力してください。',
