@@ -45,8 +45,7 @@
                 items-start
                 gap-6
                 lg:grid-cols-12
-            "
-        >
+            ">
 
 
             {{-- ====================================================
@@ -60,14 +59,13 @@
                         border border-slate-200
                         bg-white
                         p-6
-                    "
-                >
+                    ">
 
                     {{-- タイトル --}}
                     <div class="mb-5 flex items-center justify-between">
 
                         <h2 class="text-xl font-bold text-blue-900">
-                            本日の予約
+                            {{ \Carbon\Carbon::parse($selectedDate)->format('Y年m月d日') }} の予約
                         </h2>
 
                     </div>
@@ -125,8 +123,7 @@
                                                 border border-slate-200
                                                 px-3 py-3
                                                 text-center
-                                            "
-                                        >
+                                            ">
 
                                             {{ substr($reservation->start_time, 0, 5) }}
 
@@ -142,8 +139,7 @@
                                             class="
                                                 border border-slate-200
                                                 px-3 py-3
-                                            "
-                                        >
+                                            ">
                                             {{ $reservation->customer_name }}
                                         </td>
 
@@ -154,8 +150,7 @@
                                                 border border-slate-200
                                                 px-3 py-3
                                                 text-center
-                                            "
-                                        >
+                                            ">
                                             {{ $reservation->people }}名
                                         </td>
 
@@ -165,11 +160,9 @@
                                             class="
                                                 border border-slate-200
                                                 px-3 py-3
-                                            "
-                                        >
+                                            ">
 
                                             @forelse ($reservation->seats as $seat)
-
                                                 <div>
                                                     {{ $seat->seat_name }}
                                                 </div>
@@ -179,7 +172,6 @@
                                                 <span class="text-slate-400">
                                                     未割当
                                                 </span>
-
                                             @endforelse
 
                                         </td>
@@ -191,12 +183,10 @@
                                                 border border-slate-200
                                                 px-3 py-3
                                                 text-center
-                                            "
-                                        >
+                                            ">
 
                                             {{-- 確定 --}}
                                             @if ($reservation->status === 'reserved')
-
                                                 <span
                                                     class="
                                                         inline-block
@@ -205,15 +195,13 @@
                                                         px-3 py-1
                                                         text-xs font-semibold
                                                         text-blue-700
-                                                    "
-                                                >
+                                                    ">
                                                     確定
                                                 </span>
 
 
-                                            {{-- 仮予約 --}}
+                                                {{-- 仮予約 --}}
                                             @elseif ($reservation->status === 'temporary')
-
                                                 <span
                                                     class="
                                                         inline-block
@@ -222,15 +210,13 @@
                                                         px-3 py-1
                                                         text-xs font-semibold
                                                         text-slate-700
-                                                    "
-                                                >
+                                                    ">
                                                     仮予約
                                                 </span>
 
 
-                                            {{-- キャンセル --}}
+                                                {{-- キャンセル --}}
                                             @elseif ($reservation->status === 'cancelled')
-
                                                 <span
                                                     class="
                                                         inline-block
@@ -239,11 +225,9 @@
                                                         px-3 py-1
                                                         text-xs font-semibold
                                                         text-red-700
-                                                    "
-                                                >
+                                                    ">
                                                     キャンセル
                                                 </span>
-
                                             @endif
 
                                         </td>
@@ -256,15 +240,13 @@
                                     {{-- 予約がない場合 --}}
                                     <tr>
 
-                                        <td
-                                            colspan="5"
+                                        <td colspan="5"
                                             class="
                                                 border border-slate-200
                                                 px-3 py-10
                                                 text-center
                                                 text-slate-500
-                                            "
-                                        >
+                                            ">
                                             本日の予約はありません。
                                         </td>
 
