@@ -45,6 +45,11 @@
               class="w-full rounded-lg border border-slate-300 px-3 py-2
                                focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               placeholder="例：T1">
+            @error('seat_name')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
           </div>
 
           {{-- 種類 --}}
@@ -76,6 +81,11 @@
               class="w-full rounded-lg border border-slate-300 px-3 py-2
                                focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               min="1">
+            @error('capacity')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
           </div>
 
           {{-- 表示順 --}}
@@ -90,6 +100,11 @@
               class="w-full rounded-lg border border-slate-300 px-3 py-2
                                focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               min="1">
+            @error('display_order')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
           </div>
 
         </div>

@@ -7,6 +7,7 @@ use App\Models\Seat;
 use App\Models\Reservation;
 use App\Models\ShopSetting as ShopSettingModel;
 use App\Services\SeatAssignmentService;
+use Illuminate\Validation\Rule;
 
 class SeatManager extends Component
 {
@@ -143,6 +144,27 @@ class SeatManager extends Component
    */
   public function save()
   {
+    // バリデーション：席名、収容人数、表示順の必須チェック
+    $this->validate([
+      'seat_name' => 'required|string|max:255',
+      'capacity' => 'required|integer|min:1',
+      'display_order' => [
+        'required',
+        'integer',
+        'min:1',
+        Rule::unique('seats', 'display_order')->ignore($this->editingSeatId),
+      ],
+    ], [
+      'seat_name.required' => '席名を入力してください。',
+      'capacity.required' => '定員を入力してください。',
+      'capacity.integer' => '定員は整数で入力してください。',
+      'capacity.min' => '定員は1以上で入力してください。',
+      'display_order.required' => '表示順を入力してください。',
+      'display_order.integer' => '表示順は整数で入力してください。',
+      'display_order.min' => '表示順は1以上で入力してください。',
+      'display_order.unique' => 'この表示順はすでに使用されています。',
+    ]);
+
     // editingSeatId がある場合は既存席を更新
     // null の場合は新規席を作成
     if ($this->editingSeatId) {
