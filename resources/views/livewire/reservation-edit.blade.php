@@ -44,7 +44,7 @@
                 <select id="people" wire:model="people" class="rounded border-gray-300">
                     <option value="">選択してください</option>
 
-                    @for ($i = 1; $i <= 20; $i++)
+                    @for ($i = 1; $i <= $totalCapacity; $i++)
                         <option value="{{ $i }}">
                             {{ $i }}名
                         </option>
@@ -304,8 +304,8 @@
                 更新
             </button>
 
-            {{-- 詳細に戻る --}}
-            <a href="{{ route('reservations.show', $reservation) }}"
+            {{-- 一覧に戻る --}}
+            <a href="{{ route('reservations.index') }}"
                 class="rounded border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 hover:bg-gray-100">
                 戻る
             </a>

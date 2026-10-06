@@ -1,3 +1,4 @@
+
 <div class="min-h-screen bg-slate-50 text-base leading-relaxed text-slate-800">
     {{-- ヘッダー --}}
     <x-header />
@@ -11,6 +12,121 @@
             <p class="mt-2 text-base leading-relaxed text-slate-600">
                 席の登録・編集・利用状況を管理します
             </p>
+
+<div class="min-h-screen bg-slate-50">
+
+  {{-- ヘッダー --}}
+  <x-header />
+
+  {{-- メイン --}}
+  <main class="mx-auto max-w-7xl px-6 py-8">
+
+    {{-- ページタイトル --}}
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-slate-800">
+        席マスタ
+      </h1>
+      <p class="mt-1 text-slate-500">
+        席の登録・編集・利用状況を管理します
+      </p>
+    </div>
+
+    {{-- 席登録・編集フォーム --}}
+    <div class="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-slate-700">
+          @if ($editingSeatId)
+            席情報の編集
+          @else
+            席の新規登録
+          @endif
+        </h2>
+      </div>
+
+      <form wire:submit="save">
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+
+          {{-- 席名 --}}
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-600">
+              席名
+            </label>
+
+            <input
+              type="text"
+              wire:model="seat_name"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2
+                               focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              placeholder="例：T1">
+            @error('seat_name')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
+          </div>
+
+          {{-- 種類 --}}
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-600">
+              種類
+            </label>
+
+            <select
+              wire:model="type"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2
+                               focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+              <option value="">選択してください</option>
+              <option value="テーブル">テーブル</option>
+              <option value="座敷">座敷</option>
+              <option value="カウンター">カウンター</option>
+            </select>
+            @error('type')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
+          </div>
+
+          {{-- 定員 --}}
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-600">
+              定員
+            </label>
+
+            <input
+              type="number"
+              wire:model="capacity"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2
+                               focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              min="1">
+            @error('capacity')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
+          </div>
+
+          {{-- 表示順 --}}
+          <div>
+            <label class="mb-1 block text-sm font-medium text-slate-600">
+              表示順
+            </label>
+
+            <input
+              type="number"
+              wire:model="display_order"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2
+                               focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              min="1">
+            @error('display_order')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
+          </div>
+
         </div>
         {{-- 席登録・編集フォーム --}}
         <div class="mb-6 overflow-hidden rounded-xl border border-blue-100 bg-white p-5 shadow-sm sm:p-6">

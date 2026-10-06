@@ -34,6 +34,12 @@ class ReservationStatus extends Component
         $this->date = Carbon::parse($this->date)
             ->subDay()
             ->format('Y-m-d');
+
+        // TOPへ変更後の日付を通知
+        $this->dispatch(
+            'reservation-date-changed',
+            date: $this->date
+        );
     }
 
     //　次の日へ
@@ -42,6 +48,12 @@ class ReservationStatus extends Component
         $this->date = Carbon::parse($this->date)
             ->addDay()
             ->format('Y-m-d');
+
+        // TOPへ変更後の日付を通知
+        $this->dispatch(
+            'reservation-date-changed',
+            date: $this->date
+        );
     }
 
     // 時間枠を作成
@@ -118,6 +130,25 @@ class ReservationStatus extends Component
 
             $current->addMinutes($slotMinutes);
         }
+    }
+
+    public function updatedDate(): void
+    {
+        $this->dispatch(
+            'reservation-date-changed',
+            date: $this->date
+        );
+    }
+
+    // 予約状況クリックで新規登録・編集 selectEmptySlot
+    public function selectEmptySlot(string $seat, string $time): void
+    {
+        $this->dispatch(
+            'reservation-slot-selected',
+            date: $this->date,
+            seat: $seat,
+            time: $time
+        );
     }
 
 

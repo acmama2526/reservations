@@ -32,7 +32,7 @@ class ReservationService
             // 選択した席が存在するか確認
             if ($seats->count() !== count($seatIds)) {
                 throw ValidationException::withMessages([
-                    'seat' => '選択された席が存在しない、または利用できません。',
+                    'selectedSeatIds' => '選択された席が存在しない、または利用できません。',
                 ]);
             }
 
@@ -103,7 +103,7 @@ class ReservationService
             // 選択した席が存在するか確認
             if ($seats->count() !== count($seatIds)) {
                 throw ValidationException::withMessages([
-                    'seat' => '選択された席が存在しない、または利用できません。',
+                    'selectedSeatIds' => '選択された席が存在しない、または利用できません。',
                 ]);
             }
 
