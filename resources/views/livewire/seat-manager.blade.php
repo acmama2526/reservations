@@ -67,6 +67,11 @@
               <option value="座敷">座敷</option>
               <option value="カウンター">カウンター</option>
             </select>
+            @error('type')
+              <p class="mt-1 text-sm text-red-600">
+                {{ $message }}
+              </p>
+            @enderror
           </div>
 
           {{-- 定員 --}}
