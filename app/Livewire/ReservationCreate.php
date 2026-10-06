@@ -278,7 +278,6 @@ class ReservationCreate extends Component
 
         // 予約一覧へ戻る
         $this->redirectRoute('reservations.index');
-
     }
 
     // /**
@@ -322,6 +321,9 @@ class ReservationCreate extends Component
             ->orderBy('display_order')
             ->get();
 
+        // 全席の収容人数を合計
+        $totalCapacity = $seats->sum('capacity');
+
         // 店舗設定を取得
         $shopSetting = ShopSetting::first();
 
@@ -346,7 +348,6 @@ class ReservationCreate extends Component
 
             // 予約時間の単位
             $slotMinutes = (int) $shopSetting->slot_minutes;
-
         }
 
         /*
@@ -363,7 +364,6 @@ class ReservationCreate extends Component
             )
                 ->orderBy('display_order')
                 ->get();
-
         }
 
         return view('livewire.reservation-create', [
@@ -373,6 +373,7 @@ class ReservationCreate extends Component
             'start' => $start,
             'end' => $end,
             'slotMinutes' => $slotMinutes,
+            'totalCapacity' => $totalCapacity,
         ]);
     }
 }

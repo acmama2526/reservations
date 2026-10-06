@@ -48,7 +48,7 @@
                 <select id="people" wire:model="people" class="rounded border-gray-300">
                     <option value="">選択してください</option>
 
-                    @for ($i = 1; $i <= 20; $i++)
+                    @for ($i = 1; $i <= $totalCapacity; $i++)
                         <option value="{{ $i }}">
                             {{ $i }}名
                         </option>

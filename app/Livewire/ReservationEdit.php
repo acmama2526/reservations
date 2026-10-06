@@ -312,6 +312,9 @@ class ReservationEdit extends Component
             ->orderBy('display_order')
             ->get();
 
+            // 全席の収容人数を合計
+            $totalCapacity = $seats->sum('capacity');
+
         // 選択されている席を取得
         $selectedSeats = [];
 
@@ -327,6 +330,7 @@ class ReservationEdit extends Component
         return view('livewire.reservation-edit', [
             'seats' => $seats,
             'selectedSeats' => $selectedSeats,
+            'totalCapacity' => $totalCapacity,
         ]);
     }
 }
