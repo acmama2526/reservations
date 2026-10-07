@@ -109,6 +109,19 @@ class ReservationStatus extends Component
 
     /*
     |--------------------------------------------------------------------------
+    | 新規予約完了後の日付同期
+    |--------------------------------------------------------------------------
+    */
+    #[On('reservation-date-updated')]
+    public function syncDateAfterReservationCreated(
+        string $date
+    ): void {
+        $this->date = $date;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | TOPへ日付変更通知
     |--------------------------------------------------------------------------
     */
@@ -337,7 +350,8 @@ class ReservationStatus extends Component
         int $seatId,
         string $startTime,
         string $endTime,
-        string $mode = 'move'
+        string $mode = 'move',
+        int $sourceSeatId = 0
     ): void {
 
         /*
@@ -468,6 +482,19 @@ class ReservationStatus extends Component
             return;
         }
 
+        if (
+            $mode === 'move'
+            && $sourceSeatId !== $seatId
+            && (int) $reservation->people > (int) $targetSeat->capacity
+        ) {
+            $this->dispatch(
+                'reservation-drag-failed',
+                message: "移動先の席「{$targetSeat->seat_name}」は{$targetSeat->capacity}名までです。"
+            );
+
+            return;
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -494,13 +521,18 @@ class ReservationStatus extends Component
         | その席へ変更します。
         |
         */
-        if (
-            count($seatIds) === 1
-        ) {
-
-            $seatIds = [
-                $seatId,
-            ];
+        if ($mode === 'move') {
+            if (count($seatIds) <= 1) {
+                $seatIds = [$seatId];
+            } elseif ($sourceSeatId > 0 && in_array($sourceSeatId, $seatIds, true)) {
+                $seatIds = array_values(array_unique(array_map(
+                    static fn (int $id): int => $id === $sourceSeatId ? $seatId : $id,
+                    $seatIds
+                )));
+            } else {
+                $this->dispatch('reservation-drag-failed', message: '移動元の席を確認できません。');
+                return;
+            }
         }
 
 

@@ -25,37 +25,7 @@
         "
     >
 
-        {{-- ============================================================
-             左：タイトル
-        ============================================================= --}}
-        <div>
-
-            <h2
-                class="
-                    font-bold
-                    text-blue-900
-                "
-            >
-                予約状況
-            </h2>
-
-
-            <p
-                class="
-                    mt-0.5
-                    text-xs
-                    text-slate-500
-                "
-            >
-                ドラッグで移動・左右端をドラッグして時間変更
-            </p>
-
-        </div>
-
-
-        {{-- ============================================================
-             右：日付・表示単位
-        ============================================================= --}}
+        {{-- 左：日付・表示単位 --}}
         <div
             class="
                 flex
@@ -98,6 +68,7 @@
 
                 class="
                     h-9
+                    border
                     rounded-lg
                     border-slate-300
                     text-sm
@@ -136,6 +107,7 @@
 
                 class="
                     h-9
+                    border
                     rounded-lg
                     border-slate-300
                     text-sm
@@ -157,6 +129,33 @@
             </select>
 
         </div>
+
+
+        {{-- 右：新規予約 --}}
+        <button
+            type="button"
+            wire:click="$parent.openCreateModalFromButton"
+            class="
+                h-9
+                self-end
+                shrink-0
+                rounded-lg
+                bg-blue-700
+                px-3
+                text-sm
+                font-semibold
+                text-white
+                shadow-sm
+                transition
+                hover:bg-blue-800
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-300
+                focus:ring-offset-1
+            "
+        >
+            ＋ 新規予約
+        </button>
 
     </div>
 
@@ -681,6 +680,9 @@
                         */
                         active: null,
 
+                        saving: false,
+                        stopFailureListener: null,
+
                         dragged: false,
 
                         pointerMove: null,
@@ -878,7 +880,7 @@
                             /*
                              * Livewireへ送信
                              */
-                            $wire.selectEmptySlot(
+                            this.$wire.selectEmptySlot(
                                 seatId,
 
                                 this.minutesToTime(
@@ -899,12 +901,12 @@
                              * ドラッグ後のclickなら
                              * 編集モーダルを開きません。
                              */
-                            if (this.dragged) {
+                            if (this.dragged || this.saving) {
                                 return;
                             }
 
 
-                            $wire.selectReservation(
+                            this.$wire.selectReservation(
                                 id
                             );
                         },
@@ -924,12 +926,13 @@
                              * 左クリックのみ
                              */
                             if (
-                                event.button !== 0
+                                event.button !== 0 || this.saving
                             ) {
                                 return;
                             }
 
 
+                            if (this.saving) return;
                             event.preventDefault();
 
 
@@ -1014,6 +1017,7 @@
                             side
                         ) {
 
+                            if (this.saving) return;
                             event.preventDefault();
 
 
@@ -1094,7 +1098,16 @@
                         | Alpine初期化
                         |--------------------------------------------------------------------------
                         */
+                        destroy() {
+                            window.removeEventListener('pointermove', this.pointerMove);
+                            window.removeEventListener('pointerup', this.pointerUp);
+                            this.stopFailureListener?.();
+                        },
+
                         init() {
+                            this.stopFailureListener = this.$wire.on('reservation-drag-failed', (event) => {
+                                window.alert(event.message ?? event.detail?.message ?? '予約を更新できませんでした。');
+                            });
 
                             /*
                             |--------------------------------------------------------------------------
@@ -1522,24 +1535,25 @@
                                     | Livewireへ更新依頼
                                     |--------------------------------------------------------------------------
                                     */
-                                    $wire.moveReservation(
+                                    const operation = this.active;
+                                    // DOMの仮変更を戻してから、DBの結果でLivewireに再描画させます。
+                                    element.style.left = `${operation.originalLeft}%`;
+                                    element.style.width = `${operation.originalWidth}%`;
+                                    this.saving = true;
 
-                                        this.active
-                                            .reservationId,
-
+                                    this.$wire.moveReservation(
+                                        operation.reservationId,
                                         seatId,
-
-                                        this.minutesToTime(
-                                            start
-                                        ),
-
-                                        this.minutesToTime(
-                                            end
-                                        ),
-
-                                        this.active.mode
-                                    );
-
+                                        this.minutesToTime(start),
+                                        this.minutesToTime(end),
+                                        operation.mode,
+                                        operation.originalSeatId
+                                    ).catch((error) => {
+                                        console.error('Reservation update failed', error);
+                                        window.alert('予約を保存できませんでした。もう一度操作してください。');
+                                    }).finally(() => {
+                                        this.saving = false;
+                                    });
 
                                     /*
                                      * 操作終了
