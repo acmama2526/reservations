@@ -65,6 +65,8 @@ class ReservationTop extends Component
      */
     public array $selectedSeatIds = [];
 
+    public string $autoAssignError = '';
+
 
     /*
     |--------------------------------------------------------------------------
@@ -327,9 +329,130 @@ class ReservationTop extends Component
 
     /*
     |--------------------------------------------------------------------------
+    | 当日予約一覧から予約を削除
+    |--------------------------------------------------------------------------
+    */
+    public function deleteReservation(
+        int $reservationId
+    ): void {
+        $reservation =
+            Reservation::findOrFail(
+                $reservationId
+            );
+
+
+        // 予約と席の関連を先に解除してから予約本体を削除します。
+        $reservation
+            ->seats()
+            ->detach();
+
+        $reservation->delete();
+
+
+        if ($this->editingReservationId === $reservationId) {
+            $this->closeModal();
+        }
+
+
+        $this->dispatch(
+            'reservation-updated'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | 新規予約登録
     |--------------------------------------------------------------------------
     */
+    public function autoAssignSeats(): void
+    {
+        $this->autoAssignError = '';
+
+        $people = (int) $this->people;
+        if ($people < 1) {
+            $this->addError('people', '人数を選択してください。');
+            return;
+        }
+
+        if (!$this->reservationDate || !$this->startTime || !$this->endTime) {
+            $this->autoAssignError = '予約日、開始時間、終了時間を選択してください。';
+            return;
+        }
+
+        try {
+            $start = Carbon::createFromFormat('H:i', $this->startTime);
+            $end = Carbon::createFromFormat('H:i', $this->endTime);
+        } catch (\Throwable $e) {
+            $this->autoAssignError = '開始時間と終了時間を確認してください。';
+            return;
+        }
+
+        if ($end->lte($start)) {
+            $this->autoAssignError = '終了時間は開始時間より後にしてください。';
+            return;
+        }
+
+        // 指定時間に予約が入っている席を除外します。
+        $busySeatIds = Reservation::query()
+            ->with('seats:id')
+            ->whereDate('reservation_date', $this->reservationDate)
+            ->where('status', '!=', 'cancelled')
+            ->where('start_time', '<', $this->endTime)
+            ->where('end_time', '>', $this->startTime)
+            ->get()
+            ->flatMap(fn ($reservation) => $reservation->seats->pluck('id'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $availableSeats = Seat::query()
+            ->where('is_active', true)
+            ->whereNotIn('id', $busySeatIds ?: [0])
+            ->orderBy('capacity')
+            ->orderBy('display_order')
+            ->get();
+
+        // 収容人数の超過を最小限にする席の組合せを探します。
+        $bestSeatIds = null;
+        $bestCapacity = PHP_INT_MAX;
+        $bestCount = PHP_INT_MAX;
+        $seatCount = $availableSeats->count();
+
+        for ($mask = 1; $mask < (1 << $seatCount); $mask++) {
+            $ids = [];
+            $capacity = 0;
+
+            foreach ($availableSeats as $index => $seat) {
+                if ($mask & (1 << $index)) {
+                    $ids[] = (int) $seat->id;
+                    $capacity += (int) $seat->capacity;
+                }
+            }
+
+            $count = count($ids);
+            if (
+                $capacity >= $people
+                && ($capacity < $bestCapacity || ($capacity === $bestCapacity && $count < $bestCount))
+            ) {
+                $bestSeatIds = $ids;
+                $bestCapacity = $capacity;
+                $bestCount = $count;
+            }
+        }
+
+        if ($bestSeatIds === null) {
+            $this->selectedSeatIds = [];
+            $this->autoAssignError = 'この時間帯に人数を収容できる空席がありません。';
+            return;
+        }
+
+        $this->selectedSeatIds = array_map('strval', $bestSeatIds);
+        $this->resetErrorBag('selectedSeatIds');
+    }
+
+
     public function createReservation(
         ReservationService $service
     ): void {
@@ -338,6 +461,31 @@ class ReservationTop extends Component
          */
         $this->validateForm();
 
+        $selectedCapacity = Seat::query()
+            ->where('is_active', true)
+            ->whereIn('id', array_map('intval', $this->selectedSeatIds))
+            ->sum('capacity');
+
+        if ($selectedCapacity < (int) $this->people) {
+            $this->addError('selectedSeatIds', '選択した席の定員合計が予約人数に足りません。');
+            return;
+        }
+
+        $selectedSeatIds = array_map('intval', $this->selectedSeatIds);
+        $hasConflict = Reservation::query()
+            ->whereDate('reservation_date', $this->reservationDate)
+            ->where('status', '!=', 'cancelled')
+            ->where('start_time', '<', $this->endTime)
+            ->where('end_time', '>', $this->startTime)
+            ->whereHas('seats', function ($query) use ($selectedSeatIds) {
+                $query->whereIn('seats.id', $selectedSeatIds);
+            })
+            ->exists();
+
+        if ($hasConflict) {
+            $this->addError('selectedSeatIds', '選択した席はこの時間帯に使用中です。空いている席へ自動配置し直してください。');
+            return;
+        }
 
         /*
          * 予約登録
@@ -487,6 +635,7 @@ class ReservationTop extends Component
                     'required',
                     'integer',
                     'min:1',
+                    'max:' . max(1, (int) Seat::query()->where('is_active', true)->sum('capacity')),
                 ],
 
                 'phone' => [
@@ -610,6 +759,8 @@ class ReservationTop extends Component
         $this->description = '';
 
         $this->selectedSeatIds = [];
+
+        $this->autoAssignError = '';
 
         $this->editingReservationId = null;
 
@@ -797,6 +948,12 @@ class ReservationTop extends Component
 
                 'seats' =>
                     $seats,
+
+                'totalCapacity' =>
+                    (int) $seats->sum('capacity'),
+
+                'selectedSeats' =>
+                    Seat::query()->whereIn('id', array_map('intval', $this->selectedSeatIds))->get(),
 
                 'startTimeOptions' =>
                     $startTimeOptions,

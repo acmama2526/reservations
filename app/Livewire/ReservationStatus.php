@@ -469,6 +469,19 @@ class ReservationStatus extends Component
             return;
         }
 
+        if (
+            $mode === 'move'
+            && $sourceSeatId !== $seatId
+            && (int) $reservation->people > (int) $targetSeat->capacity
+        ) {
+            $this->dispatch(
+                'reservation-drag-failed',
+                message: "移動先の席「{$targetSeat->seat_name}」は{$targetSeat->capacity}名までです。"
+            );
+
+            return;
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -496,7 +509,6 @@ class ReservationStatus extends Component
         |
         */
         if ($mode === 'move') {
-            // 1席予約は席を差し替え、複数席予約はドラッグした席だけを差し替えます。
             if (count($seatIds) <= 1) {
                 $seatIds = [$seatId];
             } elseif ($sourceSeatId > 0 && in_array($sourceSeatId, $seatIds, true)) {
