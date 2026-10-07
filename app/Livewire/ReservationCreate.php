@@ -8,6 +8,7 @@ use App\Services\ReservationService;
 use App\Services\SeatAssignmentService;
 use Carbon\Carbon;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class ReservationCreate extends Component
 {
@@ -309,6 +310,40 @@ class ReservationCreate extends Component
         // エラーメッセージも消す
         $this->resetValidation();
     }
+
+    // :笹渕追記: 予約状況から空き枠を受け取る (selectReservationSlot)
+    #[On('reservation-slot-selected')]
+    public function selectReservationSlot(
+        string $date,
+        string $seat,
+        string $time
+    ): void {
+
+        // 日付
+        $this->reservationDate = $date;
+
+        // 開始時間
+        $this->startTime = $time;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | 席名から席IDを取得
+    |--------------------------------------------------------------------------
+    |
+    | ReservationCreateの<select>は
+    | seat_nameではなくseat IDを使用しているため、
+    | DBから該当する席を探します。
+    |
+    */
+
+        $seatModel = Seat::where('seat_name', $seat)->first();
+
+        if ($seatModel) {
+            $this->seat = $seatModel->id;
+        }
+    }
+
 
     /**
      * 画面を表示する

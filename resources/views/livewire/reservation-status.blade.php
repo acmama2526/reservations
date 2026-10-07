@@ -1,379 +1,1593 @@
-<div class="w-full">
+<div
+    class="w-full"
 
-    {{-- 予約状況 --}}
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    x-data="reservationTimeline({
+        businessStart: '{{ $businessStart }}',
+        businessEnd: '{{ $businessEnd }}',
+        businessMinutes: {{ $businessMinutes }},
+        slotMinutes: {{ $slotMinutes }}
+    })"
+>
+
+    {{-- ================================================================
+         予約状況ヘッダー
+    ================================================================= --}}
+    <div
+        class="
+            mb-3
+            flex
+            flex-col
+            gap-3
+
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
+        "
+    >
+
+        {{-- ============================================================
+             左：タイトル
+        ============================================================= --}}
         <div>
-            <h2 class="text-xl font-bold text-slate-800">
+
+            <h2
+                class="
+                    font-bold
+                    text-blue-900
+                "
+            >
                 予約状況
             </h2>
 
-            <p class="mt-1 text-sm text-slate-500">
-                席ごとの予約状況を確認できます
+
+            <p
+                class="
+                    mt-0.5
+                    text-xs
+                    text-slate-500
+                "
+            >
+                ドラッグで移動・左右端をドラッグして時間変更
             </p>
+
         </div>
 
 
-        {{-- 日付変更 --}}
-        <div class="flex items-center gap-2">
+        {{-- ============================================================
+             右：日付・表示単位
+        ============================================================= --}}
+        <div
+            class="
+                flex
+                flex-wrap
+                items-center
+                gap-2
+            "
+        >
 
             {{-- 前日 --}}
-            <button type="button" wire:click="previousDay"
+            <button
+                type="button"
+
+                wire:click="previousDay"
+
                 class="
-                    flex h-10 w-10
-                    items-center justify-center
+                    flex
+                    h-9
+                    w-9
+                    items-center
+                    justify-center
                     rounded-lg
-                    border border-slate-200
+                    border
+                    border-slate-300
                     bg-white
-                    text-lg text-slate-600
-                    shadow-sm
                     transition
-                    hover:border-blue-300
-                    hover:bg-blue-50
-                    hover:text-blue-600
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-blue-100
+
+                    hover:bg-slate-50
                 "
-                title="前の日">
+            >
                 ←
             </button>
 
 
-            <input type="date" wire:model.live="date"
+            {{-- 日付 --}}
+            <input
+                type="date"
+
+                wire:model.live="date"
+
                 class="
-                    h-10
-                    cursor-pointer
+                    h-9
                     rounded-lg
-                    border border-slate-200
-                    bg-white
-                    px-4
-                    text-sm font-semibold
-                    text-slate-700
-                    shadow-sm
-                    outline-none
-                    transition
-                    hover:border-blue-300
-                    focus:border-blue-500
-                    focus:ring-2
-                    focus:ring-blue-100
-                ">
+                    border-slate-300
+                    text-sm
+                "
+            >
 
 
             {{-- 翌日 --}}
-            <button type="button" wire:click="nextDay"
+            <button
+                type="button"
+
+                wire:click="nextDay"
+
                 class="
-                    flex h-10 w-10
-                    items-center justify-center
+                    flex
+                    h-9
+                    w-9
+                    items-center
+                    justify-center
                     rounded-lg
-                    border border-slate-200
+                    border
+                    border-slate-300
                     bg-white
-                    text-lg text-slate-600
-                    shadow-sm
                     transition
-                    hover:border-blue-300
-                    hover:bg-blue-50
-                    hover:text-blue-600
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-blue-100
+
+                    hover:bg-slate-50
                 "
-                title="次の日">
+            >
                 →
             </button>
+
+
+            {{-- 表示単位 --}}
+            <select
+                wire:model.live="displayMinutes"
+
+                class="
+                    h-9
+                    rounded-lg
+                    border-slate-300
+                    text-sm
+                "
+            >
+
+                <option value="15">
+                    15分表示
+                </option>
+
+                <option value="30">
+                    30分表示
+                </option>
+
+                <option value="60">
+                    1時間表示
+                </option>
+
+            </select>
 
         </div>
 
     </div>
 
 
+    {{-- ================================================================
+         予約Timeline
 
-    {{-- 予約状況表 --}}
+         overflow-autoを使用しません。
+
+         予約状況そのものが縦に長くなった場合は
+         ブラウザ全体がスクロールします。
+    ================================================================= --}}
     <div
         class="
+            w-full
             overflow-hidden
-            rounded-xl
-            border border-slate-200
+            rounded-lg
+            border
+            border-slate-200
             bg-white
-        ">
+        "
+    >
 
-        {{-- 時間数が増えた場合は、予約状況部分だけ横スクロール --}}
-        <div class="overflow-x-auto">
+        {{-- ============================================================
+             時間ヘッダー
+        ============================================================= --}}
+        <div
+            class="
+                flex
+                h-10
+                border-b
+                border-slate-200
+                bg-slate-100
+            "
+        >
 
-            <div class="min-w-max p-4">
-                {{-- 時間ヘッダー --}}
+            {{-- 席列 --}}
+            <div
+                class="
+                    flex
+                    w-24
+                    shrink-0
+                    items-center
+                    justify-center
+                    border-r
+                    border-slate-200
+                    text-xs
+                    font-bold
+                    text-slate-700
+                "
+            >
+                席
+            </div>
 
-                <div class="mb-2 grid gap-2 text-center"
-                    style="
-                        grid-template-columns:
-                        80px repeat({{ count($times) }}, 80px);">
-                    {{-- 席 --}}
+
+            {{-- 時間Timeline --}}
+            <div class="relative flex-1">
+
+                @foreach ($times as $time)
+
+                    @php
+
+                        /*
+                         * 営業開始時間
+                         */
+                        $headerStart =
+                            \Carbon\Carbon::createFromFormat(
+                                'H:i',
+                                $businessStart
+                            );
+
+
+                        /*
+                         * 現在の時間目盛り
+                         */
+                        $headerTime =
+                            \Carbon\Carbon::createFromFormat(
+                                'H:i',
+                                $time
+                            );
+
+
+                        /*
+                         * 営業開始から何分後か
+                         */
+                        $minutes =
+                            $headerStart
+                                ->diffInMinutes(
+                                    $headerTime,
+                                    false
+                                );
+
+
+                        /*
+                         * Timeline上の位置
+                         */
+                        $position =
+                            $businessMinutes > 0
+
+                                ? (
+                                    $minutes
+                                    /
+                                    $businessMinutes
+                                )
+                                *
+                                100
+
+                                : 0;
+
+                    @endphp
+
+
                     <div
                         class="
-                            flex h-10
-                            items-center justify-center
-                            rounded-md
-                            bg-slate-100
-                            text-xs font-bold
-                            text-slate-500
-                        ">
-                        席
+                            pointer-events-none
+                            absolute
+                            top-0
+                            h-full
+                            border-l
+                            border-slate-300
+                        "
+
+                        style="
+                            left: {{ $position }}%;
+                        "
+                    >
+
+                        <span
+                            class="
+                                absolute
+                                left-1
+                                top-2
+                                whitespace-nowrap
+                                text-[10px]
+                                text-slate-500
+                            "
+                        >
+
+                            {{ $time }}
+
+                        </span>
+
                     </div>
 
+                @endforeach
 
-                    {{-- 時間 --}}
-                    @foreach ($times as $time)
-                        <div
-                            class="
-                                flex h-10
-                                items-center justify-center
-                                rounded-md
-                                bg-slate-100
-                                text-xs font-semibold
-                                text-slate-600
-                            ">
-                            {{ $time }}
-                        </div>
-                    @endforeach
+            </div>
+
+        </div>
+
+
+        {{-- ============================================================
+             席
+        ============================================================= --}}
+        @foreach ($seats as $seat)
+
+            <div
+                class="
+                    flex
+                    h-12
+                    border-b
+                    border-slate-200
+
+                    last:border-b-0
+                "
+            >
+
+                {{-- ====================================================
+                     席名
+                ===================================================== --}}
+                <div
+                    class="
+                        flex
+                        w-24
+                        shrink-0
+                        items-center
+                        justify-center
+                        border-r
+                        border-slate-200
+                        bg-slate-50
+                        px-1
+                        text-center
+                        text-xs
+                        font-bold
+                    "
+                >
+
+                    {{ $seat->seat_name }}
 
                 </div>
 
 
-                {{-- ==================================================
-                     席ごとの予約状況
-                =================================================== --}}
-                <div class="space-y-2">
+                {{-- ====================================================
+                     Timeline Row
+                ===================================================== --}}
+                <div
+                    class="
+                        timeline-row
+                        relative
+                        flex-1
+                        bg-white
+                    "
 
-                    @foreach ($seats as $seat)
-                        {{--
-                            1列目：
-                            席名
+                    data-seat-id="{{ $seat->id }}"
+                >
 
-                            2列目以降：
-                            時間枠
-                        --}}
+                    {{-- =================================================
+                         空き枠クリック専用レイヤー
 
-                        <div class="grid gap-2"
+                         これが今回の重要な修正です。
+
+                         Timeline全体に透明buttonを敷きます。
+
+                         予約ブロックはz-20なので、
+                         予約部分ではこちらではなく
+                         予約ブロック側が操作されます。
+                    ================================================== --}}
+                    <button
+                        type="button"
+
+                        class="
+                            absolute
+                            inset-0
+                            z-0
+                            block
+                            h-full
+                            w-full
+                            cursor-pointer
+                            border-0
+                            bg-transparent
+                            p-0
+
+                            hover:bg-blue-50/30
+                        "
+
+                        title="クリックして新規予約"
+
+                        @click="
+                            emptyClick(
+                                $event,
+                                {{ $seat->id }}
+                            )
+                        "
+                    ></button>
+
+
+                    {{-- =================================================
+                         時間Grid線
+                    ================================================== --}}
+                    @foreach ($times as $time)
+
+                        @php
+
+                            $gridStart =
+                                \Carbon\Carbon::createFromFormat(
+                                    'H:i',
+                                    $businessStart
+                                );
+
+
+                            $gridTime =
+                                \Carbon\Carbon::createFromFormat(
+                                    'H:i',
+                                    $time
+                                );
+
+
+                            $minutes =
+                                $gridStart
+                                    ->diffInMinutes(
+                                        $gridTime,
+                                        false
+                                    );
+
+
+                            $position =
+                                $businessMinutes > 0
+
+                                    ? (
+                                        $minutes
+                                        /
+                                        $businessMinutes
+                                    )
+                                    *
+                                    100
+
+                                    : 0;
+
+                        @endphp
+
+
+                        <div
+                            class="
+                                pointer-events-none
+                                absolute
+                                inset-y-0
+                                z-[1]
+                                border-l
+                                border-slate-200
+                            "
+
                             style="
-                                grid-template-columns:
-                                80px repeat({{ count($times) }}, 80px);
-                            ">
+                                left: {{ $position }}%;
+                            "
+                        ></div>
+
+                    @endforeach
 
 
-                            {{-- 席名 --}}
+                    {{-- =================================================
+                         この席の予約ブロック
+                    ================================================== --}}
+                    @foreach ($reservations as $reservation)
+
+                        @if (
+                            (int) $reservation['seat_id']
+                            ===
+                            (int) $seat->id
+                        )
+
                             <div
+                                wire:key="
+                                    reservation-block-
+                                    {{ $reservation['id'] }}-
+                                    {{ $seat->id }}-
+                                    {{ $reservation['start_time'] }}-
+                                    {{ $reservation['end_time'] }}
+                                "
+
                                 class="
-                                    flex h-12
-                                    items-center justify-center
+                                    reservation-block
+                                    absolute
+                                    bottom-1
+                                    top-1
+                                    z-20
+                                    cursor-grab
+                                    select-none
+                                    overflow-hidden
                                     rounded-md
-                                    border border-slate-200
-                                    bg-slate-50
-                                    px-2
-                                    text-center
-                                    text-sm font-bold
-                                    text-slate-700">
-                                {{ $seat }}
-                            </div>
+                                    border
+                                    border-blue-300
+                                    bg-blue-100
+                                    shadow-sm
+
+                                    active:cursor-grabbing
+                                "
+
+                                style="
+                                    left:
+                                    {{ $reservation['left'] }}%;
+
+                                    width:
+                                    {{ $reservation['width'] }}%;
+                                "
+
+                                data-id="{{ $reservation['id'] }}"
+
+                                data-seat-id="{{ $reservation['seat_id'] }}"
+
+                                data-start="{{ $reservation['start_time'] }}"
+
+                                data-end="{{ $reservation['end_time'] }}"
+
+                                @pointerdown="
+                                    beginMove(
+                                        $event,
+                                        $el
+                                    )
+                                "
+
+                                @click.stop="
+                                    reservationClick(
+                                        {{ $reservation['id'] }}
+                                    )
+                                "
+                            >
+
+                                {{-- =========================================
+                                     左側リサイズ
+                                ========================================== --}}
+                                <div
+                                    class="
+                                        absolute
+                                        bottom-0
+                                        left-0
+                                        top-0
+                                        z-30
+                                        w-2
+                                        cursor-ew-resize
+
+                                        hover:bg-blue-500/30
+                                    "
+
+                                    title="開始時間を変更"
+
+                                    @pointerdown.stop="
+                                        beginResize(
+                                            $event,
+                                            $el.parentElement,
+                                            'start'
+                                        )
+                                    "
+                                ></div>
 
 
-                            {{-- 時間枠 --}}
-                            @foreach ($times as $time)
-                                @php
+                                {{-- =========================================
+                                     予約内容
+                                ========================================== --}}
+                                <div
+                                    class="
+                                        pointer-events-none
+                                        h-full
+                                        overflow-hidden
+                                        px-3
+                                        py-1
+                                    "
+                                >
 
-                                    $foundReservation = null;
-
-                                    $isOccupied = false;
-
-                                @endphp
-
-
-                                {{-- ==================================
-                                     この席・時間に該当する予約を検索
-                                =================================== --}}
-                                @foreach ($reservations as $reservation)
-                                    {{-- =================================
-                                         この時間から予約が始まる
-                                    ================================== --}}
-                                    @if ($seat === $reservation['seat'] && $time === $reservation['start_time'])
-                                        @php
-
-                                            $foundReservation = $reservation;
-
-                                        @endphp
-
-
-                                        {{-- =================================
-                                         前の時間から始まった予約に
-                                         この時間が含まれている
-                                    ================================== --}}
-                                    @elseif ($seat === $reservation['seat'] && $time > $reservation['start_time'] && $time < $reservation['end_time'])
-                                        @php
-
-                                            $isOccupied = true;
-
-                                        @endphp
-                                    @endif
-                                @endforeach
-
-
-                                {{-- ==================================
-                                     予約あり
-                                =================================== --}}
-                                @if ($foundReservation)
-                                    <div class="
-                                            flex h-12
-                                            items-center
-                                            overflow-hidden
-                                            rounded-md
-                                            border border-blue-200
-                                            bg-blue-50
-                                            px-3
-                                            text-sm
-                                            shadow-sm
-                                            transition
-                                            hover:border-blue-300
-                                            hover:bg-blue-100
+                                    <div
+                                        class="
+                                            truncate
+                                            text-xs
+                                            font-bold
+                                            text-blue-900
                                         "
-                                        style="
-                                            grid-column:
-                                            span {{ $foundReservation['span'] }}
-                                            /
-                                            span {{ $foundReservation['span'] }};
-                                        ">
+                                    >
 
-                                        {{-- 予約内容 --}}
-                                        <div class="min-w-0">
-
-                                            {{-- お客様名 --}}
-                                            <div
-                                                class="
-                                                    truncate
-                                                    font-bold
-                                                    text-blue-900
-                                                ">
-                                                {{ $foundReservation['name'] }}
-                                            </div>
-
-
-                                            {{-- 人数 --}}
-                                            <div
-                                                class="
-                                                    text-xs
-                                                    font-medium
-                                                    text-blue-600
-                                                ">
-                                                {{ $foundReservation['people'] }}名
-                                            </div>
-
-                                        </div>
+                                        {{ $reservation['name'] }}
 
                                     </div>
 
 
-                                    {{-- ==================================
-                                     すでに予約バーに含まれている時間
-                                =================================== --}}
-                                @elseif ($isOccupied)
-                                    {{-- ==================================
-                                     空き時間
-                                =================================== --}}
-                                @else
-                                    <button type="button"
-                                        wire:click="selectEmptySlot(
-        '{{ $seat }}',
-        '{{ $time }}'
-    )"
+                                    <div
                                         class="
-        group
-        flex h-12
-        items-center justify-center
-        rounded-md
-        border border-slate-200
-        bg-white
-        transition
+                                            whitespace-nowrap
+                                            text-[10px]
+                                            text-blue-700
+                                        "
+                                    >
 
-        hover:border-blue-400
-        hover:bg-blue-50
+                                        {{ $reservation['start_time'] }}
 
-        focus:border-blue-500
-        focus:outline-none
-        focus:ring-2
-        focus:ring-blue-100
-    "
-                                        title="{{ $seat }} {{ $time }}から予約">
+                                        ～
 
-                                        <span
-                                            class="
-            h-1.5 w-1.5
-            rounded-full
-            bg-slate-200
-            transition
-            group-hover:bg-blue-400
-        "></span>
+                                        {{ $reservation['end_time'] }}
 
-                                    </button>
-                                @endif
-                            @endforeach
+                                        ・
 
-                        </div>
+                                        {{ $reservation['people'] }}名
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- =========================================
+                                     右側リサイズ
+                                ========================================== --}}
+                                <div
+                                    class="
+                                        absolute
+                                        bottom-0
+                                        right-0
+                                        top-0
+                                        z-30
+                                        w-2
+                                        cursor-ew-resize
+
+                                        hover:bg-blue-500/30
+                                    "
+
+                                    title="終了時間を変更"
+
+                                    @pointerdown.stop="
+                                        beginResize(
+                                            $event,
+                                            $el.parentElement,
+                                            'end'
+                                        )
+                                    "
+                                ></div>
+
+                            </div>
+
+                        @endif
+
                     @endforeach
 
                 </div>
 
             </div>
 
-        </div>
+        @endforeach
 
     </div>
 
 
-    {{-- ============================================================
-         凡例
-    ============================================================= --}}
-    <div
-        class="
-            mt-3
-            flex flex-wrap
-            items-center
-            gap-x-5 gap-y-2
-            text-xs
-            text-slate-500
-        ">
+    {{-- ================================================================
+         Alpine.js
 
-        {{-- 予約あり --}}
-        <div class="flex items-center gap-2">
+         ・空き枠クリック
+         ・予約クリック
+         ・ドラッグ
+         ・左右リサイズ
+    ================================================================= --}}
+    <script>
 
-            <span
-                class="
-                    h-3 w-3
-                    rounded
-                    border border-blue-200
-                    bg-blue-50
-                "></span>
+        document.addEventListener(
+            'alpine:init',
 
-            <span>
-                予約あり
-            </span>
+            () => {
 
-        </div>
+                Alpine.data(
+                    'reservationTimeline',
+
+                    (config) => ({
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | 操作状態
+                        |--------------------------------------------------------------------------
+                        */
+                        active: null,
+
+                        saving: false,
+                        stopFailureListener: null,
+
+                        dragged: false,
+
+                        pointerMove: null,
+
+                        pointerUp: null,
 
 
-        {{-- 空き --}}
-        <div class="flex items-center gap-2">
+                        /*
+                        |--------------------------------------------------------------------------
+                        | HH:mm → 分
+                        |--------------------------------------------------------------------------
+                        */
+                        timeToMinutes(time) {
 
-            <span
-                class="
-                    h-3 w-3
-                    rounded
-                    border border-slate-200
-                    bg-white
-                "></span>
+                            const [
+                                hour,
+                                minute
+                            ] =
+                                time
+                                    .split(':')
+                                    .map(Number);
 
-            <span>
-                空き
-            </span>
 
-        </div>
+                            return (
+                                hour * 60
+                                +
+                                minute
+                            );
+                        },
 
-    </div>
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | 分 → HH:mm
+                        |--------------------------------------------------------------------------
+                        */
+                        minutesToTime(minutes) {
+
+                            minutes =
+                                Math.round(minutes);
+
+
+                            const hour =
+                                Math.floor(
+                                    minutes / 60
+                                );
+
+
+                            const minute =
+                                minutes % 60;
+
+
+                            return (
+                                String(hour)
+                                    .padStart(
+                                        2,
+                                        '0'
+                                    )
+                                +
+                                ':'
+                                +
+                                String(minute)
+                                    .padStart(
+                                        2,
+                                        '0'
+                                    )
+                            );
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ドラッグ単位へ丸める
+                        |--------------------------------------------------------------------------
+                        */
+                        snap(minutes) {
+
+                            return (
+                                Math.round(
+                                    minutes
+                                    /
+                                    config.slotMinutes
+                                )
+                                *
+                                config.slotMinutes
+                            );
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | 空き枠クリック
+                        |--------------------------------------------------------------------------
+                        |
+                        | 新規予約については15分単位で選択します。
+                        |
+                        | 表示単位が
+                        |
+                        | 30分
+                        | 60分
+                        |
+                        | でも15分単位でクリックできます。
+                        |
+                        */
+                        emptyClick(
+                            event,
+                            seatId
+                        ) {
+
+                            /*
+                             * 空き枠buttonの位置
+                             */
+                            const rect =
+                                event.currentTarget
+                                    .getBoundingClientRect();
+
+
+                            /*
+                             * クリック位置
+                             */
+                            const clickedX =
+                                event.clientX
+                                -
+                                rect.left;
+
+
+                            /*
+                             * Timeline上の割合
+                             */
+                            const ratio =
+                                clickedX
+                                /
+                                rect.width;
+
+
+                            /*
+                             * 営業開始
+                             */
+                            const businessStart =
+                                this.timeToMinutes(
+                                    config.businessStart
+                                );
+
+
+                            /*
+                             * 営業終了
+                             */
+                            const businessEnd =
+                                this.timeToMinutes(
+                                    config.businessEnd
+                                );
+
+
+                            /*
+                             * クリック位置を
+                             * 分へ変換
+                             */
+                            let minutes =
+                                businessStart
+                                +
+                                (
+                                    ratio
+                                    *
+                                    config.businessMinutes
+                                );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | 新規予約は15分刻み
+                            |--------------------------------------------------------------------------
+                            */
+                            minutes =
+                                Math.round(
+                                    minutes / 15
+                                )
+                                *
+                                15;
+
+
+                            /*
+                             * 営業時間内へ制限
+                             */
+                            minutes =
+                                Math.max(
+                                    businessStart,
+
+                                    Math.min(
+                                        minutes,
+                                        businessEnd - 15
+                                    )
+                                );
+
+
+                            /*
+                             * Livewireへ送信
+                             */
+                            this.$wire.selectEmptySlot(
+                                seatId,
+
+                                this.minutesToTime(
+                                    minutes
+                                )
+                            );
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | 予約クリック
+                        |--------------------------------------------------------------------------
+                        */
+                        reservationClick(id) {
+
+                            /*
+                             * ドラッグ後のclickなら
+                             * 編集モーダルを開きません。
+                             */
+                            if (this.dragged || this.saving) {
+                                return;
+                            }
+
+
+                            this.$wire.selectReservation(
+                                id
+                            );
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | 移動開始
+                        |--------------------------------------------------------------------------
+                        */
+                        beginMove(
+                            event,
+                            element
+                        ) {
+
+                            /*
+                             * 左クリックのみ
+                             */
+                            if (
+                                event.button !== 0 || this.saving
+                            ) {
+                                return;
+                            }
+
+
+                            if (this.saving) return;
+                            event.preventDefault();
+
+
+                            const row =
+                                element.closest(
+                                    '.timeline-row'
+                                );
+
+
+                            if (!row) {
+                                return;
+                            }
+
+
+                            const rect =
+                                row.getBoundingClientRect();
+
+
+                            this.active = {
+
+                                mode:
+                                    'move',
+
+                                element:
+                                    element,
+
+                                reservationId:
+                                    Number(
+                                        element.dataset.id
+                                    ),
+
+                                originalSeatId:
+                                    Number(
+                                        element.dataset.seatId
+                                    ),
+
+                                startX:
+                                    event.clientX,
+
+                                originalLeft:
+                                    parseFloat(
+                                        element.style.left
+                                    ),
+
+                                originalWidth:
+                                    parseFloat(
+                                        element.style.width
+                                    ),
+
+                                rowWidth:
+                                    rect.width,
+                            };
+
+
+                            this.dragged = false;
+
+
+                            window.addEventListener(
+                                'pointermove',
+                                this.pointerMove
+                            );
+
+
+                            window.addEventListener(
+                                'pointerup',
+                                this.pointerUp,
+                                {
+                                    once: true
+                                }
+                            );
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | リサイズ開始
+                        |--------------------------------------------------------------------------
+                        */
+                        beginResize(
+                            event,
+                            element,
+                            side
+                        ) {
+
+                            if (this.saving) return;
+                            event.preventDefault();
+
+
+                            const row =
+                                element.closest(
+                                    '.timeline-row'
+                                );
+
+
+                            if (!row) {
+                                return;
+                            }
+
+
+                            const rect =
+                                row.getBoundingClientRect();
+
+
+                            this.active = {
+
+                                mode:
+                                    side === 'start'
+                                        ? 'resize-start'
+                                        : 'resize-end',
+
+                                element:
+                                    element,
+
+                                reservationId:
+                                    Number(
+                                        element.dataset.id
+                                    ),
+
+                                originalSeatId:
+                                    Number(
+                                        element.dataset.seatId
+                                    ),
+
+                                startX:
+                                    event.clientX,
+
+                                originalLeft:
+                                    parseFloat(
+                                        element.style.left
+                                    ),
+
+                                originalWidth:
+                                    parseFloat(
+                                        element.style.width
+                                    ),
+
+                                rowWidth:
+                                    rect.width,
+                            };
+
+
+                            this.dragged = false;
+
+
+                            window.addEventListener(
+                                'pointermove',
+                                this.pointerMove
+                            );
+
+
+                            window.addEventListener(
+                                'pointerup',
+                                this.pointerUp,
+                                {
+                                    once: true
+                                }
+                            );
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Alpine初期化
+                        |--------------------------------------------------------------------------
+                        */
+                        destroy() {
+                            window.removeEventListener('pointermove', this.pointerMove);
+                            window.removeEventListener('pointerup', this.pointerUp);
+                            this.stopFailureListener?.();
+                        },
+
+                        init() {
+                            this.stopFailureListener = this.$wire.on('reservation-drag-failed', (event) => {
+                                window.alert(event.message ?? event.detail?.message ?? '予約を更新できませんでした。');
+                            });
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | pointermove
+                            |--------------------------------------------------------------------------
+                            */
+                            this.pointerMove =
+                                (event) => {
+
+                                    if (!this.active) {
+                                        return;
+                                    }
+
+
+                                    /*
+                                     * マウス移動量
+                                     */
+                                    const deltaPixels =
+                                        event.clientX
+                                        -
+                                        this.active.startX;
+
+
+                                    /*
+                                     * 少しでも動いた場合だけ
+                                     * ドラッグとして扱います。
+                                     */
+                                    if (
+                                        Math.abs(
+                                            deltaPixels
+                                        )
+                                        > 3
+                                    ) {
+                                        this.dragged = true;
+                                    }
+
+
+                                    /*
+                                     * px → %
+                                     */
+                                    const deltaPercent =
+                                        (
+                                            deltaPixels
+                                            /
+                                            this.active.rowWidth
+                                        )
+                                        *
+                                        100;
+
+
+                                    /*
+                                     * 1slot分の%
+                                     */
+                                    const slotPercent =
+                                        (
+                                            config.slotMinutes
+                                            /
+                                            config.businessMinutes
+                                        )
+                                        *
+                                        100;
+
+
+                                    /*
+                                     * slot単位へスナップ
+                                     */
+                                    const snappedDelta =
+                                        Math.round(
+                                            deltaPercent
+                                            /
+                                            slotPercent
+                                        )
+                                        *
+                                        slotPercent;
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | 移動
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    if (
+                                        this.active.mode
+                                        ===
+                                        'move'
+                                    ) {
+
+                                        let left =
+                                            this.active.originalLeft
+                                            +
+                                            snappedDelta;
+
+
+                                        /*
+                                         * Timeline外へ出ないようにする
+                                         */
+                                        left =
+                                            Math.max(
+                                                0,
+
+                                                Math.min(
+                                                    left,
+
+                                                    100
+                                                    -
+                                                    this.active.originalWidth
+                                                )
+                                            );
+
+
+                                        this.active
+                                            .element
+                                            .style
+                                            .left =
+                                                `${left}%`;
+                                    }
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | 左端リサイズ
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    if (
+                                        this.active.mode
+                                        ===
+                                        'resize-start'
+                                    ) {
+
+                                        let left =
+                                            this.active.originalLeft
+                                            +
+                                            snappedDelta;
+
+
+                                        let width =
+                                            this.active.originalWidth
+                                            -
+                                            snappedDelta;
+
+
+                                        /*
+                                         * 最低1slot
+                                         */
+                                        if (
+                                            width
+                                            >=
+                                            slotPercent
+                                            &&
+                                            left
+                                            >=
+                                            0
+                                        ) {
+
+                                            this.active
+                                                .element
+                                                .style
+                                                .left =
+                                                    `${left}%`;
+
+
+                                            this.active
+                                                .element
+                                                .style
+                                                .width =
+                                                    `${width}%`;
+                                        }
+                                    }
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | 右端リサイズ
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    if (
+                                        this.active.mode
+                                        ===
+                                        'resize-end'
+                                    ) {
+
+                                        let width =
+                                            this.active.originalWidth
+                                            +
+                                            snappedDelta;
+
+
+                                        /*
+                                         * 最低1slot
+                                         *
+                                         * 右端100%を超えない
+                                         */
+                                        if (
+                                            width
+                                            >=
+                                            slotPercent
+                                            &&
+                                            (
+                                                this.active.originalLeft
+                                                +
+                                                width
+                                            )
+                                            <=
+                                            100
+                                        ) {
+
+                                            this.active
+                                                .element
+                                                .style
+                                                .width =
+                                                    `${width}%`;
+                                        }
+                                    }
+                                };
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | pointerup
+                            |--------------------------------------------------------------------------
+                            */
+                            this.pointerUp =
+                                (event) => {
+
+                                    /*
+                                     * pointermove解除
+                                     */
+                                    window.removeEventListener(
+                                        'pointermove',
+                                        this.pointerMove
+                                    );
+
+
+                                    if (!this.active) {
+                                        return;
+                                    }
+
+
+                                    /*
+                                     * ドラッグしていない
+                                     *
+                                     * 通常クリックなので
+                                     * DB更新しません。
+                                     */
+                                    if (!this.dragged) {
+
+                                        this.active = null;
+
+                                        return;
+                                    }
+
+
+                                    const element =
+                                        this.active.element;
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | ドロップ先の席
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    const target =
+                                        document.elementFromPoint(
+                                            event.clientX,
+                                            event.clientY
+                                        );
+
+
+                                    const targetRow =
+                                        target
+                                            ?.closest(
+                                                '.timeline-row'
+                                            );
+
+
+                                    /*
+                                     * リサイズの場合は
+                                     * 元の席を維持します。
+                                     *
+                                     * moveの場合のみ
+                                     * 別席へ移動できます。
+                                     */
+                                    let seatId =
+                                        this.active.originalSeatId;
+
+
+                                    if (
+                                        this.active.mode
+                                        ===
+                                        'move'
+                                        &&
+                                        targetRow
+                                    ) {
+
+                                        seatId =
+                                            Number(
+                                                targetRow
+                                                    .dataset
+                                                    .seatId
+                                            );
+                                    }
+
+
+                                    /*
+                                     * 営業開始
+                                     */
+                                    const businessStart =
+                                        this.timeToMinutes(
+                                            config.businessStart
+                                        );
+
+
+                                    /*
+                                     * 現在の左位置
+                                     */
+                                    const left =
+                                        parseFloat(
+                                            element.style.left
+                                        );
+
+
+                                    /*
+                                     * 現在の幅
+                                     */
+                                    const width =
+                                        parseFloat(
+                                            element.style.width
+                                        );
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | 開始時間
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    let start =
+                                        businessStart
+                                        +
+                                        (
+                                            left
+                                            /
+                                            100
+                                            *
+                                            config.businessMinutes
+                                        );
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | 予約時間
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    let duration =
+                                        (
+                                            width
+                                            /
+                                            100
+                                            *
+                                            config.businessMinutes
+                                        );
+
+
+                                    /*
+                                     * slot単位へ丸める
+                                     */
+                                    start =
+                                        this.snap(
+                                            start
+                                        );
+
+
+                                    duration =
+                                        Math.max(
+                                            config.slotMinutes,
+
+                                            this.snap(
+                                                duration
+                                            )
+                                        );
+
+
+                                    /*
+                                     * 終了時間
+                                     */
+                                    let end =
+                                        start
+                                        +
+                                        duration;
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | 営業時間内へ補正
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    const businessEnd =
+                                        this.timeToMinutes(
+                                            config.businessEnd
+                                        );
+
+
+                                    if (
+                                        end
+                                        >
+                                        businessEnd
+                                    ) {
+
+                                        end =
+                                            businessEnd;
+
+
+                                        start =
+                                            Math.max(
+                                                businessStart,
+
+                                                end
+                                                -
+                                                duration
+                                            );
+                                    }
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Livewireへ更新依頼
+                                    |--------------------------------------------------------------------------
+                                    */
+                                    const operation = this.active;
+                                    // DOMの仮変更を戻してから、DBの結果でLivewireに再描画させます。
+                                    element.style.left = `${operation.originalLeft}%`;
+                                    element.style.width = `${operation.originalWidth}%`;
+                                    this.saving = true;
+
+                                    this.$wire.moveReservation(
+                                        operation.reservationId,
+                                        seatId,
+                                        this.minutesToTime(start),
+                                        this.minutesToTime(end),
+                                        operation.mode
+                                    ).catch((error) => {
+                                        console.error('Reservation update failed', error);
+                                        window.alert('予約を保存できませんでした。もう一度操作してください。');
+                                    }).finally(() => {
+                                        this.saving = false;
+                                    });
+
+                                    /*
+                                     * 操作終了
+                                     */
+                                    this.active = null;
+
+
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | click誤発火防止
+                                    |--------------------------------------------------------------------------
+                                    |
+                                    | pointerup直後にclickイベントが
+                                    | 発生するため少しだけdraggedを維持します。
+                                    |
+                                    */
+                                    setTimeout(
+                                        () => {
+
+                                            this.dragged =
+                                                false;
+
+                                        },
+                                        100
+                                    );
+                                };
+                        }
+
+                    })
+                );
+
+            }
+        );
+
+    </script>
 
 </div>
