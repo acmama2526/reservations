@@ -66,6 +66,8 @@ class ReservationTop extends Component
      */
     public array $selectedSeatIds = [];
 
+    public int $seatSelectionResetKey = 0;
+
     public string $autoAssignError = '';
 
 
@@ -226,23 +228,16 @@ class ReservationTop extends Component
         int $seatId,
         string $time
     ): void {
-        /*
-         * フォーム初期化
-         */
+        // 新規予約は、直前の席選択を引き継がず全チェックを外して開きます。
         $this->resetForm();
 
 
         /*
-         * クリックした情報をセット
+         * 日付と開始時間をセット
          */
         $this->reservationDate = $date;
 
         $this->startTime = $time;
-
-        $this->selectedSeatIds = [
-            (string) $seatId,
-        ];
-
 
         /*
          * 新規予約の初期終了時間は
@@ -432,7 +427,8 @@ class ReservationTop extends Component
             (int) $this->people,
             $this->reservationDate,
             $this->startTime,
-            $this->endTime
+            $this->endTime,
+            $this->editingReservationId
         );
 
         if ($assignment['error']) {
@@ -452,32 +448,12 @@ class ReservationTop extends Component
 
 
     public function createReservation(
-        ReservationService $service,
-        SeatAssignmentService $seatAssignment
+        ReservationService $service
     ): void {
         /*
          * 入力チェック
          */
         $this->validateForm();
-
-        $assignment = $seatAssignment->assign(
-            (int) $this->people,
-            $this->reservationDate,
-            $this->startTime,
-            $this->endTime
-        );
-
-        if ($assignment['error']) {
-            $this->addError('selectedSeatIds', $assignment['error']);
-            return;
-        }
-
-        if (empty($this->selectedSeatIds)) {
-            $this->selectedSeatIds = array_map(
-                'strval',
-                $assignment['selectedSeatIds']
-            );
-        }
 
         $selectedCapacity = Seat::query()
             ->where('is_active', true)
@@ -544,11 +520,6 @@ class ReservationTop extends Component
         $createdDate = $this->reservationDate;
         $this->selectedDate = $createdDate;
 
-        $this->dispatch(
-            'reservation-date-updated',
-            date: $createdDate
-        );
-
         /*
          * モーダルを閉じる
          */
@@ -570,8 +541,7 @@ class ReservationTop extends Component
     |--------------------------------------------------------------------------
     */
     public function updateReservation(
-        ReservationService $service,
-        SeatAssignmentService $seatAssignment
+        ReservationService $service
     ): void {
         /*
          * 入力チェック
@@ -586,26 +556,6 @@ class ReservationTop extends Component
             Reservation::findOrFail(
                 $this->editingReservationId
             );
-
-        $assignment = $seatAssignment->assign(
-            (int) $this->people,
-            $this->reservationDate,
-            $this->startTime,
-            $this->endTime,
-            (int) $reservation->id
-        );
-
-        if ($assignment['error']) {
-            $this->addError('selectedSeatIds', $assignment['error']);
-            return;
-        }
-
-        if (empty($this->selectedSeatIds)) {
-            $this->selectedSeatIds = array_map(
-                'strval',
-                $assignment['selectedSeatIds']
-            );
-        }
 
         $selectedSeatIds = array_map('intval', $this->selectedSeatIds);
         $selectedCapacity = Seat::query()
@@ -733,7 +683,9 @@ class ReservationTop extends Component
                 ],
 
                 'selectedSeatIds' => [
+                    'required',
                     'array',
+                    'min:1',
                 ],
 
                 'selectedSeatIds.*' => [
@@ -777,6 +729,12 @@ class ReservationTop extends Component
                 'endTime.after' =>
                     '終了時間は開始時間より後にしてください。',
 
+                'selectedSeatIds.required' =>
+                    '席を選択するか、自動配置を実行してください。',
+
+                'selectedSeatIds.min' =>
+                    '席を1つ以上選択するか、自動配置を実行してください。',
+
             ]
         );
     }
@@ -804,6 +762,8 @@ class ReservationTop extends Component
     */
     private function resetForm(): void
     {
+        $this->seatSelectionResetKey++;
+
         $this->customerName = '';
 
         $this->people = '';
