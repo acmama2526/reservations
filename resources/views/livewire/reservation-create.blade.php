@@ -1,128 +1,189 @@
-<div class="max-w-4xl mx-auto p-6">
 
-    {{-- タイトル --}}
-    <div class="bg-blue-50 border-b border-gray-200 px-4 py-3 mb-6">
-        <h1 class="text-xl font-bold text-blue-700">
-            ＋ 新規予約登録
-        </h1>
-    </div>
+<div class="min-h-screen bg-slate-50 text-base leading-relaxed text-slate-800">
 
+    <x-header />
 
-    {{-- 登録成功メッセージ --}}
-    @if (session()->has('message'))
-        <div class="mb-4 rounded bg-green-100 px-4 py-3 text-green-700">
-            {{ session('message') }}
-        </div>
-    @endif
+    <main class="mx-auto w-full max-w-screen-2xl px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
 
-
-    {{-- 入力フォーム --}}
-    <div class="bg-white border rounded-lg p-6 shadow-sm">
-
-        {{-- お客様名 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="customerName" class="font-semibold">
-                お客様名
-            </label>
-
-            <div class="col-span-3">
-                <input id="customerName" type="text" wire:model="customerName" class="w-full rounded border-gray-300"
-                    placeholder="山田 太郎">
-
-                @error('customerName')
-                    <p class="mt-1 text-sm text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
+        {{-- タイトル --}}
+        <div class="mb-4 overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm">
+            <div class="bg-blue-50 px-4 py-3">
+                <h1 class="text-xl font-bold text-blue-950">
+                    ＋ 新規予約登録
+                </h1>
             </div>
         </div>
 
-
-        {{-- 人数 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="people" class="font-semibold">
-                人数
-            </label>
-
-            <div class="col-span-3 flex items-center gap-2">
-                <select id="people" wire:model="people" class="rounded border-gray-300">
-                    <option value="">選択してください</option>
-
-                    @for ($i = 1; $i <= $totalCapacity; $i++)
-                        <option value="{{ $i }}">
-                            {{ $i }}名
-                        </option>
-                    @endfor
-                </select>
-
-                @error('people')
-                    <p class="text-sm text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
+        {{-- 登録成功メッセージ --}}
+        @if (session()->has('message'))
+            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-700">
+                {{ session('message') }}
             </div>
-        </div>
+        @endif
 
+        {{-- 入力フォーム --}}
+        <div class="overflow-hidden rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
 
-        {{-- 電話番号 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="phone" class="font-semibold">
-                電話番号
-            </label>
-
-            <div class="col-span-3">
-                <input id="phone" type="text" wire:model="phone" class="w-full rounded border-gray-300"
-                    placeholder="090-1234-5678">
-
-                @error('phone')
-                    <p class="mt-1 text-sm text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
+            {{-- 基本情報 --}}
+            <div class="mb-4">
+                <h2 class="border-b border-blue-100 bg-blue-50 px-3 py-2 font-bold text-blue-950">
+                    予約情報
+                </h2>
             </div>
-        </div>
 
+            {{-- 基本項目：2列 --}}
+            <div class="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
 
-        {{-- 予約日 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="reservationDate" class="font-semibold">
-                予約日
-            </label>
+                {{-- お客様名 --}}
+                <div>
+                    <label for="customerName" class="mb-1 block font-semibold text-slate-700">
+                        お客様名
+                    </label>
 
-            <div class="col-span-3">
-                <input id="reservationDate" type="date" wire:model="reservationDate" class="rounded border-gray-300">
+                    <input id="customerName" type="text" wire:model="customerName"
+                        class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                        placeholder="山田 太郎">
 
-                @error('reservationDate')
-                    <p class="mt-1 text-sm text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
+                    @error('customerName')
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- 人数 --}}
+                <div>
+                    <label for="people" class="mb-1 block font-semibold text-slate-700">
+                        人数
+                    </label>
+
+                    <select id="people" wire:model="people"
+                        class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+                        <option value="">選択してください</option>
+
+                        @for ($i = 1; $i <= $totalCapacity; $i++)
+                            <option value="{{ $i }}">
+                                {{ $i }}名
+                            </option>
+                        @endfor
+                    </select>
+
+                    @error('people')
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- 電話番号 --}}
+                <div>
+                    <label for="phone" class="mb-1 block font-semibold text-slate-700">
+                        電話番号
+                    </label>
+
+                    <input id="phone" type="text" wire:model="phone"
+                        class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                        placeholder="090-1234-5678">
+
+                    @error('phone')
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- 予約日 --}}
+                <div>
+                    <label for="reservationDate" class="mb-1 block font-semibold text-slate-700">
+                        予約日
+                    </label>
+
+                    <input id="reservationDate" type="date" wire:model="reservationDate"
+                        class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+
+                    @error('reservationDate')
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- 開始時間 --}}
+                <div>
+                    <label for="startTime" class="mb-1 block font-semibold text-slate-700">
+                        開始時間
+                    </label>
+
+                    <select id="startTime" wire:model="startTime"
+                        class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+                        <option value="">選択してください</option>
+
+                        @if ($start && $end && $slotMinutes > 0)
+                            @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
+                                <option value="{{ $time->format('H:i') }}">
+                                    {{ $time->format('H:i') }}
+                                </option>
+                            @endfor
+                        @endif
+                    </select>
+
+                    @error('startTime')
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                {{-- 終了時間 --}}
+                <div>
+                    <label for="endTime" class="mb-1 block font-semibold text-slate-700">
+                        終了時間
+                    </label>
+
+                    <select id="endTime" wire:model="endTime"
+                        class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+                        <option value="">選択してください</option>
+
+                        @if ($start && $end && $slotMinutes > 0)
+                            @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
+                                <option value="{{ $time->format('H:i') }}">
+                                    {{ $time->format('H:i') }}
+                                </option>
+                            @endfor
+                        @endif
+                    </select>
+
+                    @error('endTime')
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
             </div>
-        </div>
 
-        {{-- 席 --}}
-        <div class="grid grid-cols-4 items-start gap-4 mb-4">
+            {{-- 席 --}}
+            <div class="mt-4 border-t border-slate-200 pt-4">
 
-            <label class="font-semibold">
-                席
-            </label>
-
-            <div class="col-span-3">
+                <h2 class="mb-3 border-b border-blue-100 bg-blue-50 px-3 py-2 font-bold text-blue-950">
+                    席選択
+                </h2>
 
                 {{-- 手動で複数選択 --}}
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
 
                     @foreach ($seats as $seatItem)
-                        <label class="flex items-center gap-2 rounded border p-3 cursor-pointer hover:bg-gray-50">
-
+                        <label
+                            class="flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 transition hover:border-blue-300 hover:bg-blue-50">
                             <input type="checkbox" wire:model="selectedSeatIds" value="{{ $seatItem->id }}"
-                                class="rounded border-gray-300">
+                                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
 
-                            <span>
+                            <span class="font-medium text-slate-700">
                                 {{ $seatItem->seat_name }}
-                                （{{ $seatItem->capacity }}名）
+                                <span class="text-sm text-slate-500">
+                                    （{{ $seatItem->capacity }}名）
+                                </span>
                             </span>
-
                         </label>
                     @endforeach
 
@@ -141,19 +202,17 @@
                     </p>
                 @enderror
 
-                {{-- 自動配置ボタン --}}
-                <div class="mt-4">
-
+                {{-- 自動配置 --}}
+                <div class="mt-3">
                     <button type="button" wire:click="autoAssignSeats" wire:loading.attr="disabled"
-                        class="rounded bg-green-600 px-5 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50">
+                        class="inline-flex min-h-10 items-center justify-center rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                         🪑 自動配置
                     </button>
-
                 </div>
 
                 {{-- 自動配置エラー --}}
                 @if ($autoAssignError)
-                    <div class="mt-3 rounded bg-red-50 p-3">
+                    <div class="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2">
                         <p class="text-sm text-red-600">
                             {{ $autoAssignError }}
                         </p>
@@ -162,97 +221,35 @@
 
                 {{-- 現在選択されている席 --}}
                 @if (!empty($selectedSeats))
+                    <div class="mt-2 rounded-md border border-blue-100 bg-blue-50 px-3 py-2">
 
-                    <div class="mt-3 rounded bg-blue-50 p-3">
-
-                        <p class="font-semibold text-blue-700">
+                        <p class="font-semibold text-blue-900">
                             選択中の席
                         </p>
 
-                        <ul class="mt-2 list-disc pl-5">
-
+                        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
                             @foreach ($selectedSeats as $selectedSeat)
-                                <li>
-                                    {{ $selectedSeat->seat_name }}
+                                <span class="text-sm text-slate-700">
+                                    ・{{ $selectedSeat->seat_name }}
                                     （{{ $selectedSeat->capacity }}名）
-                                </li>
+                                </span>
                             @endforeach
-
-                        </ul>
+                        </div>
 
                     </div>
-
                 @endif
 
             </div>
 
-        </div>
+            {{-- 備考 --}}
+            <div class="mt-4 border-t border-slate-200 pt-4">
 
+                <label for="description" class="mb-1 block font-semibold text-slate-700">
+                    備考
+                </label>
 
-        {{-- 開始時間 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="startTime" class="font-semibold">
-                開始時間
-            </label>
-
-            <div class="col-span-3">
-                <select id="startTime" wire:model="startTime" class="rounded border-gray-300">
-                    <option value="">選択してください</option>
-
-                    @if ($start && $end && $slotMinutes > 0)
-                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
-                            <option value="{{ $time->format('H:i') }}">
-                                {{ $time->format('H:i') }}
-                            </option>
-                        @endfor
-                    @endif
-                </select>
-
-                @error('startTime')
-                    <p class="mt-1 text-sm text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
-            </div>
-        </div>
-
-
-        {{-- 終了時間 --}}
-        <div class="grid grid-cols-4 items-center gap-4 mb-4">
-            <label for="endTime" class="font-semibold">
-                終了時間
-            </label>
-
-            <div class="col-span-3">
-                <select id="endTime" wire:model="endTime" class="rounded border-gray-300">
-                    <option value="">選択してください</option>
-
-                    @if ($start && $end && $slotMinutes > 0)
-                        @for ($time = $start->copy(); $time <= $end; $time->addMinutes($slotMinutes))
-                            <option value="{{ $time->format('H:i') }}">
-                                {{ $time->format('H:i') }}
-                            </option>
-                        @endfor
-                    @endif
-                </select>
-
-                @error('endTime')
-                    <p class="mt-1 text-sm text-red-600">
-                        {{ $message }}
-                    </p>
-                @enderror
-            </div>
-        </div>
-
-
-        {{-- 備考 --}}
-        <div class="grid grid-cols-4 items-start gap-4 mb-6">
-            <label for="description" class="font-semibold pt-2">
-                備考
-            </label>
-
-            <div class="col-span-3">
-                <textarea id="description" wire:model="description" rows="3" class="w-full rounded border-gray-300"
+                <textarea id="description" wire:model="description" rows="2"
+                    class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                     placeholder="アレルギー、ご要望など"></textarea>
 
                 @error('description')
@@ -260,36 +257,43 @@
                         {{ $message }}
                     </p>
                 @enderror
+
             </div>
-        </div>
 
+            {{-- ボタン --}}
+            <div class="mt-4 flex flex-wrap justify-center gap-2 border-t border-slate-200 pt-4">
 
-        {{-- ボタン --}}
-        <div class="flex justify-center gap-4">
+                {{-- 登録 --}}
+                <button type="button" wire:click="save" wire:loading.attr="disabled"
+                    class="inline-flex min-h-11 items-center justify-center rounded-md bg-blue-600 px-7 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    登録
+                </button>
 
-            {{-- 登録 --}}
-            <button type="button" wire:click="save" wire:loading.attr="disabled"
-                class="rounded bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-                登録
-            </button>
+                {{-- クリア --}}
+                <button type="button" wire:click="clear"
+                    class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-6 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6" />
+                    </svg>
 
-            {{-- クリア --}}
-            <button type="button" wire:click="clear"
-                class="rounded border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 hover:bg-gray-100">
-                クリア
-            </button>
+                    クリア
+                </button>
 
-            {{-- 一覧リンク --}}
-            <div class="flex justify-center">
+                {{-- 一覧に戻る --}}
                 <a href="{{ route('reservations.index') }}"
-                    class="rounded border border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 hover:bg-gray-100">
+                    class="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-6 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                     一覧に戻る
                 </a>
+
             </div>
 
         </div>
 
-    </div>
+    </main>
 
+    <x-footer />
 
 </div>
+
