@@ -239,6 +239,9 @@ class SeatManager extends Component
     $this->capacity = $seat->capacity;
     $this->display_order = $seat->display_order;
     $this->is_active = $seat->is_active;
+
+    // Blade側へ「編集フォームまでスクロールして」と通知
+    $this->dispatch('scroll-to-seat-form');
   }
 
   public function render()
