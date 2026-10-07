@@ -206,7 +206,7 @@ class ReservationEdit extends Component
 
                 'status' => [
                     'required',
-                    'in:temporary,reserved,cancelled',
+                    'in:temporary,reserved,visited,paid,cancelled',
                 ],
 
                 'selectedSeatIds' => [
