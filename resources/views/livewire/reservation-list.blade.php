@@ -83,6 +83,12 @@
                         <option value="reserved">
                             確定
                         </option>
+                        <option value="visited">
+                            来店済
+                        </option>
+                        <option value="paid">
+                            会計済
+                        </option>
                         <option value="cancelled">
                             キャンセル
                         </option>
@@ -264,23 +270,34 @@
                                     @endforelse
                                 </td>
                                 {{-- 状態 --}}
-                                <td class="border-b border-slate-200 px-4 py-4 text-center align-middle tabular-nums">
-                                    @if ($reservation->status === 'reserved')
-                                        <span
-                                            class="inline-flex min-w-[80px] items-center justify-center whitespace-nowrap rounded-md bg-blue-100 px-3 py-1.5 text-sm font-semibold text-blue-800">
-                                            確定
-                                        </span>
-                                    @elseif ($reservation->status === 'temporary')
-                                        <span
-                                            class="inline-flex min-w-[80px] items-center justify-center whitespace-nowrap rounded-md bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800">
+                                <td class="border-b border-slate-200 px-4 py-4 text-center align-middle">
+                                    <select wire:change="updateStatus({{ $reservation->id }}, $event.target.value)"
+                                        class="min-h-10 min-w-[120px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
+                                        <option value="temporary"
+                                            {{ $reservation->status === 'temporary' ? 'selected' : '' }}>
                                             仮予約
-                                        </span>
-                                    @elseif ($reservation->status === 'cancelled')
-                                        <span
-                                            class="inline-flex min-w-[80px] items-center justify-center whitespace-nowrap rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">
+                                        </option>
+
+                                        <option value="reserved"
+                                            {{ $reservation->status === 'reserved' ? 'selected' : '' }}>
+                                            確定
+                                        </option>
+
+                                        <option value="visited"
+                                            {{ $reservation->status === 'visited' ? 'selected' : '' }}>
+                                            来店済
+                                        </option>
+
+                                        <option value="paid"
+                                            {{ $reservation->status === 'paid' ? 'selected' : '' }}>
+                                            会計済
+                                        </option>
+
+                                        <option value="cancelled"
+                                            {{ $reservation->status === 'cancelled' ? 'selected' : '' }}>
                                             キャンセル
-                                        </span>
-                                    @endif
+                                        </option>
+                                    </select>
                                 </td>
                                 {{-- 電話番号 --}}
                                 <td

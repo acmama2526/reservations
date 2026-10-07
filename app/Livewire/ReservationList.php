@@ -83,6 +83,36 @@ class ReservationList extends Component
     }
 
     /**
+     * 予約状態を変更
+     */
+    public function updateStatus(int $id, string $status): void
+    {
+        $allowedStatuses = [
+            'temporary',
+            'reserved',
+            'visited',
+            'paid',
+            'cancelled',
+        ];
+
+        // 許可されていない状態は変更しない
+        if (!in_array($status, $allowedStatuses, true)) {
+            return;
+        }
+
+        $reservation = Reservation::findOrFail($id);
+
+        $reservation->update([
+            'status' => $status,
+        ]);
+
+        session()->flash(
+            'message',
+            '予約状態を変更しました。'
+        );
+    }
+
+    /**
      * 画面表示
      */
     public function render()

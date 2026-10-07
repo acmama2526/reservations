@@ -1,4 +1,3 @@
-
 <div class="min-h-screen bg-slate-50 text-base leading-relaxed text-slate-800">
 
     <x-header />
@@ -92,7 +91,8 @@
                     <div class="flex flex-wrap gap-2">
 
                         @forelse ($reservation->seats as $seat)
-                            <span class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-900">
+                            <span
+                                class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-900">
                                 {{ $seat->seat_name }}
                                 <span class="ml-1 text-blue-700">
                                     （{{ $seat->capacity }}名）
@@ -117,12 +117,24 @@
                 <div class="col-span-3">
 
                     @if ($reservation->status === 'temporary')
-                        <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-800">
+                        <span
+                            class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-800">
                             仮予約
                         </span>
                     @elseif ($reservation->status === 'reserved')
-                        <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800">
+                        <span
+                            class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800">
                             確定
+                        </span>
+                    @elseif ($reservation->status === 'visited')
+                        <span
+                            class="inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">
+                            来店済
+                        </span>
+                    @elseif ($reservation->status === 'paid')
+                        <span
+                            class="inline-flex rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-800">
+                            会計済
                         </span>
                     @elseif ($reservation->status === 'cancelled')
                         <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-800">
@@ -152,18 +164,14 @@
             <div class="mt-4 flex flex-wrap justify-center gap-2 border-t border-slate-200 pt-4">
 
                 {{-- 一覧に戻る --}}
-                <a
-                    href="{{ route('reservations.index') }}"
-                    class="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-6 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                >
+                <a href="{{ route('reservations.index') }}"
+                    class="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-6 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                     一覧に戻る
                 </a>
 
                 {{-- 編集 --}}
-                <a
-                    href="{{ route('reservations.edit', $reservation) }}"
-                    class="inline-flex min-h-11 items-center justify-center rounded-md bg-blue-600 px-7 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                >
+                <a href="{{ route('reservations.edit', $reservation) }}"
+                    class="inline-flex min-h-11 items-center justify-center rounded-md bg-blue-600 px-7 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                     編集する
                 </a>
 
