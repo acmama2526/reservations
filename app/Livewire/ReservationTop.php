@@ -137,35 +137,80 @@ class ReservationTop extends Component
     */
     public function openCreateModalFromButton(): void
     {
+        [$businessStart, $businessEnd] =
+            $this->businessHours();
+
+        $seats =
+            Seat::query()
+                ->where('is_active', true)
+                ->orderBy('display_order')
+                ->get();
+
+        $reservations =
+            Reservation::with('seats:id')
+                ->whereDate(
+                    'reservation_date',
+                    $this->selectedDate
+                )
+                ->where('status', '!=', 'cancelled')
+                ->get();
+
         /*
-         * 前回のフォーム内容を初期化
+         * ＋ボタンでも空き枠クリックと同じ初期化処理を使い、
+         * 選択日の最初の空き15分枠を初期値にします。
          */
+        for (
+            $slotStart = $businessStart->copy();
+            $slotStart->lt($businessEnd);
+            $slotStart->addMinutes(15)
+        ) {
+            $slotEnd = $slotStart->copy()->addMinutes(15);
+
+            if ($slotEnd->gt($businessEnd)) {
+                break;
+            }
+
+            $startTime = $slotStart->format('H:i');
+            $endTime = $slotEnd->format('H:i');
+
+            foreach ($seats as $seat) {
+                $isOccupied =
+                    $reservations->contains(
+                        fn ($reservation) =>
+                            substr($reservation->start_time, 0, 5) < $endTime
+                            && substr($reservation->end_time, 0, 5) > $startTime
+                            && $reservation->seats->contains('id', $seat->id)
+                    );
+
+                if (!$isOccupied) {
+                    $this->openCreateModal(
+                        $this->selectedDate,
+                        (int) $seat->id,
+                        $startTime
+                    );
+
+                    return;
+                }
+            }
+        }
+
+        /*
+         * 空き枠がない日でもモーダルは開き、
+         * 利用者が時間を変更できるようにします。
+        */
         $this->resetForm();
-
-
-        /*
-         * TOPで現在表示している日付をセット
-         */
-        $this->reservationDate =
-            $this->selectedDate;
-
-
-        /*
-         * 席・時間はまだ選択しない
-         */
-        $this->selectedSeatIds = [];
-
-        $this->startTime = '';
-
-        $this->endTime = '';
-
-
-        /*
-         * 新規予約モーダル表示
-         */
+        $this->reservationDate = $this->selectedDate;
+        $this->startTime = $businessStart->format('H:i');
+        $defaultEnd = $businessStart->copy()->addMinutes(15);
+        if ($defaultEnd->gt($businessEnd)) {
+            $defaultEnd = $businessEnd->copy();
+        }
+        $this->endTime = $defaultEnd->format('H:i');
         $this->showCreateModal = true;
-
         $this->showEditModal = false;
+
+        $this->autoAssignError =
+            '選択日の営業時間内に空き枠がありません。時間を変更してください。';
     }
 
 
