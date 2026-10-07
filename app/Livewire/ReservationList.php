@@ -173,13 +173,16 @@ class ReservationList extends Component
             ->orderBy('display_order')
             ->get();
 
+        // 全席の収容人数を合計
+        $totalCapacity = $seats->sum('capacity');
+
         return view(
             'livewire.reservation-list',
             [
                 'reservations' => $reservations,
                 'seats' => $seats,
+                'totalCapacity' => $totalCapacity,
             ]
         );
-
     }
 }

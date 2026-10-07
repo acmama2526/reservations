@@ -3,15 +3,7 @@
     <x-header />
     {{-- メイン --}}
     <main class="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        {{-- タイトル --}}
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold leading-snug tracking-tight text-blue-950">
-                予約一覧・検索
-            </h1>
-            <p class="mt-2 text-base leading-relaxed text-slate-600">
-                予約の検索・確認・詳細表示・状態管理
-            </p>
-        </div>
+
         {{-- フラッシュメッセージ --}}
         @if (session()->has('message'))
             <div role="status" aria-live="polite"
@@ -68,7 +60,7 @@
                         <option value="">
                             指定なし
                         </option>
-                        @for ($i = 1; $i <= 10; $i++)
+                        @for ($i = 1; $i <= $totalCapacity; $i++)
                             <option value="{{ $i }}">
                                 {{ $i }}名
                             </option>
@@ -143,9 +135,9 @@
             <div
                 class="-mx-5 -mt-5 mb-6 flex flex-col gap-4 border-b border-blue-100 bg-blue-50 px-5 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
                 <h2 class="flex flex-wrap items-center gap-2 text-lg font-semibold text-blue-950">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
                         <rect x="4" y="3" width="16" height="18" rx="2" />
                         <path d="M8 8h8M8 12h8M8 16h5" />
                     </svg>
