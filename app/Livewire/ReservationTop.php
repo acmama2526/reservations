@@ -6,6 +6,7 @@ use App\Models\Reservation;
 use App\Models\Seat;
 use App\Models\ShopSetting;
 use App\Services\ReservationService;
+use App\Services\SeatAssignmentService;
 use Carbon\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -297,6 +298,8 @@ class ReservationTop extends Component
     public function openEditModal(
         int $reservationId
     ): void {
+        $this->resetForm();
+
         $reservation =
             Reservation::with('seats')
                 ->findOrFail(
@@ -410,12 +413,12 @@ class ReservationTop extends Component
     | 新規予約登録
     |--------------------------------------------------------------------------
     */
-    public function autoAssignSeats(): void
-    {
+    public function autoAssignSeats(
+        SeatAssignmentService $seatAssignment
+    ): void {
         $this->autoAssignError = '';
 
-        $people = (int) $this->people;
-        if ($people < 1) {
+        if ((int) $this->people < 1) {
             $this->addError('people', '人数を選択してください。');
             return;
         }
@@ -425,86 +428,56 @@ class ReservationTop extends Component
             return;
         }
 
-        try {
-            $start = Carbon::createFromFormat('H:i', $this->startTime);
-            $end = Carbon::createFromFormat('H:i', $this->endTime);
-        } catch (\Throwable $e) {
-            $this->autoAssignError = '開始時間と終了時間を確認してください。';
-            return;
-        }
+        $assignment = $seatAssignment->assign(
+            (int) $this->people,
+            $this->reservationDate,
+            $this->startTime,
+            $this->endTime
+        );
 
-        if ($end->lte($start)) {
-            $this->autoAssignError = '終了時間は開始時間より後にしてください。';
-            return;
-        }
-
-        // 指定時間に予約が入っている席を除外します。
-        $busySeatIds = Reservation::query()
-            ->with('seats:id')
-            ->whereDate('reservation_date', $this->reservationDate)
-            ->where('status', '!=', 'cancelled')
-            ->where('start_time', '<', $this->endTime)
-            ->where('end_time', '>', $this->startTime)
-            ->get()
-            ->flatMap(fn ($reservation) => $reservation->seats->pluck('id'))
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        $availableSeats = Seat::query()
-            ->where('is_active', true)
-            ->whereNotIn('id', $busySeatIds ?: [0])
-            ->orderBy('capacity')
-            ->orderBy('display_order')
-            ->get();
-
-        // 収容人数の超過を最小限にする席の組合せを探します。
-        $bestSeatIds = null;
-        $bestCapacity = PHP_INT_MAX;
-        $bestCount = PHP_INT_MAX;
-        $seatCount = $availableSeats->count();
-
-        for ($mask = 1; $mask < (1 << $seatCount); $mask++) {
-            $ids = [];
-            $capacity = 0;
-
-            foreach ($availableSeats as $index => $seat) {
-                if ($mask & (1 << $index)) {
-                    $ids[] = (int) $seat->id;
-                    $capacity += (int) $seat->capacity;
-                }
-            }
-
-            $count = count($ids);
-            if (
-                $capacity >= $people
-                && ($capacity < $bestCapacity || ($capacity === $bestCapacity && $count < $bestCount))
-            ) {
-                $bestSeatIds = $ids;
-                $bestCapacity = $capacity;
-                $bestCount = $count;
-            }
-        }
-
-        if ($bestSeatIds === null) {
+        if ($assignment['error']) {
             $this->selectedSeatIds = [];
-            $this->autoAssignError = 'この時間帯に人数を収容できる空席がありません。';
+            $this->autoAssignError = $assignment['error'];
             return;
         }
 
-        $this->selectedSeatIds = array_map('strval', $bestSeatIds);
+        $this->selectedSeatIds = array_map(
+            'strval',
+            $assignment['selectedSeatIds']
+        );
+
+        $this->autoAssignError = '';
         $this->resetErrorBag('selectedSeatIds');
     }
 
 
     public function createReservation(
-        ReservationService $service
+        ReservationService $service,
+        SeatAssignmentService $seatAssignment
     ): void {
         /*
          * 入力チェック
          */
         $this->validateForm();
+
+        $assignment = $seatAssignment->assign(
+            (int) $this->people,
+            $this->reservationDate,
+            $this->startTime,
+            $this->endTime
+        );
+
+        if ($assignment['error']) {
+            $this->addError('selectedSeatIds', $assignment['error']);
+            return;
+        }
+
+        if (empty($this->selectedSeatIds)) {
+            $this->selectedSeatIds = array_map(
+                'strval',
+                $assignment['selectedSeatIds']
+            );
+        }
 
         $selectedCapacity = Seat::query()
             ->where('is_active', true)
@@ -568,6 +541,13 @@ class ReservationTop extends Component
             )
         );
 
+        $createdDate = $this->reservationDate;
+        $this->selectedDate = $createdDate;
+
+        $this->dispatch(
+            'reservation-date-updated',
+            date: $createdDate
+        );
 
         /*
          * モーダルを閉じる
@@ -590,7 +570,8 @@ class ReservationTop extends Component
     |--------------------------------------------------------------------------
     */
     public function updateReservation(
-        ReservationService $service
+        ReservationService $service,
+        SeatAssignmentService $seatAssignment
     ): void {
         /*
          * 入力チェック
@@ -606,6 +587,52 @@ class ReservationTop extends Component
                 $this->editingReservationId
             );
 
+        $assignment = $seatAssignment->assign(
+            (int) $this->people,
+            $this->reservationDate,
+            $this->startTime,
+            $this->endTime,
+            (int) $reservation->id
+        );
+
+        if ($assignment['error']) {
+            $this->addError('selectedSeatIds', $assignment['error']);
+            return;
+        }
+
+        if (empty($this->selectedSeatIds)) {
+            $this->selectedSeatIds = array_map(
+                'strval',
+                $assignment['selectedSeatIds']
+            );
+        }
+
+        $selectedSeatIds = array_map('intval', $this->selectedSeatIds);
+        $selectedCapacity = Seat::query()
+            ->where('is_active', true)
+            ->whereIn('id', $selectedSeatIds)
+            ->sum('capacity');
+
+        if ($selectedCapacity < (int) $this->people) {
+            $this->addError('selectedSeatIds', '選択した席の定員合計が予約人数に足りません。');
+            return;
+        }
+
+        $hasConflict = Reservation::query()
+            ->where('id', '!=', $reservation->id)
+            ->whereDate('reservation_date', $this->reservationDate)
+            ->where('status', '!=', 'cancelled')
+            ->where('start_time', '<', $this->endTime)
+            ->where('end_time', '>', $this->startTime)
+            ->whereHas('seats', function ($query) use ($selectedSeatIds) {
+                $query->whereIn('seats.id', $selectedSeatIds);
+            })
+            ->exists();
+
+        if ($hasConflict) {
+            $this->addError('selectedSeatIds', '選択した席はこの時間帯に使用中です。空いている席へ自動配置し直してください。');
+            return;
+        }
 
         /*
          * 更新
@@ -706,9 +733,7 @@ class ReservationTop extends Component
                 ],
 
                 'selectedSeatIds' => [
-                    'required',
                     'array',
-                    'min:1',
                 ],
 
                 'selectedSeatIds.*' => [
@@ -752,11 +777,6 @@ class ReservationTop extends Component
                 'endTime.after' =>
                     '終了時間は開始時間より後にしてください。',
 
-                'selectedSeatIds.required' =>
-                    '席を選択してください。',
-
-                'selectedSeatIds.min' =>
-                    '席を1つ以上選択してください。',
             ]
         );
     }
@@ -773,9 +793,7 @@ class ReservationTop extends Component
 
         $this->showEditModal = false;
 
-        $this->editingReservationId = null;
-
-        $this->resetValidation();
+        $this->resetForm();
     }
 
 
