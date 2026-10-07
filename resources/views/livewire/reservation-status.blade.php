@@ -1,9 +1,13 @@
-<div class="w-full" x-data="reservationTimeline({
-    businessStart: '{{ $businessStart }}',
-    businessEnd: '{{ $businessEnd }}',
-    businessMinutes: {{ $businessMinutes }},
-    slotMinutes: {{ $slotMinutes }}
-})">
+<div
+    class="w-full"
+
+    x-data="reservationTimeline({
+        businessStart: '{{ $businessStart }}',
+        businessEnd: '{{ $businessEnd }}',
+        businessMinutes: {{ $businessMinutes }},
+        slotMinutes: {{ $slotMinutes }}
+    })"
+>
 
     {{-- ================================================================
          予約状況ヘッダー
@@ -18,19 +22,25 @@
             sm:flex-row
             sm:items-center
             sm:justify-between
-        ">
+        "
+    >
 
-        {{-- 日付変更 --}}
+        {{-- 左：日付・表示単位 --}}
         <div
             class="
                 flex
                 flex-wrap
                 items-center
                 gap-2
-            ">
+            "
+        >
 
             {{-- 前日 --}}
-            <button type="button" wire:click="previousDay"
+            <button
+                type="button"
+
+                wire:click="previousDay"
+
                 class="
                     flex
                     h-9
@@ -44,23 +54,34 @@
                     transition
 
                     hover:bg-slate-50
-                ">
+                "
+            >
                 ←
             </button>
 
 
-            {{-- 日付カレンダー --}}
-            <input type="date" wire:model.live="date"
+            {{-- 日付 --}}
+            <input
+                type="date"
+
+                wire:model.live="date"
+
                 class="
                     h-9
+                    border
                     rounded-lg
                     border-slate-300
                     text-sm
-                ">
+                "
+            >
 
 
             {{-- 翌日 --}}
-            <button type="button" wire:click="nextDay"
+            <button
+                type="button"
+
+                wire:click="nextDay"
+
                 class="
                     flex
                     h-9
@@ -74,19 +95,24 @@
                     transition
 
                     hover:bg-slate-50
-                ">
+                "
+            >
                 →
             </button>
 
 
             {{-- 表示単位 --}}
-            <select wire:model.live="displayMinutes"
+            <select
+                wire:model.live="displayMinutes"
+
                 class="
                     h-9
+                    border
                     rounded-lg
                     border-slate-300
                     text-sm
-                ">
+                "
+            >
 
                 <option value="15">
                     15分表示
@@ -104,34 +130,31 @@
 
         </div>
 
-        {{-- 新規予約ボタン --}}
-        <button type="button" wire:click="$parent.openCreateModalFromButton"
+
+        {{-- 右：新規予約 --}}
+        <button
+            type="button"
+            wire:click="$parent.openCreateModalFromButton"
             class="
-                    inline-flex
-                    items-center
-                    gap-1
-                    rounded-lg
-                    bg-blue-700
-                    px-4 py-2
-                    text-sm
-                    font-semibold
-                    text-white
-                    shadow-sm
-                    transition
-
-                    hover:bg-blue-800
-
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-blue-300
-                ">
-
-            <span class="text-lg leading-none">
-                ＋
-            </span>
-
-            新規予約
-
+                h-9
+                self-end
+                shrink-0
+                rounded-lg
+                bg-blue-700
+                px-3
+                text-sm
+                font-semibold
+                text-white
+                shadow-sm
+                transition
+                hover:bg-blue-800
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-300
+                focus:ring-offset-1
+            "
+        >
+            ＋ 新規予約
         </button>
 
     </div>
@@ -153,7 +176,8 @@
             border
             border-slate-200
             bg-white
-        ">
+        "
+    >
 
         {{-- ============================================================
              時間ヘッダー
@@ -165,7 +189,8 @@
                 border-b
                 border-slate-200
                 bg-slate-100
-            ">
+            "
+        >
 
             {{-- 席列 --}}
             <div
@@ -180,7 +205,8 @@
                     text-xs
                     font-bold
                     text-slate-700
-                ">
+                "
+            >
                 席
             </div>
 
@@ -189,32 +215,61 @@
             <div class="relative flex-1">
 
                 @foreach ($times as $time)
+
                     @php
 
                         /*
                          * 営業開始時間
                          */
-                        $headerStart = \Carbon\Carbon::createFromFormat('H:i', $businessStart);
+                        $headerStart =
+                            \Carbon\Carbon::createFromFormat(
+                                'H:i',
+                                $businessStart
+                            );
+
 
                         /*
                          * 現在の時間目盛り
                          */
-                        $headerTime = \Carbon\Carbon::createFromFormat('H:i', $time);
+                        $headerTime =
+                            \Carbon\Carbon::createFromFormat(
+                                'H:i',
+                                $time
+                            );
+
 
                         /*
                          * 営業開始から何分後か
                          */
-                        $minutes = $headerStart->diffInMinutes($headerTime, false);
+                        $minutes =
+                            $headerStart
+                                ->diffInMinutes(
+                                    $headerTime,
+                                    false
+                                );
+
 
                         /*
                          * Timeline上の位置
                          */
-                        $position = $businessMinutes > 0 ? ($minutes / $businessMinutes) * 100 : 0;
+                        $position =
+                            $businessMinutes > 0
+
+                                ? (
+                                    $minutes
+                                    /
+                                    $businessMinutes
+                                )
+                                *
+                                100
+
+                                : 0;
 
                     @endphp
 
 
-                    <div class="
+                    <div
+                        class="
                             pointer-events-none
                             absolute
                             top-0
@@ -222,9 +277,11 @@
                             border-l
                             border-slate-300
                         "
+
                         style="
                             left: {{ $position }}%;
-                        ">
+                        "
+                    >
 
                         <span
                             class="
@@ -234,13 +291,15 @@
                                 whitespace-nowrap
                                 text-[10px]
                                 text-slate-500
-                            ">
+                            "
+                        >
 
                             {{ $time }}
 
                         </span>
 
                     </div>
+
                 @endforeach
 
             </div>
@@ -252,6 +311,7 @@
              席
         ============================================================= --}}
         @foreach ($seats as $seat)
+
             <div
                 class="
                     flex
@@ -260,7 +320,8 @@
                     border-slate-200
 
                     last:border-b-0
-                ">
+                "
+            >
 
                 {{-- ====================================================
                      席名
@@ -279,7 +340,8 @@
                         text-center
                         text-xs
                         font-bold
-                    ">
+                    "
+                >
 
                     {{ $seat->seat_name }}
 
@@ -289,13 +351,16 @@
                 {{-- ====================================================
                      Timeline Row
                 ===================================================== --}}
-                <div class="
+                <div
+                    class="
                         timeline-row
                         relative
                         flex-1
                         bg-white
                     "
-                    data-seat-id="{{ $seat->id }}">
+
+                    data-seat-id="{{ $seat->id }}"
+                >
 
                     {{-- =================================================
                          空き枠クリック専用レイヤー
@@ -308,7 +373,9 @@
                          予約部分ではこちらではなく
                          予約ブロック側が操作されます。
                     ================================================== --}}
-                    <button type="button"
+                    <button
+                        type="button"
+
                         class="
                             absolute
                             inset-0
@@ -323,33 +390,65 @@
 
                             hover:bg-blue-50/30
                         "
+
                         title="クリックして新規予約"
+
                         @click="
                             emptyClick(
                                 $event,
                                 {{ $seat->id }}
                             )
-                        "></button>
+                        "
+                    ></button>
 
 
                     {{-- =================================================
                          時間Grid線
                     ================================================== --}}
                     @foreach ($times as $time)
+
                         @php
 
-                            $gridStart = \Carbon\Carbon::createFromFormat('H:i', $businessStart);
+                            $gridStart =
+                                \Carbon\Carbon::createFromFormat(
+                                    'H:i',
+                                    $businessStart
+                                );
 
-                            $gridTime = \Carbon\Carbon::createFromFormat('H:i', $time);
 
-                            $minutes = $gridStart->diffInMinutes($gridTime, false);
+                            $gridTime =
+                                \Carbon\Carbon::createFromFormat(
+                                    'H:i',
+                                    $time
+                                );
 
-                            $position = $businessMinutes > 0 ? ($minutes / $businessMinutes) * 100 : 0;
+
+                            $minutes =
+                                $gridStart
+                                    ->diffInMinutes(
+                                        $gridTime,
+                                        false
+                                    );
+
+
+                            $position =
+                                $businessMinutes > 0
+
+                                    ? (
+                                        $minutes
+                                        /
+                                        $businessMinutes
+                                    )
+                                    *
+                                    100
+
+                                    : 0;
 
                         @endphp
 
 
-                        <div class="
+                        <div
+                            class="
                                 pointer-events-none
                                 absolute
                                 inset-y-0
@@ -357,10 +456,12 @@
                                 border-l
                                 border-slate-200
                             "
+
                             style="
                                 left: {{ $position }}%;
-                            ">
-                        </div>
+                            "
+                        ></div>
+
                     @endforeach
 
 
@@ -368,14 +469,22 @@
                          この席の予約ブロック
                     ================================================== --}}
                     @foreach ($reservations as $reservation)
-                        @if ((int) $reservation['seat_id'] === (int) $seat->id)
-                            <div wire:key="
+
+                        @if (
+                            (int) $reservation['seat_id']
+                            ===
+                            (int) $seat->id
+                        )
+
+                            <div
+                                wire:key="
                                     reservation-block-
                                     {{ $reservation['id'] }}-
                                     {{ $seat->id }}-
                                     {{ $reservation['start_time'] }}-
                                     {{ $reservation['end_time'] }}
                                 "
+
                                 class="
                                     reservation-block
                                     absolute
@@ -393,6 +502,7 @@
 
                                     active:cursor-grabbing
                                 "
+
                                 style="
                                     left:
                                     {{ $reservation['left'] }}%;
@@ -400,25 +510,34 @@
                                     width:
                                     {{ $reservation['width'] }}%;
                                 "
-                                data-id="{{ $reservation['id'] }}" data-seat-id="{{ $reservation['seat_id'] }}"
+
+                                data-id="{{ $reservation['id'] }}"
+
+                                data-seat-id="{{ $reservation['seat_id'] }}"
+
                                 data-start="{{ $reservation['start_time'] }}"
+
                                 data-end="{{ $reservation['end_time'] }}"
+
                                 @pointerdown="
                                     beginMove(
                                         $event,
                                         $el
                                     )
                                 "
+
                                 @click.stop="
                                     reservationClick(
                                         {{ $reservation['id'] }}
                                     )
-                                ">
+                                "
+                            >
 
                                 {{-- =========================================
                                      左側リサイズ
                                 ========================================== --}}
-                                <div class="
+                                <div
+                                    class="
                                         absolute
                                         bottom-0
                                         left-0
@@ -429,15 +548,17 @@
 
                                         hover:bg-blue-500/30
                                     "
+
                                     title="開始時間を変更"
+
                                     @pointerdown.stop="
                                         beginResize(
                                             $event,
                                             $el.parentElement,
                                             'start'
                                         )
-                                    ">
-                                </div>
+                                    "
+                                ></div>
 
 
                                 {{-- =========================================
@@ -450,7 +571,8 @@
                                         overflow-hidden
                                         px-3
                                         py-1
-                                    ">
+                                    "
+                                >
 
                                     <div
                                         class="
@@ -458,7 +580,8 @@
                                             text-xs
                                             font-bold
                                             text-blue-900
-                                        ">
+                                        "
+                                    >
 
                                         {{ $reservation['name'] }}
 
@@ -470,7 +593,8 @@
                                             whitespace-nowrap
                                             text-[10px]
                                             text-blue-700
-                                        ">
+                                        "
+                                    >
 
                                         {{ $reservation['start_time'] }}
 
@@ -490,7 +614,8 @@
                                 {{-- =========================================
                                      右側リサイズ
                                 ========================================== --}}
-                                <div class="
+                                <div
+                                    class="
                                         absolute
                                         bottom-0
                                         right-0
@@ -501,23 +626,28 @@
 
                                         hover:bg-blue-500/30
                                     "
+
                                     title="終了時間を変更"
+
                                     @pointerdown.stop="
                                         beginResize(
                                             $event,
                                             $el.parentElement,
                                             'end'
                                         )
-                                    ">
-                                </div>
+                                    "
+                                ></div>
 
                             </div>
+
                         @endif
+
                     @endforeach
 
                 </div>
 
             </div>
+
         @endforeach
 
     </div>
@@ -532,6 +662,7 @@
          ・左右リサイズ
     ================================================================= --}}
     <script>
+
         document.addEventListener(
             'alpine:init',
 
@@ -570,13 +701,14 @@
                                 hour,
                                 minute
                             ] =
-                            time
-                                .split(':')
-                                .map(Number);
+                                time
+                                    .split(':')
+                                    .map(Number);
 
 
                             return (
-                                hour * 60 +
+                                hour * 60
+                                +
                                 minute
                             );
                         },
@@ -605,16 +737,18 @@
 
                             return (
                                 String(hour)
-                                .padStart(
-                                    2,
-                                    '0'
-                                ) +
-                                ':' +
+                                    .padStart(
+                                        2,
+                                        '0'
+                                    )
+                                +
+                                ':'
+                                +
                                 String(minute)
-                                .padStart(
-                                    2,
-                                    '0'
-                                )
+                                    .padStart(
+                                        2,
+                                        '0'
+                                    )
                             );
                         },
 
@@ -628,9 +762,11 @@
 
                             return (
                                 Math.round(
-                                    minutes /
+                                    minutes
+                                    /
                                     config.slotMinutes
-                                ) *
+                                )
+                                *
                                 config.slotMinutes
                             );
                         },
@@ -661,14 +797,15 @@
                              */
                             const rect =
                                 event.currentTarget
-                                .getBoundingClientRect();
+                                    .getBoundingClientRect();
 
 
                             /*
                              * クリック位置
                              */
                             const clickedX =
-                                event.clientX -
+                                event.clientX
+                                -
                                 rect.left;
 
 
@@ -676,7 +813,8 @@
                              * Timeline上の割合
                              */
                             const ratio =
-                                clickedX /
+                                clickedX
+                                /
                                 rect.width;
 
 
@@ -703,9 +841,11 @@
                              * 分へ変換
                              */
                             let minutes =
-                                businessStart +
+                                businessStart
+                                +
                                 (
-                                    ratio *
+                                    ratio
+                                    *
                                     config.businessMinutes
                                 );
 
@@ -718,7 +858,8 @@
                             minutes =
                                 Math.round(
                                     minutes / 15
-                                ) *
+                                )
+                                *
                                 15;
 
 
@@ -812,29 +953,37 @@
 
                             this.active = {
 
-                                mode: 'move',
+                                mode:
+                                    'move',
 
-                                element: element,
+                                element:
+                                    element,
 
-                                reservationId: Number(
-                                    element.dataset.id
-                                ),
+                                reservationId:
+                                    Number(
+                                        element.dataset.id
+                                    ),
 
-                                originalSeatId: Number(
-                                    element.dataset.seatId
-                                ),
+                                originalSeatId:
+                                    Number(
+                                        element.dataset.seatId
+                                    ),
 
-                                startX: event.clientX,
+                                startX:
+                                    event.clientX,
 
-                                originalLeft: parseFloat(
-                                    element.style.left
-                                ),
+                                originalLeft:
+                                    parseFloat(
+                                        element.style.left
+                                    ),
 
-                                originalWidth: parseFloat(
-                                    element.style.width
-                                ),
+                                originalWidth:
+                                    parseFloat(
+                                        element.style.width
+                                    ),
 
-                                rowWidth: rect.width,
+                                rowWidth:
+                                    rect.width,
                             };
 
 
@@ -849,7 +998,8 @@
 
                             window.addEventListener(
                                 'pointerup',
-                                this.pointerUp, {
+                                this.pointerUp,
+                                {
                                     once: true
                                 }
                             );
@@ -888,30 +1038,39 @@
 
                             this.active = {
 
-                                mode: side === 'start' ?
-                                    'resize-start' : 'resize-end',
+                                mode:
+                                    side === 'start'
+                                        ? 'resize-start'
+                                        : 'resize-end',
 
-                                element: element,
+                                element:
+                                    element,
 
-                                reservationId: Number(
-                                    element.dataset.id
-                                ),
+                                reservationId:
+                                    Number(
+                                        element.dataset.id
+                                    ),
 
-                                originalSeatId: Number(
-                                    element.dataset.seatId
-                                ),
+                                originalSeatId:
+                                    Number(
+                                        element.dataset.seatId
+                                    ),
 
-                                startX: event.clientX,
+                                startX:
+                                    event.clientX,
 
-                                originalLeft: parseFloat(
-                                    element.style.left
-                                ),
+                                originalLeft:
+                                    parseFloat(
+                                        element.style.left
+                                    ),
 
-                                originalWidth: parseFloat(
-                                    element.style.width
-                                ),
+                                originalWidth:
+                                    parseFloat(
+                                        element.style.width
+                                    ),
 
-                                rowWidth: rect.width,
+                                rowWidth:
+                                    rect.width,
                             };
 
 
@@ -926,7 +1085,8 @@
 
                             window.addEventListener(
                                 'pointerup',
-                                this.pointerUp, {
+                                this.pointerUp,
+                                {
                                     once: true
                                 }
                             );
@@ -946,8 +1106,7 @@
 
                         init() {
                             this.stopFailureListener = this.$wire.on('reservation-drag-failed', (event) => {
-                                window.alert(event.message ?? event.detail?.message ??
-                                    '予約を更新できませんでした。');
+                                window.alert(event.message ?? event.detail?.message ?? '予約を更新できませんでした。');
                             });
 
                             /*
@@ -967,7 +1126,8 @@
                                      * マウス移動量
                                      */
                                     const deltaPixels =
-                                        event.clientX -
+                                        event.clientX
+                                        -
                                         this.active.startX;
 
 
@@ -978,8 +1138,8 @@
                                     if (
                                         Math.abs(
                                             deltaPixels
-                                        ) >
-                                        3
+                                        )
+                                        > 3
                                     ) {
                                         this.dragged = true;
                                     }
@@ -990,9 +1150,11 @@
                                      */
                                     const deltaPercent =
                                         (
-                                            deltaPixels /
+                                            deltaPixels
+                                            /
                                             this.active.rowWidth
-                                        ) *
+                                        )
+                                        *
                                         100;
 
 
@@ -1001,9 +1163,11 @@
                                      */
                                     const slotPercent =
                                         (
-                                            config.slotMinutes /
+                                            config.slotMinutes
+                                            /
                                             config.businessMinutes
-                                        ) *
+                                        )
+                                        *
                                         100;
 
 
@@ -1012,9 +1176,11 @@
                                      */
                                     const snappedDelta =
                                         Math.round(
-                                            deltaPercent /
+                                            deltaPercent
+                                            /
                                             slotPercent
-                                        ) *
+                                        )
+                                        *
                                         slotPercent;
 
 
@@ -1024,12 +1190,14 @@
                                     |--------------------------------------------------------------------------
                                     */
                                     if (
-                                        this.active.mode ===
+                                        this.active.mode
+                                        ===
                                         'move'
                                     ) {
 
                                         let left =
-                                            this.active.originalLeft +
+                                            this.active.originalLeft
+                                            +
                                             snappedDelta;
 
 
@@ -1043,7 +1211,8 @@
                                                 Math.min(
                                                     left,
 
-                                                    100 -
+                                                    100
+                                                    -
                                                     this.active.originalWidth
                                                 )
                                             );
@@ -1053,7 +1222,7 @@
                                             .element
                                             .style
                                             .left =
-                                            `${left}%`;
+                                                `${left}%`;
                                     }
 
 
@@ -1063,17 +1232,20 @@
                                     |--------------------------------------------------------------------------
                                     */
                                     if (
-                                        this.active.mode ===
+                                        this.active.mode
+                                        ===
                                         'resize-start'
                                     ) {
 
                                         let left =
-                                            this.active.originalLeft +
+                                            this.active.originalLeft
+                                            +
                                             snappedDelta;
 
 
                                         let width =
-                                            this.active.originalWidth -
+                                            this.active.originalWidth
+                                            -
                                             snappedDelta;
 
 
@@ -1081,9 +1253,12 @@
                                          * 最低1slot
                                          */
                                         if (
-                                            width >=
-                                            slotPercent &&
-                                            left >=
+                                            width
+                                            >=
+                                            slotPercent
+                                            &&
+                                            left
+                                            >=
                                             0
                                         ) {
 
@@ -1091,14 +1266,14 @@
                                                 .element
                                                 .style
                                                 .left =
-                                                `${left}%`;
+                                                    `${left}%`;
 
 
                                             this.active
                                                 .element
                                                 .style
                                                 .width =
-                                                `${width}%`;
+                                                    `${width}%`;
                                         }
                                     }
 
@@ -1109,12 +1284,14 @@
                                     |--------------------------------------------------------------------------
                                     */
                                     if (
-                                        this.active.mode ===
+                                        this.active.mode
+                                        ===
                                         'resize-end'
                                     ) {
 
                                         let width =
-                                            this.active.originalWidth +
+                                            this.active.originalWidth
+                                            +
                                             snappedDelta;
 
 
@@ -1124,12 +1301,16 @@
                                          * 右端100%を超えない
                                          */
                                         if (
-                                            width >=
-                                            slotPercent &&
+                                            width
+                                            >=
+                                            slotPercent
+                                            &&
                                             (
-                                                this.active.originalLeft +
+                                                this.active.originalLeft
+                                                +
                                                 width
-                                            ) <=
+                                            )
+                                            <=
                                             100
                                         ) {
 
@@ -1137,7 +1318,7 @@
                                                 .element
                                                 .style
                                                 .width =
-                                                `${width}%`;
+                                                    `${width}%`;
                                         }
                                     }
                                 };
@@ -1197,9 +1378,9 @@
 
                                     const targetRow =
                                         target
-                                        ?.closest(
-                                            '.timeline-row'
-                                        );
+                                            ?.closest(
+                                                '.timeline-row'
+                                            );
 
 
                                     /*
@@ -1214,16 +1395,18 @@
 
 
                                     if (
-                                        this.active.mode ===
-                                        'move' &&
+                                        this.active.mode
+                                        ===
+                                        'move'
+                                        &&
                                         targetRow
                                     ) {
 
                                         seatId =
                                             Number(
                                                 targetRow
-                                                .dataset
-                                                .seatId
+                                                    .dataset
+                                                    .seatId
                                             );
                                     }
 
@@ -1261,10 +1444,13 @@
                                     |--------------------------------------------------------------------------
                                     */
                                     let start =
-                                        businessStart +
+                                        businessStart
+                                        +
                                         (
-                                            left /
-                                            100 *
+                                            left
+                                            /
+                                            100
+                                            *
                                             config.businessMinutes
                                         );
 
@@ -1276,8 +1462,10 @@
                                     */
                                     let duration =
                                         (
-                                            width /
-                                            100 *
+                                            width
+                                            /
+                                            100
+                                            *
                                             config.businessMinutes
                                         );
 
@@ -1305,7 +1493,8 @@
                                      * 終了時間
                                      */
                                     let end =
-                                        start +
+                                        start
+                                        +
                                         duration;
 
 
@@ -1321,7 +1510,8 @@
 
 
                                     if (
-                                        end >
+                                        end
+                                        >
                                         businessEnd
                                     ) {
 
@@ -1333,7 +1523,8 @@
                                             Math.max(
                                                 businessStart,
 
-                                                end -
+                                                end
+                                                -
                                                 duration
                                             );
                                     }
@@ -1355,7 +1546,8 @@
                                         seatId,
                                         this.minutesToTime(start),
                                         this.minutesToTime(end),
-                                        operation.mode
+                                        operation.mode,
+                                        operation.originalSeatId
                                     ).catch((error) => {
                                         console.error('Reservation update failed', error);
                                         window.alert('予約を保存できませんでした。もう一度操作してください。');
@@ -1395,6 +1587,7 @@
 
             }
         );
+
     </script>
 
 </div>

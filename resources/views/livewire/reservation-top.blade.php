@@ -5,6 +5,10 @@
     ================================================================= --}}
     <div class="mx-auto max-w-[1800px] px-4 py-4">
 
+        <h1 class="mb-4 text-2xl font-bold text-blue-900">
+            予約管理
+        </h1>
+
 
         {{-- ============================================================
              メイン
@@ -98,45 +102,29 @@
 
                         @forelse ($todayReservations as $reservation)
 
-                            <button
-                                type="button"
-
-                                wire:click="
-                                    openEditModal(
-                                        {{ $reservation->id }}
-                                    )
-                                "
-
-                                wire:key="
-                                    reservation-list-{{ $reservation->id }}
-                                "
-
-                                class="
-                                    block
-                                    w-full
-                                    rounded-lg
-                                    border
-                                    border-slate-200
-                                    bg-white
-                                    p-3
-                                    text-left
-                                    transition
-
-                                    hover:border-blue-400
-                                    hover:bg-blue-50
-                                "
+                            <div
+                                wire:key="reservation-list-{{ $reservation->id }}"
+                                class="relative rounded-lg border border-slate-200 bg-white p-3 transition hover:border-blue-400 hover:bg-blue-50"
                             >
 
+                                <button
+                                    type="button"
+                                    wire:click="openEditModal({{ $reservation->id }})"
+                                    class="block w-full text-left"
+                                    aria-label="{{ $reservation->customer_name }}の予約を編集"
+                                >
+
                                 {{-- =========================================
-                                     時間・人数
+                                     時間
                                 ========================================== --}}
                                 <div
-                                    class="
-                                        flex
-                                        items-center
-                                        justify-between
-                                        gap-2
-                                    "
+                                        class="
+                                            flex
+                                            items-center
+                                            justify-between
+                                            gap-2
+                                            pr-14
+                                        "
                                 >
 
                                     <span
@@ -155,34 +143,28 @@
                                     </span>
 
 
-                                    <span
-                                        class="
-                                            whitespace-nowrap
-                                            text-xs
-                                            text-slate-500
-                                        "
-                                    >
-
-                                        {{ $reservation->people }}名
-
-                                    </span>
-
                                 </div>
 
 
                                 {{-- =========================================
-                                     名前
+                                     名前・人数
                                 ========================================== --}}
                                 <div
                                     class="
                                         mt-1
-                                        font-semibold
-                                        text-blue-900
+                                        flex
+                                        items-center
+                                        justify-between
+                                        gap-2
+                                        pr-14
                                     "
                                 >
-
-                                    {{ $reservation->customer_name }}
-
+                                    <span class="truncate font-semibold text-blue-900">
+                                        {{ $reservation->customer_name }}
+                                    </span>
+                                    <span class="shrink-0 font-semibold text-blue-900">
+                                        {{ $reservation->people }}名
+                                    </span>
                                 </div>
 
 
@@ -213,7 +195,18 @@
 
                                 </div>
 
-                            </button>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    wire:click.stop="deleteReservation({{ $reservation->id }})"
+                                    wire:confirm="この予約を削除します。よろしいですか？"
+                                    aria-label="{{ $reservation->customer_name }}の予約を削除"
+                                    class="absolute right-2 top-2 inline-flex h-7 items-center justify-center rounded-md bg-red-600 px-2 text-xs font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                                >
+                                    削除
+                                </button>
+                            </div>
 
                         @empty
 
@@ -385,7 +378,7 @@
                                 class="
                                     w-full
                                     rounded-lg
-                                    border-slate-300
+                                    border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                 "
                             >
 
@@ -419,19 +412,16 @@
                             </label>
 
 
-                            <input
+                            <select
                                 id="people"
-                                type="number"
-                                min="1"
-
-                                wire:model="people"
-
-                                class="
-                                    w-full
-                                    rounded-lg
-                                    border-slate-300
-                                "
+                                wire:model.live="people"
+                                class="w-full rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
+                                <option value="">選択してください</option>
+                                @for ($count = 1; $count <= $totalCapacity; $count++)
+                                    <option value="{{ $count }}">{{ $count }}名</option>
+                                @endfor
+                            </select>
 
 
                             @error('people')
@@ -472,7 +462,7 @@
                                 class="
                                     w-full
                                     rounded-lg
-                                    border-slate-300
+                                    border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                 "
                             >
 
@@ -515,7 +505,7 @@
                                 class="
                                     w-full
                                     rounded-lg
-                                    border-slate-300
+                                    border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                 "
                             >
 
@@ -560,7 +550,7 @@
                                 class="
                                     w-full
                                     rounded-lg
-                                    border-slate-300
+                                    border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                 "
                             >
 
@@ -617,7 +607,7 @@
                                 class="
                                     w-full
                                     rounded-lg
-                                    border-slate-300
+                                    border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                 "
                             >
 
@@ -703,7 +693,7 @@
 
                                         class="
                                             rounded
-                                            border-slate-300
+                                            border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                         "
                                     >
 
@@ -726,12 +716,40 @@
 
 
                         @error('selectedSeatIds')
-
-                            <p class="mt-1 text-xs text-red-600">
-                                {{ $message }}
-                            </p>
-
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
+
+                        @error('selectedSeatIds.*')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+
+                        @if ($showCreateModal)
+                            <div class="mt-3">
+                                <button
+                                    type="button"
+                                    wire:click="autoAssignSeats"
+                                    wire:loading.attr="disabled"
+                                    @disabled(!$people || !$reservationDate || !$startTime || !$endTime)
+                                    class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    🪑 空いている席へ自動配置
+                                </button>
+
+                                @if ($autoAssignError)
+                                    <p class="mt-2 rounded-lg bg-red-50 p-2 text-sm text-red-700">
+                                        {{ $autoAssignError }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+
+                        @if ($selectedSeats->isNotEmpty())
+                            <div class="mt-3 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+                                <span class="font-semibold">選択中：</span>
+                                {{ $selectedSeats->pluck('seat_name')->join(' / ') }}
+                                （定員合計 {{ $selectedSeats->sum('capacity') }}名）
+                            </div>
+                        @endif
 
                     </div>
 
@@ -766,7 +784,7 @@
                                 class="
                                     w-full
                                     rounded-lg
-                                    border-slate-300
+                                    border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                                 "
                             >
 
@@ -817,7 +835,7 @@
                             class="
                                 w-full
                                 rounded-lg
-                                border-slate-300
+                                border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                             "
                         ></textarea>
 
@@ -849,7 +867,7 @@
                         class="
                             rounded-lg
                             border
-                            border-slate-300
+                            border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
                             px-5 py-2
                             font-semibold
                             text-slate-600
