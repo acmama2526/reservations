@@ -8,6 +8,7 @@ use App\Models\ShopSetting;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 class ReservationStatus extends Component
@@ -17,6 +18,7 @@ class ReservationStatus extends Component
     | 現在表示している日付
     |--------------------------------------------------------------------------
     */
+    #[Modelable]
     public string $date = '';
 
 
@@ -51,8 +53,9 @@ class ReservationStatus extends Component
     */
     public function mount(): void
     {
-        $this->date =
-            today()->format('Y-m-d');
+        if ($this->date === '') {
+            $this->date = today()->format('Y-m-d');
+        }
 
         $this->makeTimes();
     }
@@ -104,19 +107,6 @@ class ReservationStatus extends Component
     public function updatedDate(): void
     {
         $this->dateChanged();
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | 新規予約完了後の日付同期
-    |--------------------------------------------------------------------------
-    */
-    #[On('reservation-date-updated')]
-    public function syncDateAfterReservationCreated(
-        string $date
-    ): void {
-        $this->date = $date;
     }
 
 

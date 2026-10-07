@@ -45,7 +45,7 @@
                     "
                 >
 
-                    <livewire:reservation-status />
+                    <livewire:reservation-status wire:model.live="selectedDate" />
 
                 </div>
 
@@ -664,6 +664,7 @@
                                 gap-2
                                 md:grid-cols-3
                             "
+                            wire:key="seat-selection-{{ $seatSelectionResetKey }}"
                         >
 
                             @foreach ($seats as $seat)
@@ -723,7 +724,7 @@
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
 
-                        @if ($showCreateModal)
+                        @if ($showCreateModal || $showEditModal)
                             <div class="mt-3">
                                 <button
                                     type="button"
@@ -925,6 +926,30 @@
                             "
                         >
                             更新
+                        </button>
+
+                        <button
+                            type="button"
+
+                            wire:click="deleteReservation({{ $editingReservationId }})"
+
+                            wire:confirm="この予約を削除します。よろしいですか？"
+
+                            wire:loading.attr="disabled"
+
+                            class="
+                                rounded-lg
+                                bg-red-600
+                                px-5 py-2
+                                font-semibold
+                                text-white
+
+                                hover:bg-red-700
+
+                                disabled:opacity-50
+                            "
+                        >
+                            削除
                         </button>
 
                     @endif
