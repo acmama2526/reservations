@@ -75,7 +75,8 @@
                         電話番号
                     </label>
 
-                    <input id="phone" type="text" wire:model="phone"
+                    <input id="phone" type="tel" wire:model="phone" inputmode="numeric" pattern="[0-9]*"
+                        maxlength="11" placeholder="09012345678"
                         class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
 
                     @error('phone')

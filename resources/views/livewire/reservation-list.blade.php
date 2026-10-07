@@ -300,9 +300,20 @@
                                     </select>
                                 </td>
                                 {{-- 電話番号 --}}
+                                {{-- 10～11桁の電話番号に-をつける --}}
                                 <td
                                     class="whitespace-nowrap border-b border-slate-200 px-4 py-4 align-middle leading-6 tabular-nums">
-                                    {{ $reservation->phone ?? '―' }}
+                                    @if ($reservation->phone)
+                                        @if (strlen($reservation->phone) === 11)
+                                            {{ preg_replace('/^(\d{3})(\d{4})(\d{4})$/', '$1-$2-$3', $reservation->phone) }}
+                                        @elseif (strlen($reservation->phone) === 10)
+                                            {{ preg_replace('/^(\d{2,4})(\d{2,4})(\d{4})$/', '$1-$2-$3', $reservation->phone) }}
+                                        @else
+                                            {{ $reservation->phone }}
+                                        @endif
+                                    @else
+                                        ―
+                                    @endif
                                 </td>
                                 {{-- 備考 --}}
                                 <td class="border-b border-slate-200 px-4 py-4 align-middle">

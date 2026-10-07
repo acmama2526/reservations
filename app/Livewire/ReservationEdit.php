@@ -168,6 +168,7 @@ class ReservationEdit extends Component
      */
     public function update(ReservationService $service): void
     {
+
         $this->validate(
             [
                 'customerName' => [
@@ -184,8 +185,7 @@ class ReservationEdit extends Component
 
                 'phone' => [
                     'nullable',
-                    'string',
-                    'max:20'
+                    'regex:/^[0-9]{10,11}$/',
                 ],
 
                 'reservationDate' => [
@@ -234,6 +234,8 @@ class ReservationEdit extends Component
                 'people.required' => '人数を選択してください。',
                 'people.integer' => '人数は数字で入力してください。',
                 'people.min' => '人数は1人以上を選択してください。',
+
+                'phone.regex' => '電話番号は半角数字10～11桁で入力してください。',
 
                 'reservationDate.required' => '予約日を入力してください。',
                 'reservationDate.date' => '正しい予約日を入力してください。',
@@ -312,8 +314,8 @@ class ReservationEdit extends Component
             ->orderBy('display_order')
             ->get();
 
-            // 全席の収容人数を合計
-            $totalCapacity = $seats->sum('capacity');
+        // 全席の収容人数を合計
+        $totalCapacity = $seats->sum('capacity');
 
         // 選択されている席を取得
         $selectedSeats = [];
