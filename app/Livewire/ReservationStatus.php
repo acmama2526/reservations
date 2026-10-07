@@ -337,7 +337,8 @@ class ReservationStatus extends Component
         int $seatId,
         string $startTime,
         string $endTime,
-        string $mode = 'move'
+        string $mode = 'move',
+        int $sourceSeatId = 0
     ): void {
 
         /*
@@ -494,13 +495,19 @@ class ReservationStatus extends Component
         | その席へ変更します。
         |
         */
-        if (
-            count($seatIds) === 1
-        ) {
-
-            $seatIds = [
-                $seatId,
-            ];
+        if ($mode === 'move') {
+            // 1席予約は席を差し替え、複数席予約はドラッグした席だけを差し替えます。
+            if (count($seatIds) <= 1) {
+                $seatIds = [$seatId];
+            } elseif ($sourceSeatId > 0 && in_array($sourceSeatId, $seatIds, true)) {
+                $seatIds = array_values(array_unique(array_map(
+                    static fn (int $id): int => $id === $sourceSeatId ? $seatId : $id,
+                    $seatIds
+                )));
+            } else {
+                $this->dispatch('reservation-drag-failed', message: '移動元の席を確認できません。');
+                return;
+            }
         }
 
 
