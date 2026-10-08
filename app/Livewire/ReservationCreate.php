@@ -157,8 +157,7 @@ class ReservationCreate extends Component
 
                 'phone' => [
                     'nullable',
-                    'string',
-                    'max:20',
+                    'regex:/^[0-9]{10,11}$/',
                 ],
 
                 'reservationDate' => [
@@ -208,7 +207,7 @@ class ReservationCreate extends Component
                 'people.integer' => '人数は数字で入力してください。',
                 'people.min' => '人数は1人以上を選択してください。',
 
-                'phone.max' => '電話番号は20文字以内で入力してください。',
+                'phone.regex' => '電話番号は半角数字10～11桁で入力してください。',
 
                 'reservationDate.required' => '予約日を入力してください。',
                 'reservationDate.date' => '正しい予約日を入力してください。',

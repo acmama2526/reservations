@@ -1,4 +1,3 @@
-
 <div class="min-h-screen bg-slate-50 text-base leading-relaxed text-slate-800">
 
     <x-header />
@@ -81,9 +80,10 @@
                         電話番号
                     </label>
 
-                    <input id="phone" type="text" wire:model="phone"
+                    <input id="phone" type="tel" wire:model="phone" inputmode="numeric" pattern="[0-9]*"
+                        maxlength="11"
                         class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                        placeholder="090-1234-5678">
+                        placeholder="09012345678">
 
                     @error('phone')
                         <p class="mt-1 text-sm text-red-600">
@@ -272,9 +272,9 @@
                 {{-- クリア --}}
                 <button type="button" wire:click="clear"
                     class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-6 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6" />
                     </svg>
 
@@ -296,4 +296,3 @@
     <x-footer />
 
 </div>
-
