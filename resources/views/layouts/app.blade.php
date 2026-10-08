@@ -13,5 +13,7 @@
         {{ $slot }}
 
         @livewireScripts
+
+        @include('partials.login-expiry')
     </body>
 </html>

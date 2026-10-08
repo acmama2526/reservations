@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Support\LoginExpiry;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -35,6 +36,11 @@ class Login extends Component
         }
 
         session()->regenerate();
+
+        session()->put(
+            'login_expires_at',
+            LoginExpiry::deadline()->getTimestamp()
+        );
 
         $this->reset('password');
 
