@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class UserManagement extends Component
@@ -17,7 +18,11 @@ class UserManagement extends Component
     public $currentPassword = '';
     public $role = 'staff';
     public $showForm = false;
+    #[Locked]
     public $editingId = null;
+
+    #[Locked]
+    public $deletingId = null;
 
     private function canManageUsers(): bool
     {
@@ -41,7 +46,7 @@ class UserManagement extends Component
     {
         $this->reset([
             'name', 'email', 'password', 'currentPassword',
-            'role', 'showForm', 'editingId',
+            'role', 'showForm', 'editingId', 'deletingId',
         ]);
         $this->resetValidation();
     }
@@ -79,7 +84,7 @@ class UserManagement extends Component
     private function confirmCurrentPassword(): bool
     {
         $this->resetValidation('currentPassword');
-        $key = 'user-create-password:'.Auth::id();
+        $key = 'user-management-password:'.Auth::id();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
@@ -94,7 +99,7 @@ class UserManagement extends Component
             'currentPassword.string' => 'パスワードを正しく入力してください。',
         ]);
 
-        // 登録対象ではなく、現在ログインしている管理者と照合する。
+        // 操作対象ではなく、現在ログインしている管理者と照合する。
         $admin = User::query()->find(Auth::id());
         if (! $admin || $admin->role !== 'admin'
             || ! Hash::check($this->currentPassword, $admin->password)) {
@@ -156,24 +161,57 @@ class UserManagement extends Component
 
     public function updateUser()
     {
-        if (! $this->ensureAdmin()) {
-            return;
+        try {
+            if (! $this->ensureAdmin()) {
+                return;
+            }
+
+            if (! $this->confirmCurrentPassword()) {
+                return;
+            }
+
+            $user = User::findOrFail($this->editingId);
+            $data = $this->validateUser($user);
+            $user->update($data);
+
+            $this->clearForm();
+            session()->flash('user-message', 'ユーザーを更新しました。');
+        } finally {
+            $this->reset('currentPassword');
         }
-        $user = User::findOrFail($this->editingId);
-        $data = $this->validateUser($user);
-        $user->update($data);
-        $this->clearForm();
-        session()->flash('user-message', 'ユーザーを更新しました。');
     }
 
-    public function deleteUser($id)
+    // 削除ボタンでは、まだ削除せず確認欄を表示する。
+    public function showDeleteForm($id)
     {
         if (! $this->ensureAdmin()) {
             return;
         }
-        User::findOrFail($id)->delete();
+
+        $user = User::findOrFail($id);
         $this->clearForm();
-        session()->flash('user-message', 'ユーザーを削除しました。');
+        $this->deletingId = $user->id;
+    }
+
+    // 確認欄で選んだユーザーを、パスワード照合後に削除する。
+    public function deleteUser()
+    {
+        try {
+            if (! $this->ensureAdmin()) {
+                return;
+            }
+
+            if (! $this->confirmCurrentPassword()) {
+                return;
+            }
+
+            User::findOrFail($this->deletingId)->delete();
+
+            $this->clearForm();
+            session()->flash('user-message', 'ユーザーを削除しました。');
+        } finally {
+            $this->reset('currentPassword');
+        }
     }
 
     public function cancelForm()
@@ -201,9 +239,14 @@ class UserManagement extends Component
                 ];
             });
 
+        $deleteTarget = $canManageUsers && $this->deletingId !== null
+            ? User::query()->select(['id', 'name'])->find($this->deletingId)
+            : null;
+
         return view('livewire.user-management', [
             'users' => $users,
             'canManageUsers' => $canManageUsers,
+            'deleteTarget' => $deleteTarget,
         ]);
     }
 }
