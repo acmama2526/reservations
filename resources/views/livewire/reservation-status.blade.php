@@ -279,7 +279,7 @@
                                 }
                                 if (this.active.mode === 'resize-end') {
                                     let width = this.active.originalWidth + snappedDelta;
-                                    if (width >= slotPercent && (this.active.originalLeft + width) <= 100) {
+                                    if (width >= slotPercent && (this.active.originalLeft + width) <= 100.000001) {
                                         this.active.element.style.width = `${width}%`;
                                     }
                                 }
