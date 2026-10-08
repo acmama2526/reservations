@@ -47,13 +47,18 @@
             </div>
 
             {{-- 電話番号 --}}
+            {{-- 電話番号 --}}
             <div class="grid grid-cols-4 items-center border-b border-slate-100 py-2.5">
                 <div class="font-semibold text-slate-600">
                     電話番号
                 </div>
 
                 <div class="col-span-3 font-medium text-slate-900">
-                    {{ $reservation->phone ?? '―' }}
+                    @if ($reservation->phone)
+                        {{ preg_replace('/^(\d{3})(\d{4})(\d{4})$/', '$1-$2-$3', $reservation->phone) }}
+                    @else
+                        ―
+                    @endif
                 </div>
             </div>
 
