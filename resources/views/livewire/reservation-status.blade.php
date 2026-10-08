@@ -1,4 +1,4 @@
-<div class="min-w-0 w-full" x-data="reservationTimeline({ businessStart: '{{ $businessStart }}', businessEnd: '{{ $businessEnd }}', businessMinutes: {{ $businessMinutes }}, slotMinutes: {{ $slotMinutes }} })">
+<div class="min-w-0 w-full xl:flex xl:h-full xl:min-h-0 xl:flex-col" x-data="reservationTimeline({ businessStart: '{{ $businessStart }}', businessEnd: '{{ $businessEnd }}', businessMinutes: {{ $businessMinutes }}, slotMinutes: {{ $slotMinutes }} })">
     @php
         $timelineStatusStyles = [
             'temporary' => ['class' => 'border-amber-400 bg-amber-100 text-amber-950', 'label' => '仮予約'],
@@ -8,7 +8,7 @@
             'cancelled' => ['class' => 'border-stone-400 bg-stone-100 text-stone-700', 'label' => 'キャンセル'],
         ];
     @endphp
-    <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-3 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-wrap items-center gap-2">
             <button type="button" wire:click="previousDay" aria-label="前日の予約を表示"
                 class="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-stone-400 bg-white text-lg font-semibold text-stone-700 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
@@ -38,7 +38,7 @@
             ＋ 新規予約
         </button>
     </div>
-    <div class="mb-3 flex flex-wrap items-center gap-2 text-xs" aria-label="予約状態の色分け">
+    <div class="mb-3 flex shrink-0 flex-wrap items-center gap-2 text-xs" aria-label="予約状態の色分け">
         <span class="mr-1 font-medium text-stone-600">状態</span>
         <span
             class="inline-flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-2.5 py-1 font-semibold text-amber-950"><span
@@ -56,11 +56,11 @@
             class="inline-flex items-center gap-1.5 rounded-md border border-stone-400 bg-stone-100 px-2.5 py-1 font-semibold text-stone-700"><span
                 class="h-2 w-2 rounded-full bg-stone-500" aria-hidden="true"></span>キャンセル</span>
     </div>
-    <p class="mb-3 text-xs leading-relaxed text-stone-600">空き枠をクリックして予約登録。予約枠をクリックして編集、ドラッグして移動、左右の端で時間を調整できます。</p>
     <div role="region" aria-label="席別の予約タイムテーブル" tabindex="0"
-        class="w-full overflow-x-auto rounded-lg border border-stone-300 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
-        <div style="min-width: {{ max(960, count($times) * 36 + 112) }}px;">
-            <div class="flex h-12 border-b border-stone-300 bg-stone-100">
+        class="w-full overflow-x-auto rounded-lg xl:min-h-0 xl:flex-1 xl:overflow-y-hidden border border-stone-300 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+        <div class="xl:flex xl:h-full xl:min-h-0 xl:flex-col"
+            style="min-width: {{ max(960, count($times) * 36 + 112) }}px;">
+            <div class="sticky top-0 z-40 flex h-10 shrink-0 border-b border-stone-300 bg-stone-100">
                 <div
                     class="sticky left-0 z-30 flex w-28 shrink-0 items-center justify-center border-r border-stone-300 bg-stone-100 text-sm font-semibold text-stone-700">
                     席
@@ -76,7 +76,7 @@
                         <div class="pointer-events-none absolute top-0 h-full border-l border-stone-300"
                             style="left: {{ $position }}%;">
                             <span
-                                class="absolute top-3 whitespace-nowrap text-xs tabular-nums text-stone-700 {{ $loop->last ? '-left-1 -translate-x-full' : 'left-1' }}">
+                                class="absolute top-2 whitespace-nowrap text-xs tabular-nums text-stone-700 {{ $loop->last ? '-left-1 -translate-x-full' : 'left-1' }}">
                                 {{ $time }}
                             </span>
                         </div>
@@ -84,7 +84,8 @@
                 </div>
             </div>
             @foreach ($seats as $seat)
-                <div class="flex h-[72px] border-b border-stone-300 last:border-b-0">
+                <div
+                    class="flex h-12 border-b border-stone-300 last:border-b-0 xl:h-auto xl:min-h-0 xl:max-h-14 xl:flex-1">
                     <div
                         class="sticky left-0 z-30 flex w-28 shrink-0 items-center justify-center border-r border-stone-300 bg-stone-50 px-2 text-center text-sm font-semibold text-stone-800">
                         {{ $seat->seat_name }}
@@ -106,8 +107,8 @@
                         @foreach ($reservations as $reservation)
                             @if ((int) $reservation['seat_id'] === (int) $seat->id)
                                 <div wire:key="reservation-block-{{ $reservation['id'] }}-{{ $seat->id }}-{{ $reservation['start_time'] }}-{{ $reservation['end_time'] }}"
-                                    class="reservation-block absolute bottom-1.5 top-1.5 z-20 cursor-grab select-none overflow-hidden rounded-lg border shadow-sm active:cursor-grabbing {{ $timelineStatusStyles[$reservation['status'] ?? '']['class'] ?? 'border-stone-400 bg-stone-100 text-stone-800' }}"
-                                    title="{{ $reservation['name'] }}／{{ $reservation['start_time'] }}～{{ $reservation['end_time'] }}／{{ $timelineStatusStyles[$reservation['status'] ?? '']['label'] ?? '状態未取得' }}"
+                                    class="reservation-block absolute bottom-1 top-1 z-20 cursor-grab select-none overflow-hidden rounded-lg border shadow-sm active:cursor-grabbing {{ $timelineStatusStyles[$reservation['status'] ?? '']['class'] ?? 'border-stone-400 bg-stone-100 text-stone-800' }}"
+                                    title="{{ $reservation['name'] }}／{{ $reservation['start_time'] }}～{{ $reservation['end_time'] }}／{{ $reservation['people'] }}名／{{ $timelineStatusStyles[$reservation['status'] ?? '']['label'] ?? '状態未取得' }}"
                                     style="left: {{ $reservation['left'] }}%; width: {{ $reservation['width'] }}%;"
                                     data-id="{{ $reservation['id'] }}" data-seat-id="{{ $reservation['seat_id'] }}"
                                     @pointerdown="beginMove( $event, $el )"
@@ -116,20 +117,20 @@
                                         title="開始時間を変更"
                                         @pointerdown.stop="beginResize( $event, $el.parentElement, 'start' )"></div>
                                     <div
-                                        class="pointer-events-none flex h-full flex-col justify-center overflow-hidden px-4 py-1">
-                                        <div class="truncate text-sm font-semibold leading-5">
+                                        class="pointer-events-none flex h-full min-w-0 items-center gap-2 overflow-hidden px-3 text-xs leading-4">
+                                        <span class="min-w-0 max-w-full shrink-0 truncate font-semibold">
                                             {{ $reservation['name'] }}
-                                        </div>
-                                        <div class="truncate text-xs leading-4 tabular-nums">
-                                            {{ $reservation['start_time'] }}
-                                            ～
-                                            {{ $reservation['end_time'] }}
-                                            ・
+                                        </span>
+                                        <span class="shrink-0 whitespace-nowrap tabular-nums">
+                                            {{ $reservation['start_time'] }}～{{ $reservation['end_time'] }}
+                                        </span>
+                                        <span class="shrink-0 whitespace-nowrap tabular-nums">
                                             {{ $reservation['people'] }}名
-                                        </div>
-                                        <div class="truncate text-[10px] font-medium leading-3">
+                                        </span>
+                                        <span
+                                            class="shrink-0 whitespace-nowrap rounded border border-current/20 bg-white/50 px-1 text-[10px] font-semibold leading-4">
                                             {{ $timelineStatusStyles[$reservation['status'] ?? '']['label'] ?? '状態未取得' }}
-                                        </div>
+                                        </span>
                                     </div>
                                     <div class="absolute bottom-0 right-0 top-0 z-30 w-2 cursor-ew-resize hover:bg-emerald-500/30"
                                         title="終了時間を変更"
@@ -224,8 +225,7 @@
                             const rect = row.getBoundingClientRect();
                             this.active = {
                                 mode: side === 'start' ?
-                                    'resize-start' :
-                                    'resize-end',
+                                    'resize-start' : 'resize-end',
                                 element: element,
                                 reservationId: Number(element.dataset.id),
                                 originalSeatId: Number(element.dataset.seatId),
@@ -251,7 +251,7 @@
                         init() {
                             this.stopFailureListener = this.$wire.on('reservation-drag-failed', (event) => {
                                 window.alert(event.message ?? event.detail?.message ??
-                                '予約を更新できませんでした。');
+                                    '予約を更新できませんでした。');
                             });
                             this.pointerMove = (event) => {
                                 if (!this.active) {
@@ -279,7 +279,8 @@
                                 }
                                 if (this.active.mode === 'resize-end') {
                                     let width = this.active.originalWidth + snappedDelta;
-                                    if (width >= slotPercent && (this.active.originalLeft + width) <= 100.000001) {
+                                    if (width >= slotPercent && (this.active.originalLeft + width) <=
+                                        100.000001) {
                                         this.active.element.style.width = `${width}%`;
                                     }
                                 }
