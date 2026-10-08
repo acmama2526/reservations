@@ -38,7 +38,7 @@ Route::get('/reservations/{reservation}', ReservationShow::class)
 Route::get('/reservations/{reservation}/edit', ReservationEdit::class)
     ->name('reservations.edit');
 
-// 席マスタ：管理者・責任者のみ
+// 席マスター
 Route::get('/seats', SeatManager::class)
     ->middleware('can:access-seats')
     ->name('seats.index');
@@ -59,6 +59,14 @@ Route::get('/login', Login::class)
 Route::view('/admin-dashboard', 'admin-dashboard')
     ->name('admin-dashboard');
 
+// 開いたままの画面からログイン状態を確認
+Route::get('/auth/session-status', function () {
+    return response()->json([
+        'authenticated' => Auth::check(),
+    ])->header('Cache-Control', 'no-store, private');
+})
+    ->name('login.session-status');
+
 // ログアウト
 Route::post('/logout', function (Request $request) {
     Auth::logout();
@@ -66,7 +74,7 @@ Route::post('/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect()->route('admin-dashboard');
+    return redirect()->route('login');
 })
     ->middleware('auth')
     ->name('logout');
