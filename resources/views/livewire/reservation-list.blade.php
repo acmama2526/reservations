@@ -164,6 +164,19 @@
                         </svg>
                         新規登録
                     </a>
+                    {{-- 印刷 --}}
+                    <button type="button" wire:click="printReservations" wire:loading.attr="disabled"
+                        wire:target="printReservations"
+                        class="inline-flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-blue-300 bg-white px-5 py-2.5 text-base font-semibold text-blue-700 transition hover:bg-blue-50 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 9V2h12v7" />
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                            <path d="M6 14h12v8H6z" />
+                        </svg>
+                        印刷
+                    </button>
                     {{-- 表示件数 --}}
                     <div class="flex items-center gap-2 whitespace-nowrap text-sm text-slate-600">
                         <span>
