@@ -190,31 +190,29 @@
                         @enderror
                     </div>
                 </div>
-                @if (! $editingId)
-                    <div class="rounded-lg border border-stone-300 bg-white p-4">
-                        <label for="current-password" class="mb-2 block text-sm font-medium text-stone-700">
-                            ログイン中の管理者のパスワード
-                        </label>
-                        <input
-                            id="current-password"
-                            type="password"
-                            wire:model="currentPassword"
-                            autocomplete="current-password"
-                            required
-                            class="{{ $inputClass }}"
-                            aria-invalid="{{ $errors->has('currentPassword') ? 'true' : 'false' }}"
-                            aria-describedby="current-password-help{{ $errors->has('currentPassword') ? ' current-password-error' : '' }}"
-                        >
-                        <p id="current-password-help" class="mb-0 mt-2 text-sm text-stone-600">
-                            登録を承認するため、現在ログインしている管理者ご自身のパスワードを入力してください。
+                <div class="rounded-lg border border-stone-300 bg-white p-4">
+                    <label for="current-password" class="mb-2 block text-sm font-medium text-stone-700">
+                        ログイン中の管理者のパスワード
+                    </label>
+                    <input
+                        id="current-password"
+                        type="password"
+                        wire:model="currentPassword"
+                        autocomplete="current-password"
+                        required
+                        class="{{ $inputClass }}"
+                        aria-invalid="{{ $errors->has('currentPassword') ? 'true' : 'false' }}"
+                        aria-describedby="current-password-help{{ $errors->has('currentPassword') ? ' current-password-error' : '' }}"
+                    >
+                    <p id="current-password-help" class="mb-0 mt-2 text-sm text-stone-600">
+                        この操作を承認するため、現在ログインしている管理者ご自身のパスワードを入力してください。
+                    </p>
+                    @error('currentPassword')
+                        <p id="current-password-error" role="alert" class="mb-0 mt-2 text-sm text-red-700">
+                            {{ $message }}
                         </p>
-                        @error('currentPassword')
-                            <p id="current-password-error" role="alert" class="mb-0 mt-2 text-sm text-red-700">
-                                {{ $message }}
-                            </p>
-                        @enderror
-                    </div>
-                @endif
+                    @enderror
+                </div>
                 <div class="flex flex-wrap justify-end gap-3 border-t border-stone-300 pt-5">
                     <button
                         type="button"
@@ -240,6 +238,75 @@
                     </button>
                 </div>
             </form>
+        </section>
+    @endif
+    {{-- 削除の確認 --}}
+    @if ($canManageUsers && $deletingId !== null)
+        <section
+            aria-labelledby="delete-user-title"
+            class="mx-5 mt-5 rounded-lg border border-stone-300 bg-stone-50 p-4 sm:mx-6 sm:p-5"
+        >
+            <h3 id="delete-user-title" class="m-0 text-base font-semibold">
+                ユーザーの削除確認
+            </h3>
+            @if ($deleteTarget)
+                <p class="mb-5 mt-2 text-sm leading-relaxed text-stone-700">
+                    「{{ $deleteTarget->name }}」さん（No. {{ $deleteTarget->id }}）を削除します。
+                    この操作は取り消せません。
+                </p>
+                <form wire:submit.prevent="deleteUser" class="space-y-5">
+                    <div>
+                        <label for="delete-current-password" class="mb-2 block text-sm font-medium text-stone-700">
+                            ログイン中の管理者のパスワード
+                        </label>
+                        <input
+                            id="delete-current-password"
+                            type="password"
+                            wire:model="currentPassword"
+                            autocomplete="current-password"
+                            required
+                            class="{{ $inputClass }}"
+                            aria-invalid="{{ $errors->has('currentPassword') ? 'true' : 'false' }}"
+                            aria-describedby="delete-password-help{{ $errors->has('currentPassword') ? ' delete-password-error' : '' }}"
+                        >
+                        <p id="delete-password-help" class="mb-0 mt-2 text-sm text-stone-600">
+                            削除するユーザーではなく、現在ログインしている管理者ご自身のパスワードを入力してください。
+                        </p>
+                        @error('currentPassword')
+                            <p id="delete-password-error" role="alert" class="mb-0 mt-2 text-sm text-red-700">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+                    <div class="flex flex-wrap justify-end gap-3 border-t border-stone-300 pt-5">
+                        <button
+                            type="button"
+                            wire:click="cancelForm"
+                            wire:loading.attr="disabled"
+                            wire:target="deleteUser"
+                            class="{{ $secondaryButtonClass }}"
+                        >
+                            キャンセル
+                        </button>
+                        <button
+                            type="submit"
+                            wire:loading.attr="disabled"
+                            wire:target="deleteUser"
+                            class="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-red-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-wait disabled:opacity-50"
+                        >
+                            <span wire:loading.remove wire:target="deleteUser">削除を実行する</span>
+                            <span wire:loading wire:target="deleteUser">削除中…</span>
+                        </button>
+                    </div>
+                </form>
+            @else
+                <p role="status" class="mb-4 mt-2 text-sm text-stone-700">
+                    このユーザーは既に削除されています。
+                </p>
+                <button type="button" wire:click="cancelForm" class="{{ $secondaryButtonClass }}">
+                    閉じる
+                </button>
+            @endif
         </section>
     @endif
     {{-- 一覧 --}}
@@ -342,10 +409,9 @@
                                         </button>
                                         <button
                                             type="button"
-                                            wire:click="deleteUser({{ $user->id }})"
-                                            wire:confirm="{{ $user->name }}さんを削除しますか？この操作は取り消せません。"
+                                            wire:click="showDeleteForm({{ $user->id }})"
                                             wire:loading.attr="disabled"
-                                            wire:target="deleteUser({{ $user->id }})"
+                                            wire:target="showDeleteForm({{ $user->id }})"
                                             aria-label="{{ $user->name }}さんを削除"
                                             class="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-lg border border-stone-300 bg-white px-3 text-sm font-medium text-red-700 transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-wait disabled:opacity-50"
                                         >
