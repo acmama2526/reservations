@@ -3,14 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\Reservation;
-use App\Models\Seat;
 use Livewire\Component;
-use Livewire\WithPagination;
 
-class ReservationList extends Component
+class ReservationPrint extends Component
 {
-    use WithPagination;
-
     // 検索条件
     public string $dateFrom = '';
 
@@ -24,107 +20,18 @@ class ReservationList extends Component
 
     public string $seat = '';
 
-    // 1ページあたりの表示件数
-    public int $perPage = 10;
-
     /**
-     * 初期表示
+     * 印刷ページを開いたとき
+     * URLの検索条件を受け取る
      */
     public function mount(): void
     {
-        $this->dateFrom = now()->format('Y-m-d');
-        $this->dateTo = now()->format('Y-m-d');
-    }
-
-    /**
-     * 検索
-     */
-    public function search(): void
-    {
-        $this->resetPage();
-    }
-
-    /**
-     * 予約一覧を印刷
-     */
-    public function printReservations()
-    {
-        return redirect()->route('reservations.print', [
-            'dateFrom' => $this->dateFrom,
-            'dateTo' => $this->dateTo,
-            'customerName' => $this->customerName,
-            'people' => $this->people,
-            'status' => $this->status,
-            'seat' => $this->seat,
-        ]);
-    }
-
-    /**
-     * 検索条件をクリア
-     */
-    public function clearSearch(): void
-    {
-        $this->dateFrom = '';
-        $this->dateTo = '';
-        $this->customerName = '';
-        $this->people = '';
-        $this->status = '';
-        $this->seat = '';
-
-        $this->resetPage();
-    }
-
-    /**
-     * 表示件数変更
-     */
-    public function updatedPerPage(): void
-    {
-        $this->resetPage();
-    }
-
-    /**
-     * 予約を削除
-     */
-    public function deleteReservation(int $id): void
-    {
-        $reservation = Reservation::findOrFail($id);
-
-        $reservation->delete();
-
-        session()->flash(
-            'message',
-            '予約を削除しました。'
-        );
-    }
-
-    /**
-     * 予約状態を変更
-     */
-    public function updateStatus(int $id, string $status): void
-    {
-        $allowedStatuses = [
-            'temporary',
-            'reserved',
-            'visited',
-            'paid',
-            'cancelled',
-        ];
-
-        // 許可されていない状態は変更しない
-        if (!in_array($status, $allowedStatuses, true)) {
-            return;
-        }
-
-        $reservation = Reservation::findOrFail($id);
-
-        $reservation->update([
-            'status' => $status,
-        ]);
-
-        session()->flash(
-            'message',
-            '予約状態を変更しました。'
-        );
+        $this->dateFrom = request('dateFrom', '');
+        $this->dateTo = request('dateTo', '');
+        $this->customerName = request('customerName', '');
+        $this->people = request('people', '');
+        $this->status = request('status', '');
+        $this->seat = request('seat', '');
     }
 
     /**
@@ -209,24 +116,17 @@ class ReservationList extends Component
                 }
             )
 
+            // 日付・開始時間順
             ->orderBy('reservation_date')
             ->orderBy('start_time')
-            ->paginate($this->perPage);
 
-        $seats = Seat::query()
-            ->where('is_active', true)
-            ->orderBy('display_order')
+            // 印刷なのでページネーションしない
             ->get();
 
-        // 全席の収容人数を合計
-        $totalCapacity = $seats->sum('capacity');
-
         return view(
-            'livewire.reservation-list',
+            'livewire.reservation-print',
             [
                 'reservations' => $reservations,
-                'seats' => $seats,
-                'totalCapacity' => $totalCapacity,
             ]
         );
     }

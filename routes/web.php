@@ -6,6 +6,7 @@ use App\Livewire\ReservationList;
 use App\Livewire\ReservationCreate;
 use App\Livewire\ReservationShow;
 use App\Livewire\ReservationEdit;
+use App\Livewire\ReservationPrint;
 use App\Livewire\SeatManager;
 use App\Livewire\Login;
 use App\Livewire\ReservationTop;
@@ -20,6 +21,10 @@ Route::get('/top', ReservationTop::class)
 // 予約一覧
 Route::get('/reservations', ReservationList::class)
     ->name('reservations.index');
+
+//予約一覧印刷
+Route::get('/reservations/print', ReservationPrint::class)
+    ->name('reservations.print');
 
 // 新規予約登録
 Route::get('/reservations/create', ReservationCreate::class)
