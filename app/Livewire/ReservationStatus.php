@@ -251,6 +251,8 @@ class ReservationStatus extends Component
 
                     'people' => $reservation->people,
 
+                    'status' => $reservation->status,
+
                     'start_time' => $startTime,
 
                     'end_time' => $endTime,
