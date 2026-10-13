@@ -44,7 +44,7 @@ class Login extends Component
 
         $this->reset('password');
 
-        return redirect()->route('admin-dashboard');
+        return redirect()->route('top');
     }
 
     public function render()
