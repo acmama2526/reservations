@@ -30,9 +30,6 @@ class ReservationEdit extends Component
     // 終了時間
     public string $endTime = '';
 
-    // 手動で選択した席
-    // public string $seat = '';
-
     // 状態
     public string $status = '';
 
@@ -44,6 +41,15 @@ class ReservationEdit extends Component
 
     // 自動配置のエラー
     public string $autoAssignError = '';
+
+    // 選択可能な席ID
+    public array $availableSeatIds = [];
+
+    // 空席確認済みかどうか
+    public bool $availabilityChecked = false;
+
+    // 空席確認時のエラー
+    public string $availabilityError = '';
 
 
     /*
@@ -69,6 +75,85 @@ class ReservationEdit extends Component
             ->pluck('seats.id')
             ->map(fn($id) => (string) $id)
             ->toArray();
+
+        // 空席状況を確認
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
+    }
+
+    /*
+    * 空席状況を更新
+    */
+    public function updateAvailableSeats(
+        SeatAssignmentService $service
+    ): void {
+        // 必要な入力がそろっていない場合
+        if (
+            $this->reservationDate === '' ||
+            $this->startTime === '' ||
+            $this->endTime === '' ||
+            $this->endTime <= $this->startTime
+        ) {
+            $this->availableSeatIds = [];
+            $this->availabilityChecked = false;
+            $this->availabilityError = '';
+
+            return;
+        }
+
+        // 編集中の予約自身は重複判定から除外
+        $result = $service->searchAvailableSeatIds(
+            $this->reservationDate,
+            $this->startTime,
+            $this->endTime,
+            $this->reservation->id
+        );
+
+        $this->availableSeatIds = $result['availableSeatIds'];
+        $this->availabilityChecked = true;
+        $this->availabilityError = $result['error'] ?? '';
+
+        // 選択済みの席のうち、空席でなくなった席を外す
+        $this->selectedSeatIds = array_values(
+            array_filter(
+                $this->selectedSeatIds,
+                fn($seatId) => in_array(
+                    (int) $seatId,
+                    $this->availableSeatIds
+                )
+            )
+        );
+    }
+
+    /*
+    * 予約日の変更時
+    */
+    public function updatedReservationDate(): void
+    {
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
+    }
+
+    /*
+    * 開始時間の変更時
+    */
+    public function updatedStartTime(): void
+    {
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
+    }
+
+    /*
+    * 終了時間の変更時
+    */
+    public function updatedEndTime(): void
+    {
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
     }
 
     /*
@@ -151,16 +236,6 @@ class ReservationEdit extends Component
             'message',
             '席を自動配置しました。'
         );
-
-        // // 自動配置結果を保存
-        // $this->selectedSeatIds = $result['selectedSeatIds'];
-
-        // // 自動配置結果がある場合
-        // if (!empty($this->selectedSeatIds)) {
-        //     // 自動配置したことが分かるように
-        //     // 手動選択欄は変更しない
-        //     $this->autoAssignError = '';
-        // }
     }
 
     /*
@@ -333,6 +408,8 @@ class ReservationEdit extends Component
             'seats' => $seats,
             'selectedSeats' => $selectedSeats,
             'totalCapacity' => $totalCapacity,
+            'availableSeatIds' => $this->availableSeatIds,
+            'availabilityChecked' => $this->availabilityChecked,
         ]);
     }
 }
