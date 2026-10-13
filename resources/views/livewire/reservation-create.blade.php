@@ -98,7 +98,7 @@
                         予約日
                     </label>
 
-                    <input id="reservationDate" type="date" wire:model="reservationDate"
+                    <input id="reservationDate" type="date" wire:model.live="reservationDate"
                         class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
 
                     @error('reservationDate')
@@ -114,7 +114,7 @@
                         開始時間
                     </label>
 
-                    <select id="startTime" wire:model="startTime"
+                    <select id="startTime" wire:model.live="startTime"
                         class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
                         <option value="">選択してください</option>
 
@@ -140,7 +140,7 @@
                         終了時間
                     </label>
 
-                    <select id="endTime" wire:model="endTime"
+                    <select id="endTime" wire:model.live="endTime"
                         class="min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
                         <option value="">選択してください</option>
 
@@ -173,16 +173,32 @@
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
 
                     @foreach ($seats as $seatItem)
-                        <label
-                            class="flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2.5 transition hover:border-blue-300 hover:bg-blue-50">
+                        @php
+                            $isAvailable = in_array($seatItem->id, $availableSeatIds);
+
+                            $isOccupied = $availabilityChecked && !$isAvailable;
+                        @endphp
+
+                        <label @class([
+                            'flex items-center gap-2 rounded-md border px-3 py-2.5 transition',
+                            'cursor-pointer border-slate-300 bg-white hover:border-blue-300 hover:bg-blue-50' => !$isOccupied,
+                            'cursor-not-allowed border-slate-300 bg-gray-200 text-gray-500' => $isOccupied,
+                        ])>
                             <input type="checkbox" wire:model="selectedSeatIds" value="{{ $seatItem->id }}"
+                                @disabled($isOccupied)
                                 class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
 
-                            <span class="font-medium text-slate-700">
+                            <span class="font-medium">
                                 {{ $seatItem->seat_name }}
-                                <span class="text-sm text-slate-500">
+                                <span class="text-sm">
                                     （{{ $seatItem->capacity }}名）
                                 </span>
+
+                                @if ($isOccupied)
+                                    <span class="text-sm text-red-600">
+                                        （予約済み）
+                                    </span>
+                                @endif
                             </span>
                         </label>
                     @endforeach
@@ -201,6 +217,13 @@
                         {{ $message }}
                     </p>
                 @enderror
+
+                {{-- 空席状況のメッセージ --}}
+                @if ($seatAvailabilityMessage !== '')
+                    <p class="mt-2 text-sm text-red-600">
+                        {{ $seatAvailabilityMessage }}
+                    </p>
+                @endif
 
                 {{-- 自動配置 --}}
                 <div class="mt-3">
