@@ -4,9 +4,11 @@
         $reservationStatusClasses = [
             'temporary' => 'border-amber-400 bg-amber-50 text-amber-950 focus:border-amber-600 focus:ring-amber-600/20',
             'reserved' => 'border-blue-400 bg-blue-50 text-blue-950 focus:border-blue-600 focus:ring-blue-600/20',
-            'visited' => 'border-emerald-400 bg-emerald-50 text-emerald-950 focus:border-emerald-600 focus:ring-emerald-600/20',
+            'visited' =>
+                'border-emerald-400 bg-emerald-50 text-emerald-950 focus:border-emerald-600 focus:ring-emerald-600/20',
             'paid' => 'border-violet-400 bg-violet-50 text-violet-950 focus:border-violet-600 focus:ring-violet-600/20',
-            'cancelled' => 'border-stone-400 bg-stone-100 text-stone-700 focus:border-stone-600 focus:ring-stone-600/20',
+            'cancelled' =>
+                'border-stone-400 bg-stone-100 text-stone-700 focus:border-stone-600 focus:ring-stone-600/20',
         ];
     @endphp
     {{-- ヘッダー --}}
@@ -21,7 +23,8 @@
             </div>
         @endif
         {{-- 検索条件 --}}
-        <section aria-labelledby="reservation-search-title" class="mb-5 overflow-hidden rounded-xl border border-stone-300 bg-white p-5 shadow-sm sm:p-6">
+        <section aria-labelledby="reservation-search-title"
+            class="mb-5 overflow-hidden rounded-xl border border-stone-300 bg-white p-5 shadow-sm sm:p-6">
             <h2 id="reservation-search-title"
                 class="flex items-center gap-2 -mx-5 -mt-5 mb-6 border-b border-emerald-200 bg-emerald-50 px-5 py-4 text-lg font-semibold text-stone-900 sm:-mx-6 sm:-mt-6 sm:px-6">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
@@ -122,7 +125,8 @@
                 </div>
             </div>
             {{-- 検索ボタン --}}
-            <div class="mt-5 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div
+                class="mt-5 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <button type="button" wire:click="clearSearch" wire:loading.attr="disabled"
                     wire:target="search,clearSearch"
                     class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-100 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
@@ -146,18 +150,21 @@
             </div>
         </section>
         {{-- 一覧 --}}
-        <section aria-labelledby="reservation-list-title" class="overflow-hidden rounded-xl border border-stone-300 bg-white p-5 shadow-sm sm:p-6">
+        <section aria-labelledby="reservation-list-title"
+            class="overflow-hidden rounded-xl border border-stone-300 bg-white p-5 shadow-sm sm:p-6">
             <div
                 class="-mx-5 -mt-5 mb-6 flex flex-col gap-4 border-b border-emerald-200 bg-emerald-50 px-5 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-                <h2 id="reservation-list-title" class="flex flex-wrap items-center gap-2 text-lg font-semibold text-stone-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        aria-hidden="true">
+                <h2 id="reservation-list-title"
+                    class="flex flex-wrap items-center gap-2 text-lg font-semibold text-stone-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
                         <rect x="4" y="3" width="16" height="18" rx="2" />
                         <path d="M8 8h8M8 12h8M8 16h5" />
                     </svg>
                     予約一覧
-                    <span class="ml-2 inline-block whitespace-nowrap rounded-md border border-stone-300 bg-white px-2.5 py-1 text-xs font-medium text-stone-700">
+                    <span
+                        class="ml-2 inline-block whitespace-nowrap rounded-md border border-stone-300 bg-white px-2.5 py-1 text-xs font-medium text-stone-700">
                         （全 {{ $reservations->total() }} 件）
                     </span>
                 </h2>
@@ -173,8 +180,29 @@
                         </svg>
                         新規予約
                     </a>
-                    {{-- 印刷 --}}
-                    <button type="button" wire:click="printReservations" wire:loading.attr="disabled"
+                    {{-- 一覧印刷 --}}
+                    <a href="{{ route('reservations.print', [
+                        'dateFrom' => $searchedDateFrom,
+                        'dateTo' => $searchedDateTo,
+                        'customerName' => $searchedCustomerName,
+                        'people' => $searchedPeople,
+                        'status' => $searchedStatus,
+                        'seat' => $searchedSeat,
+                    ]) }}"
+                        target="_blank" rel="noopener noreferrer"
+                        class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-stone-400 bg-white px-5 py-2.5 text-base font-semibold text-stone-700 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 9V2h12v7" />
+                            <path d="M6 18H4a2 2 0 0 1 2-2v-5a2 2 0 0 1 2 2h16a2 2 0 0 1 2 2v5h-2" />
+                            <path d="M6 14h12v8H6z" />
+                        </svg>
+
+                        一覧を印刷
+                    </a>
+                    {{-- <button type="button" wire:click="printReservations" wire:loading.attr="disabled"
                         wire:target="printReservations"
                         class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-stone-400 bg-white px-5 py-2.5 text-base font-semibold text-stone-700 transition hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
@@ -185,7 +213,7 @@
                             <path d="M6 14h12v8H6z" />
                         </svg>
                         一覧を印刷
-                    </button>
+                    </button> --}}
                     {{-- 表示件数 --}}
                     <div class="flex items-center gap-2 whitespace-nowrap text-sm text-stone-600">
                         <span>
@@ -208,7 +236,8 @@
             </div>
             <p class="mb-3 text-xs text-stone-600 xl:hidden">一覧は横にスクロールできます。</p>
             {{-- テーブル --}}
-            <div role="region" aria-label="予約一覧" tabindex="0" class="overflow-x-auto rounded-lg border border-stone-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+            <div role="region" aria-label="予約一覧" tabindex="0"
+                class="overflow-x-auto rounded-lg border border-stone-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
                 <table
                     class="[&_th:nth-child(1)]:text-center [&_th:nth-child(4)]:text-center [&_th:nth-child(6)]:text-center w-full min-w-[1180px] border-collapse text-left text-sm text-stone-800">
                     <thead class="bg-stone-100">
@@ -281,13 +310,15 @@
                                     {{ $reservation->people }}名
                                 </td>
                                 {{-- 席 --}}
-                                <td class="min-w-[110px] whitespace-nowrap border-b border-stone-300 px-4 py-4 align-middle">
+                                <td
+                                    class="min-w-[110px] whitespace-nowrap border-b border-stone-300 px-4 py-4 align-middle">
                                     @forelse ($reservation->seats as $seat)
                                         <div>
                                             {{ $seat->seat_name }}
                                         </div>
                                     @empty
-                                        <span class="inline-block whitespace-nowrap rounded-md border border-stone-300 bg-stone-100 px-2 py-1 text-xs font-medium text-stone-700">
+                                        <span
+                                            class="inline-block whitespace-nowrap rounded-md border border-stone-300 bg-stone-100 px-2 py-1 text-xs font-medium text-stone-700">
                                             未割当
                                         </span>
                                     @endforelse
@@ -336,24 +367,29 @@
                                     @endif
                                 </td>
                                 {{-- 備考 --}}
-                                <td class="min-w-[120px] max-w-[260px] break-words border-b border-stone-300 px-4 py-4 align-middle text-stone-700">
+                                <td
+                                    class="min-w-[120px] max-w-[260px] break-words border-b border-stone-300 px-4 py-4 align-middle text-stone-700">
                                     {{ $reservation->description ?? '―' }}
                                 </td>
                                 {{-- 操作 --}}
-                                <td class="md:sticky md:right-0 z-10 border-b border-l border-stone-300 bg-white px-4 py-4 align-middle group-hover:bg-emerald-50 group-focus-within:bg-emerald-50">
+                                <td
+                                    class="md:sticky md:right-0 z-10 border-b border-l border-stone-300 bg-white px-4 py-4 align-middle group-hover:bg-emerald-50 group-focus-within:bg-emerald-50">
                                     <div class="flex items-center justify-end gap-2 whitespace-nowrap">
                                         {{-- 詳細 --}}
-                                        <a href="{{ route('reservations.show', $reservation) }}" aria-label="{{ $reservation->customer_name }}様の予約詳細"
+                                        <a href="{{ route('reservations.show', $reservation) }}"
+                                            aria-label="{{ $reservation->customer_name }}様の予約詳細"
                                             class="inline-flex min-h-12 min-w-[64px] cursor-pointer items-center justify-center rounded-lg border border-stone-400 bg-white px-3 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
                                             詳細
                                         </a>
                                         {{-- 編集 --}}
-                                        <a href="{{ route('reservations.edit', $reservation) }}" aria-label="{{ $reservation->customer_name }}様の予約を編集"
+                                        <a href="{{ route('reservations.edit', $reservation) }}"
+                                            aria-label="{{ $reservation->customer_name }}様の予約を編集"
                                             class="inline-flex min-h-12 min-w-[64px] cursor-pointer items-center justify-center rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
                                             編集
                                         </a>
                                         {{-- 削除 --}}
-                                        <button type="button" wire:click="deleteReservation({{ $reservation->id }})" aria-label="{{ $reservation->customer_name }}様の予約を削除"
+                                        <button type="button" wire:click="deleteReservation({{ $reservation->id }})"
+                                            aria-label="{{ $reservation->customer_name }}様の予約を削除"
                                             wire:loading.attr="disabled" wire:target="deleteReservation"
                                             wire:confirm="{{ $reservation->customer_name }} 様／{{ $reservation->reservation_date->format('Y/m/d') }} {{ substr($reservation->start_time, 0, 5) }} の予約を削除しますか？"
                                             class="inline-flex min-h-12 min-w-[64px] cursor-pointer items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-700 focus-visible:ring-offset-2">
