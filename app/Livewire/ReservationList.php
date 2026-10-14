@@ -27,6 +27,19 @@ class ReservationList extends Component
     // 1ページあたりの表示件数
     public int $perPage = 10;
 
+    // 検索確定後の条件
+    public string $searchedDateFrom = '';
+
+    public string $searchedDateTo = '';
+
+    public string $searchedCustomerName = '';
+
+    public string $searchedPeople = '';
+
+    public string $searchedStatus = '';
+
+    public string $searchedSeat = '';
+
     /**
      * 初期表示
      */
@@ -34,6 +47,9 @@ class ReservationList extends Component
     {
         $this->dateFrom = now()->format('Y-m-d');
         $this->dateTo = now()->format('Y-m-d');
+
+        $this->searchedDateFrom = $this->dateFrom;
+        $this->searchedDateTo = $this->dateTo;
     }
 
     /**
@@ -41,23 +57,30 @@ class ReservationList extends Component
      */
     public function search(): void
     {
+        $this->searchedDateFrom = $this->dateFrom;
+        $this->searchedDateTo = $this->dateTo;
+        $this->searchedCustomerName = $this->customerName;
+        $this->searchedPeople = $this->people;
+        $this->searchedStatus = $this->status;
+        $this->searchedSeat = $this->seat;
+
         $this->resetPage();
     }
 
     /**
      * 予約一覧を印刷
      */
-    public function printReservations()
-    {
-        return redirect()->route('reservations.print', [
-            'dateFrom' => $this->dateFrom,
-            'dateTo' => $this->dateTo,
-            'customerName' => $this->customerName,
-            'people' => $this->people,
-            'status' => $this->status,
-            'seat' => $this->seat,
-        ]);
-    }
+    // public function printReservations()
+    // {
+    //     return redirect()->route('reservations.print', [
+    //         'dateFrom' => $this->dateFrom,
+    //         'dateTo' => $this->dateTo,
+    //         'customerName' => $this->customerName,
+    //         'people' => $this->people,
+    //         'status' => $this->status,
+    //         'seat' => $this->seat,
+    //     ]);
+    // }
 
     /**
      * 検索条件をクリア
@@ -70,6 +93,13 @@ class ReservationList extends Component
         $this->people = '';
         $this->status = '';
         $this->seat = '';
+
+        $this->searchedDateFrom = '';
+        $this->searchedDateTo = '';
+        $this->searchedCustomerName = '';
+        $this->searchedPeople = '';
+        $this->searchedStatus = '';
+        $this->searchedSeat = '';
 
         $this->resetPage();
     }
