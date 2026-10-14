@@ -1,40 +1,17 @@
 <div class="bg-stone-50" x-data="{
     resizeHandler: null,
-    resizeFrame: null,
-    previousTop: null,
     init() {
         this.resizeHandler = () => {
-            if (this.resizeFrame !== null) {
-                return;
-            }
-
-            this.resizeFrame = window.requestAnimationFrame(() => {
-                this.resizeFrame = null;
-
-                const top = Math.max(
-                    0,
-                    Math.round(this.$el.getBoundingClientRect().top + window.scrollY)
-                );
-
-                if (top !== this.previousTop) {
-                    this.previousTop = top;
-                    this.$el.style.setProperty('--reservation-page-top', top + 'px');
-                }
-            });
+            const top = Math.max(0, this.$el.getBoundingClientRect().top);
+            this.$el.style.setProperty('--reservation-page-top', top + 'px');
         };
-
         this.$nextTick(this.resizeHandler);
-        window.addEventListener('resize', this.resizeHandler, { passive: true });
-        window.visualViewport?.addEventListener('resize', this.resizeHandler, { passive: true });
+        window.addEventListener('resize', this.resizeHandler);
+        window.visualViewport?.addEventListener('resize', this.resizeHandler);
     },
     destroy() {
         window.removeEventListener('resize', this.resizeHandler);
         window.visualViewport?.removeEventListener('resize', this.resizeHandler);
-
-        if (this.resizeFrame !== null) {
-            window.cancelAnimationFrame(this.resizeFrame);
-            this.resizeFrame = null;
-        }
     }
 }">
     @php
@@ -47,11 +24,11 @@
         ];
     @endphp
     <div
-        class="mx-auto w-full max-w-[1800px] px-2 py-3 text-stone-900 sm:px-4 sm:py-4 lg:px-6 xl:h-[calc(100dvh-var(--reservation-page-top,64px))] xl:min-h-[320px]">
+        class="mx-auto max-w-[1800px] px-4 py-4 text-stone-900 sm:px-6 lg:px-8 xl:h-[calc(100dvh-var(--reservation-page-top,64px))] xl:min-h-[320px]">
         <div
             class="grid grid-cols-1 items-start gap-4 xl:h-full xl:min-h-0 xl:grid-cols-12 xl:grid-rows-[minmax(0,1fr)]">
             <section class="min-w-0 xl:col-span-9 xl:h-full xl:min-h-0">
-                <div class="rounded-xl border border-stone-300 bg-white p-3 shadow-sm sm:p-4 xl:h-full xl:min-h-0">
+                <div class="rounded-xl border border-stone-300 bg-white p-4 shadow-sm xl:h-full xl:min-h-0">
                     <livewire:reservation-status wire:model.live="selectedDate" />
                 </div>
             </section>
@@ -65,7 +42,7 @@
                         </h2>
                     </div>
                     <div role="region" aria-label="選択日の予約一覧" tabindex="0"
-                        class="max-h-[70dvh] space-y-2 overflow-y-auto p-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-700 xl:flex xl:max-h-none xl:min-h-0 xl:flex-1 xl:flex-col xl:gap-2 xl:space-y-0 xl:overflow-y-auto">
+                        class="space-y-2 p-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-700 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col xl:gap-2 xl:space-y-0 xl:overflow-y-auto">
                         @forelse ($todayReservations as $reservation)
                             <div wire:key="reservation-list-{{ $reservation->id }}"
                                 class="relative grid grid-cols-[minmax(0,1fr)_64px] items-center gap-3 rounded-lg border border-l-4 px-3 py-2 shadow-sm xl:flex-[0_1_190px] xl:min-h-max {{ $dailyStatusStyles[$reservation->status]['class'] ?? 'border-stone-300 bg-white text-stone-900' }}">
@@ -141,7 +118,7 @@
                     </button>
                 </div>
                 <div class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-                    <div class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         @if ($showEditModal)
                             <div class="md:col-span-2">
                                 <span class="mb-2 block text-sm font-semibold">状態</span>
@@ -170,7 +147,7 @@
                                 お客様名
                             </label>
                             <input id="customerName" type="text" wire:model="customerName"
-                                class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
+                                class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
                             @error('customerName')
                                 <p class="mt-2 text-sm text-red-700">
                                     {{ $message }}
@@ -182,7 +159,7 @@
                                 人数
                             </label>
                             <select id="people" wire:model.live="people"
-                                class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
+                                class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
                                 <option value="">選択してください</option>
                                 @for ($count = 1; $count <= $totalCapacity; $count++)
                                     <option value="{{ $count }}">{{ $count }}名</option>
@@ -200,7 +177,7 @@
                             </label>
                             <input id="phone" type="tel" wire:model="phone" inputmode="numeric" pattern="[0-9]*"
                                 maxlength="11"
-                                class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2 text-base text-stone-900 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"
+                                class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2 text-base text-stone-900 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"
                                 placeholder="09012345678">
                             @error('phone')
                                 <p class="mt-1 text-sm text-red-600">
@@ -213,11 +190,7 @@
                                 予約日
                             </label>
                             <input id="reservationDate" type="date" wire:model="reservationDate"
-                                class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
-
-                            <input id="reservationDate" type="date" wire:model.live="reservationDate"
                                 class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
-
                             @error('reservationDate')
                                 <p class="mt-2 text-sm text-red-700">
                                     {{ $message }}
@@ -229,11 +202,7 @@
                                 開始時間
                             </label>
                             <select id="startTime" wire:model="startTime"
-                                class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
-
-                            <select id="startTime" wire:model.live="startTime"
                                 class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
-
                                 <option value="">
                                     選択してください
                                 </option>
@@ -254,11 +223,7 @@
                                 終了時間
                             </label>
                             <select id="endTime" wire:model="endTime"
-                                class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
-
-                            <select id="endTime" wire:model.live="endTime"
                                 class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
-
                                 <option value="">
                                     選択してください
                                 </option>
@@ -279,50 +244,28 @@
                         <label class="mb-2 block text-sm font-semibold">
                             席
                         </label>
-                        {{-- 手動で複数選択 --}}
-                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
+                        <div class="grid grid-cols-2 gap-2 md:grid-cols-3"
                             wire:key="seat-selection-{{ $seatSelectionResetKey }}">
                             @foreach ($seats as $seat)
-                                @php
-                                    $isAvailable = in_array((int) $seat->id, $availableSeatIds);
-
-                                    $isOccupied = $availabilityChecked && !$isAvailable;
-                                @endphp
-
-                                <label @class([
-                                    'flex items-center gap-2 rounded-md border px-3 py-2.5 transition',
-                                    'cursor-pointer border-slate-300 bg-white hover:border-blue-300 hover:bg-blue-50' => !$isOccupied,
-                                    'cursor-not-allowed border-slate-300 bg-gray-200 text-gray-500' => $isOccupied,
-                                ])>
+                                <label
+                                    class="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-stone-400 bg-white p-3 transition hover:bg-emerald-50 has-[:checked]:border-emerald-700 has-[:checked]:bg-emerald-50 has-[:checked]:ring-1 has-[:checked]:ring-emerald-700">
                                     <input type="checkbox" wire:model="selectedSeatIds" value="{{ $seat->id }}"
-                                        @disabled($isOccupied)
-                                        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-
-                                    <span class="font-medium">
+                                        class="h-5 w-5 shrink-0 rounded border border-stone-400 text-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
+                                    <span class="text-sm">
                                         {{ $seat->seat_name }}
-                                        <span class="text-sm">
+                                        <span class="text-stone-600">
                                             （{{ $seat->capacity }}名）
                                         </span>
-
-                                        @if ($isOccupied)
-                                            <span class="text-sm text-red-600">
-                                                （予約済み）
-                                            </span>
-                                        @endif
                                     </span>
                                 </label>
                             @endforeach
                         </div>
-
-                        {{-- 選択した席のエラー --}}
                         @error('selectedSeatIds')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
                         @enderror
-
                         @error('selectedSeatIds.*')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
                         @enderror
-                        
                         <div class="mt-3">
                             <button type="button" wire:click="autoAssignSeats" wire:loading.attr="disabled"
                                 @disabled(!$people || !$reservationDate || !$startTime || !$endTime)
@@ -348,7 +291,7 @@
                             備考
                         </label>
                         <textarea id="description" wire:model="description" rows="3"
-                            class="min-h-12 w-full min-w-0 rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"></textarea>
+                            class="min-h-12 w-full rounded-lg border border-stone-400 bg-white px-3 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"></textarea>
                     </div>
                 </div>
                 <div
