@@ -21,6 +21,7 @@
                 →
             </button>
             <select wire:model.live="displayMinutes" aria-label="タイムテーブルの表示単位"
+                @change="saveDisplayMinutes($event.target.value)"
                 class="h-12 min-w-0 rounded-lg border border-stone-400 bg-white px-3 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
                 <option value="15">
                     15分表示
@@ -160,6 +161,32 @@
                         dragged: false,
                         pointerMove: null,
                         pointerUp: null,
+                        displayMinutesStorageKey: 'reservation.timeline.displayMinutes',
+                        saveDisplayMinutes(value) {
+                            if (!['15', '30', '60'].includes(String(value))) return;
+
+                            try {
+                                window.localStorage.setItem(this.displayMinutesStorageKey, String(value));
+                            } catch (error) {
+                                // ストレージが利用できなくても表示単位の変更は続行します。
+                            }
+                        },
+                        restoreDisplayMinutes() {
+                            let saved;
+                            try {
+                                saved = window.localStorage.getItem(this.displayMinutesStorageKey);
+                            } catch (error) {
+                                return;
+                            }
+
+                            if (!['15', '30', '60'].includes(saved)) return;
+
+                            const minutes = Number(saved);
+                            if (minutes !== Number(this.$wire.displayMinutes)) {
+                                // サーバー側の updatedDisplayMinutes で時間目盛りも再生成します。
+                                this.$wire.$set('displayMinutes', minutes);
+                            }
+                        },
                         timeToMinutes(time) {
                             const [hour, minute] = time.split(':').map(Number);
                             return (hour * 60 + minute);
@@ -253,6 +280,7 @@
                             this.stopFailureListener?.();
                         },
                         init() {
+                            this.restoreDisplayMinutes();
                             this.stopFailureListener = this.$wire.on('reservation-drag-failed', (event) => {
                                 window.alert(event.message ?? event.detail?.message ??
                                     '予約を更新できませんでした。');
