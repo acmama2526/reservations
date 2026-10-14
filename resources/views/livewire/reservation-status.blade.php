@@ -59,7 +59,7 @@
     <div role="region" aria-label="席別の予約タイムテーブル" tabindex="0"
         class="w-full overflow-x-auto rounded-lg xl:min-h-0 xl:flex-1 xl:overflow-y-hidden border border-stone-300 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
         <div class="xl:flex xl:h-full xl:min-h-0 xl:flex-col"
-            style="min-width: {{ max(960, count($times) * 36 + 112) }}px;">
+            style="min-width: {{ max(960, count($times) * 36 + 112) + 48 }}px;">
             <div class="sticky top-0 z-40 flex h-10 shrink-0 border-b border-stone-300 bg-stone-100">
                 <div
                     class="sticky left-0 z-30 flex w-28 shrink-0 items-center justify-center border-r border-stone-300 bg-stone-100 text-sm font-semibold text-stone-700">
@@ -76,12 +76,14 @@
                         <div class="pointer-events-none absolute top-0 h-full border-l border-stone-300"
                             style="left: {{ $position }}%;">
                             <span
-                                class="absolute top-2 whitespace-nowrap text-xs tabular-nums text-stone-700 {{ $loop->last ? '-left-1 -translate-x-full' : 'left-1' }}">
+                                class="absolute top-2 whitespace-nowrap text-xs tabular-nums text-stone-700 left-1 z-10">
                                 {{ $time }}
                             </span>
                         </div>
                     @endforeach
                 </div>
+                {{-- 閉店時刻の表示専用列 --}}
+                <div class="w-12 shrink-0 bg-stone-100" aria-hidden="true"></div>
             </div>
             @foreach ($seats as $seat)
                 <div
@@ -139,6 +141,8 @@
                             @endif
                         @endforeach
                     </div>
+                    {{-- 表示専用：予約のクリック・ドラッグ領域には含めません --}}
+                    <div class="pointer-events-none w-12 shrink-0 bg-stone-50" aria-hidden="true"></div>
                 </div>
             @endforeach
         </div>
