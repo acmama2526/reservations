@@ -39,6 +39,16 @@ class ReservationCreate extends Component
     // 自動配置のエラー
     public string $autoAssignError = '';
 
+    // 選択可能な席のID
+    public array $availableSeatIds = [];
+
+    // 空席状況を確認済みかどうか
+    public bool $availabilityChecked = false;
+
+    // 空席状況のメッセージ
+    public string $seatAvailabilityMessage = '';
+
+
     // 備考
     public string $description = '';
 
@@ -120,8 +130,13 @@ class ReservationCreate extends Component
             return;
         }
 
-        // 自動配置された席selectedSeatIds に入れる
+        // 自動配置された席を selectedSeatIds に入れる
         $this->selectedSeatIds = $result['selectedSeatIds'];
+
+        // 空席情報も更新する
+        $this->availableSeatIds = $result['availableSeatIds'];
+        $this->availabilityChecked = true;
+        $this->seatAvailabilityMessage = '';
 
         // エラーメッセージを消す
         $this->autoAssignError = '';
@@ -133,6 +148,87 @@ class ReservationCreate extends Component
             'message',
             '席を自動配置しました。'
         );
+    }
+
+    /**
+     * 予約日時に応じて空席を更新する
+     */
+    public function updateAvailableSeats(
+        SeatAssignmentService $service
+    ): void {
+        // 日付・開始時間・終了時間が揃っていなければ、
+        // 空席状況の確認はまだ行わない
+        if (
+            $this->reservationDate === '' ||
+            $this->startTime === '' ||
+            $this->endTime === '' ||
+            $this->endTime <= $this->startTime
+        ) {
+            $this->availabilityChecked = false;
+            $this->availableSeatIds = [];
+            $this->seatAvailabilityMessage = '';
+
+            return;
+        }
+
+        $result = $service->searchAvailableSeatIds(
+            $this->reservationDate,
+            $this->startTime,
+            $this->endTime
+        );
+
+        // 営業時間外などで確認できない場合
+        if ($result['error'] !== null) {
+            $this->availabilityChecked = false;
+            $this->availableSeatIds = [];
+            $this->seatAvailabilityMessage = $result['error'];
+
+            return;
+        }
+
+        // 空いている席のIDを保存
+        $this->availableSeatIds = $result['availableSeatIds'];
+        $this->availabilityChecked = true;
+        $this->seatAvailabilityMessage = '';
+
+        // 空席状況の更新後、選択中の席が予約済みなら選択を解除
+        $unavailableSelectedIds = array_diff(
+            $this->selectedSeatIds,
+            $this->availableSeatIds
+        );
+
+        if (! empty($unavailableSelectedIds)) {
+            $this->selectedSeatIds = array_values(
+                array_diff(
+                    $this->selectedSeatIds,
+                    $unavailableSelectedIds
+                )
+            );
+
+            $this->seatAvailabilityMessage =
+                '予約済みになった席の選択を解除しました。空いている席を選び直してください。';
+        }
+    }
+
+    /**
+     * 予約日・開始時間・終了時間が変更されたら空席を更新する
+     */
+    public function updatedReservationDate(
+        SeatAssignmentService $service
+    ): void {
+        $this->updateAvailableSeats($service);
+    }
+
+    public function updatedStartTime(
+        SeatAssignmentService $service
+    ): void {
+        $this->updateAvailableSeats($service);
+    }
+
+    public function updatedEndTime(
+        SeatAssignmentService $service
+    ): void {
+        $this->updateAvailableSeats($service);
     }
 
     /**
@@ -305,42 +401,31 @@ class ReservationCreate extends Component
         $this->selectedSeatIds = [];
         $this->description = '';
         $this->autoAssignError = '';
+        // 空席情報も初期化する
+        $this->availableSeatIds = [];
+        $this->availabilityChecked = false;
+        $this->seatAvailabilityMessage = '';
 
         // エラーメッセージも消す
         $this->resetValidation();
     }
 
     // :笹渕追記: 予約状況から空き枠を受け取る (selectReservationSlot)
+    // TOP画面から予約枠の情報を受け取る
     #[On('reservation-slot-selected')]
     public function selectReservationSlot(
         string $date,
-        string $seat,
+        int $seatId,
         string $time
     ): void {
-
-        // 日付
+        // 予約日
         $this->reservationDate = $date;
 
         // 開始時間
         $this->startTime = $time;
 
-
-        /*
-    |--------------------------------------------------------------------------
-    | 席名から席IDを取得
-    |--------------------------------------------------------------------------
-    |
-    | ReservationCreateの<select>は
-    | seat_nameではなくseat IDを使用しているため、
-    | DBから該当する席を探します。
-    |
-    */
-
-        $seatModel = Seat::where('seat_name', $seat)->first();
-
-        if ($seatModel) {
-            $this->seat = $seatModel->id;
-        }
+        // TOPでクリックした席を初期選択する
+        $this->selectedSeatIds = [$seatId];
     }
 
 
@@ -408,6 +493,9 @@ class ReservationCreate extends Component
             'end' => $end,
             'slotMinutes' => $slotMinutes,
             'totalCapacity' => $totalCapacity,
+            'availableSeatIds' => $this->availableSeatIds,
+            'availabilityChecked' => $this->availabilityChecked,
+            'seatAvailabilityMessage' => $this->seatAvailabilityMessage,
         ]);
     }
 }

@@ -29,6 +29,12 @@ class ReservationTop extends Component
     public int $seatSelectionResetKey = 0;
     public string $autoAssignError = '';
 
+    // 指定日時に選択できる席ID
+    public array $availableSeatIds = [];
+
+    // 空席確認が完了しているか
+    public bool $availabilityChecked = false;
+
     public function mount(): void
     {
         $this->selectedDate = today()->format('Y-m-d');
@@ -74,9 +80,9 @@ class ReservationTop extends Component
 
             foreach ($seats as $seat) {
                 $isOccupied = $reservations->contains(
-                    fn ($reservation) => substr($reservation->start_time, 0, 5) < $endTime
-                    && substr($reservation->end_time, 0, 5) > $startTime
-                    && $reservation->seats->contains('id', $seat->id)
+                    fn($reservation) => substr($reservation->start_time, 0, 5) < $endTime
+                        && substr($reservation->end_time, 0, 5) > $startTime
+                        && $reservation->seats->contains('id', $seat->id)
                 );
 
                 if (!$isOccupied) {
@@ -125,6 +131,9 @@ class ReservationTop extends Component
         $this->showCreateModal = true;
 
         $this->showEditModal = false;
+
+        // 追加：モーダルを開いたときに空席を判定する
+        $this->updateAvailableSeats(app(SeatAssignmentService::class));
     }
 
     #[On('reservation-selected')]
@@ -152,11 +161,14 @@ class ReservationTop extends Component
 
         $this->description = $reservation->description ?? '';
 
-        $this->selectedSeatIds = $reservation->seats->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+        $this->selectedSeatIds = $reservation->seats->pluck('id')->map(fn($id) => (string) $id)->toArray();
 
         $this->showEditModal = true;
 
         $this->showCreateModal = false;
+
+        // 追加：編集中の予約自身を除外して空席を判定する
+        $this->updateAvailableSeats(app(SeatAssignmentService::class));
     }
 
     public function deleteReservation(int $reservationId): void
@@ -173,6 +185,88 @@ class ReservationTop extends Component
         }
 
         $this->dispatch('reservation-updated');
+    }
+
+    /**
+     * 追記：予約日時に応じて選択可能な席を更新する
+     */
+    public function updateAvailableSeats(
+        SeatAssignmentService $service
+    ): void {
+        // 日付・開始時間・終了時間が揃っていない場合は判定しない
+        if (
+            $this->reservationDate === '' ||
+            $this->startTime === '' ||
+            $this->endTime === ''
+        ) {
+            $this->availableSeatIds = [];
+            $this->availabilityChecked = false;
+
+            return;
+        }
+
+        // 終了時間が開始時間以前の場合は判定しない
+        if ($this->endTime <= $this->startTime) {
+            $this->availableSeatIds = [];
+            $this->availabilityChecked = false;
+
+            return;
+        }
+
+        // 編集中の予約自身は競合対象から除外する
+        $result = $service->searchAvailableSeatIds(
+            $this->reservationDate,
+            $this->startTime,
+            $this->endTime,
+            $this->editingReservationId
+        );
+
+        $this->availableSeatIds = $result['availableSeatIds'];
+        $this->availabilityChecked = true;
+
+        // すでに選択している席が利用不可になった場合は選択解除
+        $this->selectedSeatIds = array_values(
+            array_filter(
+                $this->selectedSeatIds,
+                fn($seatId) => in_array(
+                    (int) $seatId,
+                    $this->availableSeatIds
+                )
+            )
+        );
+
+        // 営業時間外などのエラーを表示
+        $this->autoAssignError = $result['error'] ?? '';
+    }
+
+    /**
+     * 予約日の変更時
+     */
+    public function updatedReservationDate(): void
+    {
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
+    }
+
+    /**
+     * 開始時間の変更時
+     */
+    public function updatedStartTime(): void
+    {
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
+    }
+
+    /**
+     * 終了時間の変更時
+     */
+    public function updatedEndTime(): void
+    {
+        $this->updateAvailableSeats(
+            app(SeatAssignmentService::class)
+        );
     }
 
     public function autoAssignSeats(SeatAssignmentService $seatAssignment): void
@@ -215,9 +309,8 @@ class ReservationTop extends Component
         }
 
         $selectedSeatIds = array_map('intval', $this->selectedSeatIds);
-        $hasConflict = Reservation::query()->whereDate('reservation_date', $this->reservationDate)->where('status', '!=', 'cancelled')->where('start_time', '<', $this->endTime)->where('end_time', '>', $this->startTime)->whereHas('seats', function ($query) use ($selectedSeatIds)
-            {
-                $query->whereIn('seats.id', $selectedSeatIds);
+        $hasConflict = Reservation::query()->whereDate('reservation_date', $this->reservationDate)->where('status', '!=', 'cancelled')->where('start_time', '<', $this->endTime)->where('end_time', '>', $this->startTime)->whereHas('seats', function ($query) use ($selectedSeatIds) {
+            $query->whereIn('seats.id', $selectedSeatIds);
         })->exists();
 
         if ($hasConflict) {
@@ -268,9 +361,8 @@ class ReservationTop extends Component
             return;
         }
 
-        $hasConflict = Reservation::query()->where('id', '!=', $reservation->id)->whereDate('reservation_date', $this->reservationDate)->where('status', '!=', 'cancelled')->where('start_time', '<', $this->endTime)->where('end_time', '>', $this->startTime)->whereHas('seats', function ($query) use ($selectedSeatIds)
-            {
-                $query->whereIn('seats.id', $selectedSeatIds);
+        $hasConflict = Reservation::query()->where('id', '!=', $reservation->id)->whereDate('reservation_date', $this->reservationDate)->where('status', '!=', 'cancelled')->where('start_time', '<', $this->endTime)->where('end_time', '>', $this->startTime)->whereHas('seats', function ($query) use ($selectedSeatIds) {
+            $query->whereIn('seats.id', $selectedSeatIds);
         })->exists();
 
         if ($hasConflict) {
@@ -399,6 +491,11 @@ class ReservationTop extends Component
         $this->editingReservationId = null;
 
         $this->resetValidation();
+
+        //追記
+        $this->availableSeatIds = [];
+
+        $this->availabilityChecked = false;
     }
 
     private function businessHours(): array
