@@ -7,21 +7,43 @@
             'paid' => ['class' => 'border-violet-400 bg-violet-100 text-violet-950', 'label' => '会計済'],
             'cancelled' => ['class' => 'border-stone-400 bg-stone-100 text-stone-700', 'label' => 'キャンセル'],
         ];
+        // 表示用の幅：隣り合う時間ラベルに最低56pxを確保します。
+        $minimumTimeGap = max(1, (int) $displayMinutes);
+        $previousHeaderTime = null;
+
+        foreach ($times as $headerLabelTime) {
+            $currentHeaderTime = \Carbon\Carbon::createFromFormat('H:i', $headerLabelTime);
+
+            if ($previousHeaderTime !== null) {
+                $gap = $previousHeaderTime->diffInMinutes($currentHeaderTime, false);
+
+                if ($gap > 0) {
+                    $minimumTimeGap = min($minimumTimeGap, $gap);
+                }
+            }
+
+            $previousHeaderTime = $currentHeaderTime;
+        }
+
+        $timelineMinimumWidth = max(
+            960,
+            (int) ceil(max(0, $businessMinutes) / $minimumTimeGap * 56) + 112 + 48
+        );
     @endphp
-    <div class="mb-3 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex flex-wrap items-center gap-2">
+    <div class="mb-3 flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div class="grid w-full min-w-0 grid-cols-[48px_minmax(0,1fr)_48px] items-center gap-2 sm:flex sm:w-auto sm:flex-wrap">
             <button type="button" wire:click="previousDay" aria-label="前日の予約を表示"
                 class="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-stone-400 bg-white text-lg font-semibold text-stone-700 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
                 ←
             </button>
             <input type="date" wire:model.live="date" aria-label="予約を表示する日付"
-                class="h-12 min-w-0 rounded-lg border border-stone-400 bg-white px-3 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
+                class="h-12 w-full min-w-0 rounded-lg sm:w-44 border border-stone-400 bg-white px-3 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
             <button type="button" wire:click="nextDay" aria-label="翌日の予約を表示"
                 class="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-stone-400 bg-white text-lg font-semibold text-stone-700 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
                 →
             </button>
             <select wire:model.live="displayMinutes" aria-label="タイムテーブルの表示単位"
-                class="h-12 min-w-0 rounded-lg border border-stone-400 bg-white px-3 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
+                class="col-span-3 h-12 w-full min-w-0 rounded-lg sm:w-auto border border-stone-400 bg-white px-3 text-base text-stone-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20">
                 <option value="15">
                     15分表示
                 </option>
@@ -34,7 +56,7 @@
             </select>
         </div>
         <button type="button" wire:click="$parent.openCreateModalFromButton"
-            class="inline-flex min-h-12 self-end shrink-0 cursor-pointer items-center justify-center rounded-lg bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
+            class="inline-flex min-h-12 w-full self-end shrink-0 sm:w-auto cursor-pointer items-center justify-center rounded-lg bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
             ＋ 新規予約
         </button>
     </div>
@@ -58,8 +80,8 @@
     </div>
     <div role="region" aria-label="席別の予約タイムテーブル" tabindex="0"
         class="w-full overflow-x-auto rounded-lg xl:min-h-0 xl:flex-1 xl:overflow-y-hidden border border-stone-300 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
-        <div class="xl:flex xl:h-full xl:min-h-0 xl:flex-col"
-            style="min-width: {{ max(960, count($times) * 36 + 112) }}px;">
+        <div class="pr-12 xl:flex xl:h-full xl:min-h-0 xl:flex-col"
+            style="min-width: {{ $timelineMinimumWidth }}px;">
             <div class="sticky top-0 z-40 flex h-10 shrink-0 border-b border-stone-300 bg-stone-100">
                 <div
                     class="sticky left-0 z-30 flex w-28 shrink-0 items-center justify-center border-r border-stone-300 bg-stone-100 text-sm font-semibold text-stone-700">
@@ -76,7 +98,7 @@
                         <div class="pointer-events-none absolute top-0 h-full border-l border-stone-300"
                             style="left: {{ $position }}%;">
                             <span
-                                class="absolute top-2 whitespace-nowrap text-xs tabular-nums text-stone-700 {{ $loop->last ? '-left-1 -translate-x-full' : 'left-1' }}">
+                                class="absolute top-2 whitespace-nowrap text-xs tabular-nums text-stone-700 left-1">
                                 {{ $time }}
                             </span>
                         </div>
@@ -348,3 +370,4 @@
         );
     </script>
 </div>
+
