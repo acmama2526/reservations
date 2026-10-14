@@ -52,17 +52,19 @@
     <div
         class="mx-auto grid w-full max-w-screen-2xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6 xl:grid-cols-[auto_minmax(0,1fr)_16rem] xl:gap-x-6">
 
-        {{-- システム名 --}}
-        <h1 class="order-1 m-0 min-w-0 text-base font-semibold leading-snug tracking-tight sm:text-xl">
-            <a href="{{ auth()->check() ? route('top') : route('login') }}"
-                class="rounded-sm no-underline transition-colors hover:text-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700">
-                予約管理システム
+        {{-- サイトロゴ --}}
+        <h1 class="order-1 m-0 min-w-0">
+            <a href="{{ auth()->check() ? route('top') : route('login') }}" aria-label="YoyaQ 予約管理トップへ"
+                class="inline-flex max-w-full items-center rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700">
+                <img src="{{ asset('logo.png') }}" alt="YoyaQ 予約管理システム"
+                    class="block h-14 w-auto max-w-full object-contain">
             </a>
         </h1>
 
         {{-- ナビゲーション --}}
         <nav aria-label="メインメニュー" class="order-3 col-span-2 min-w-0 overflow-x-auto xl:order-2 xl:col-span-1">
-            <ul class="m-0 flex w-max min-w-full list-none items-center justify-start gap-1 p-1 sm:gap-2 xl:justify-end">
+            <ul
+                class="m-0 flex w-max min-w-full list-none items-center justify-start gap-1 p-1 sm:gap-2 xl:justify-end">
                 @foreach ($menus as $menu)
                     <li class="shrink-0">
                         <a href="{{ route($menu['route']) }}"
